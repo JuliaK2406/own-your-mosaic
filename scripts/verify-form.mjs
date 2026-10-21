@@ -84,7 +84,9 @@ async function emptyEndpointPass(browser, base, name, outDir, prefix) {
   if (name === '390' && !prefix) await page.screenshot({ path: path.join(outDir, '390-full.png'), fullPage: true });
   await page.locator('.closing').screenshot({ path: path.join(outDir, `${prefix}${name}-form.png`) });
   await page.locator('.hero .btn').click();
-  await page.waitForTimeout(900);
+  // the page scrolls smoothly: wait until the form has arrived, up to four seconds
+  await page.waitForFunction(() => { const top = document.getElementById('register').getBoundingClientRect().top; return top >= 0 && top < window.innerHeight; }, null, { timeout: 4000 }).catch(() => {});
+  await page.waitForTimeout(SETTLE);
   let s = await state(page);
   expect(s.registerTop >= 0 && s.registerTop < vp.height, `the first-screen button brings the form into view (top at ${s.registerTop} px)`);
   expect(s.namesSideBySide === (name === '1440'), `first and last name ${name === '1440' ? 'side by side' : 'under each other'} at ${name}`);
