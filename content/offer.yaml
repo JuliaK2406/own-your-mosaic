@@ -1,0 +1,134 @@
+# Own Your Mosaic of Life: all text of the page lives in this file.
+# Edit the text after the colons. Keep field names and indentation as they are.
+# Lines marked "draft" were written by us and wait for Julia's OK.
+
+meta:
+  published: false   # false = hidden from search engines, TODO and draft marks are visible. Set true on launch day
+  site_url: ""       # the final address, e.g. https://programme.juliakrylova.com. Empty until the subdomain is chosen
+  title: "Own Your Mosaic of Life | Julia Krylova"
+  description: "An eight-week online group programme for women leaders who are ready for their next professional ambition but aren't sure how to make it happen."
+
+links:
+  main_site: https://www.juliakrylova.com
+
+register:
+  label: "Register your interest"
+  url: "TODO"   # where the button leads. Julia decides: Calendly or a form on this page
+
+hero:
+  title: "Own Your Mosaic of Life"
+  subtitle: "Build a Roadmap for Your Next Ambition"
+  name: "Julia Krylova"   # draft
+  positioning: "Strategic Mentor for Ambitious Women Leaders at Their Next Big Chapter"
+  paragraphs:
+    - "You've built a career and achieved a lot. But right now, you may feel stretched in too many directions, uncertain about your next step, or unsure how to make your value more visible."
+    - "In this programme, you'll take a fresh look at the bigger picture, identify what may be holding you back, and build a practical roadmap for moving forward."
+    - "An eight-week online group programme for women leaders who are ready for their next professional ambition but aren't sure how to make it happen."
+  facts: ["January 2027 pilot cohort", "Online", "Maximum 8 participants"]
+  photo: julia-krylova-headshot.jpg
+  photo_alt: "Julia Krylova smiling, in a white jacket, her chin resting on her hand"
+
+who:
+  heading: "Is this you?"
+  items:
+    - "You're doing well, maybe better than ever on paper, but you're stretched across too many directions to think straight about what's actually next."
+    - "You're ready for a bigger role, a bigger bet, a bigger version of what you're already doing. You just haven't built the bridge to get there yet."
+    - "People respect what you do, but somehow your real value still isn't fully recognised, and you're tired of being the best-kept secret in the room."
+    - "You can build a plan for anyone: your team, your clients, your family. Building one for yourself, without it costing you everything else, is the part you haven't cracked."
+
+problem:
+  statement: "The ambition is real and it isn't going away. What's missing isn't drive, it's a clear, workable path that actually fits the life you're living, not an idealised version of it."
+
+promise:
+  heading: "Your Next Chapter Roadmap"
+  paragraphs:
+    - "By the end of the programme, you'll have a practical, personalised roadmap for moving towards your professional ambition, one that takes your career, priorities, energy and personal life into account."
+    - "You'll have greater clarity about what you want, a strategy that fits your circumstances, and practical steps to help you move forward: something you can execute, not just admire."
+
+process:
+  heading: "The Mosaic of Life Method™"
+  intro: "We begin with the Mosaic of Life diagnostic, a helicopter view of where you are today: what's working well, where you feel stretched, and what may be holding you back."
+  levels_intro: "Then, over eight weeks, we work through three levels:"
+  start_label: "Mosaic of Life diagnostic"    # infographic label, words from the intro above
+  finish_label: "Your Next Chapter Roadmap"   # infographic label, the promise heading
+  levels:
+    - name: "Life Foundation"
+      text: "Look at your time, energy and support systems. Identify what needs to change so your life can better support your ambitions."
+    - name: "Professional Strategy"
+      text: "Clarify your professional goals, explore opportunities and identify the steps that can move you closer to your ambition."
+    - name: "Visibility & Influence"
+      text: "Explore how to communicate your value, strengthen your presence and influence, and become more visible at work."
+
+package:
+  heading: "What's included, in every tier"
+  items:
+    - "Eight weekly online group sessions, 90 minutes each"
+    - "A 30-minute private 1:1 session with me, included for every participant"
+    - "The Mosaic of Life diagnostic: your personal starting-point assessment"
+    - "Practical teaching, tools you can apply directly to your own situation, live Q&A and interactive mastermind discussions"
+    - "The opportunity to bring your own questions and challenges, receive guidance, and learn from other women navigating the same leap"
+    - "A library of practical tools and resources"
+    - "A private community chat for exchanging ideas, sharing insights and receiving guidance from me throughout the programme"
+    - "Session recordings, available during the programme and for one additional month afterwards"
+
+pricing:
+  heading: "Founding Members"
+  subheading: "Pilot Cohort, January 2027"
+  vat_label: "+ VAT"
+  tiers:
+    - name: "Core"
+      price: "€795"
+      spots: "8 spots"
+      text: "Your complete eight-week Mosaic of Life group programme, including the diagnostic, weekly sessions, practical tools, interactive masterminds and community support."
+    - name: "Plus"
+      price: "€1,095"
+      spots: "5 spots available"
+      text: "Everything in Core, plus one private mentoring session to explore your personal challenges and decisions in greater depth."
+    - name: "Premium"
+      price: "€1,895"
+      spots: "2 spots available"
+      text: "Everything in Core, plus four private mentoring sessions: two during the programme and two during the following two months, helping you implement your roadmap and adjust your strategy."
+  note: "Included in all three tiers: access to the tools library and all session recordings throughout the programme and for one additional month after it ends."
+
+proof:
+  heading: "Meet your mentor"   # draft
+  paragraphs:
+    - "My approach doesn't come from theory. It comes from building and scaling complex, high-pressure ventures myself. I co-built a production company from the ground up, grew it to a team of 15 (including working alongside names like Ennio Morricone), eventually leading to a 51% acquisition by Sony. I know what it actually takes to turn an ambitious idea into a working, resourced, resilient system, not just a plan on paper."
+    - "And I know this from the inside, not only from a boardroom. I'm a mother. I know what it actually takes to hold a real ambition while still showing up for your children and your partner, and over the years, I've learned how to navigate that balance, not just talk about it."
+    - "What producing gave me, and what I bring directly into this work: **vision**, **strategy**, **creative thinking**, **resourcefulness**, and **strategic focus**."
+    - >-
+      Since then, I've mentored ambitious women across industries (concertmasters and
+      conductors, producers on major international productions, founders building their
+      own ventures), helping them do exactly what this programme is built to do: take
+      "too much, too fast, too unclear" and turn it into a concrete, workable action plan.
+      The Mosaic of Life Method™ is the direct result of that experience, mine and theirs.
+  photo: julia-krylova-book-launch.jpg
+  photo_alt: "Julia Krylova in a white suit, holding a microphone next to a table with copies of her book"
+  quotes_heading: "In their own words"
+  quotes:   # draft: two quotes from the speaker page, waiting for Julia's OK or her own quotes
+    - quote: "The small adjustments we worked on had a much bigger impact than I expected."
+      name: "Angela Weigend"
+      role: "Customer Care Program Manager"
+      company: "Heineken"
+    - quote: "This work helped me become calmer, more outspoken, and more confident."
+      name: "Dorottya Barsony"
+      role: "Manager Creative Development"
+      company: "GEAlive, Sony Masterworks"
+
+logistics:
+  heading: "Practical details"   # draft
+  items:
+    - { label: "Start", value: "Mid-January 2027" }
+    - { label: "Duration", value: "8 weeks, one 90-minute online session per week" }
+    - { label: "Schedule", value: "Weekday evenings, exact day and time to be confirmed" }
+    - { label: "Group", value: "Maximum 8 participants" }
+    - { label: "Enrollment", value: "Short registration form plus a €200 + VAT deposit to secure a place" }
+    - { label: "Final payment", value: "Remaining balance due by 18 December 2026" }
+    - { label: "Onboarding", value: "Welcome email, short questionnaire, and access to the community five days prior to the start" }
+
+closing:
+  text: "There's something about January: a year that hasn't been written yet, a clean page to actually start from. Imagine walking into it already holding a real plan, built alongside other women doing the same thing, instead of figuring it out alone in your head again. This is your chance to know, from day one, exactly how you're going to bring this year's ambition to life."
+
+footer:
+  legal_line: "Mastermind Global B.V. · KVK 88166473 · Amsterdam"
+  main_site_label: "juliakrylova.com"
