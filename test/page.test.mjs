@@ -1,17 +1,16 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { loadContent, loadRaw, findDrafts, walkStrings } from '../src/check.mjs';
-import { renderPage, rich, esc } from '../src/render/page.mjs';
-import { COLOURS } from '../src/render/mosaic.mjs';
+import { renderPage, rich, esc, DIAGRAM_ALPHAS } from '../src/render/page.mjs';
+import { COLOURS, BAND_VARIANTS } from '../src/render/mosaic.mjs';
 
 const content = await loadContent();
 const raw = await loadRaw();
 const drafts = new Set(findDrafts(raw, content).drafts.map((draft) => draft.path));
-// A manifest like the one src/images.mjs returns (with its crops), without running sharp.
+// A manifest like the one src/images.mjs returns (with its crop), without running sharp.
 const manifest = {
-  [content.hero.photo]: { slug: 'hero', widths: [640, 1024, 1600], width: 3859, height: 4824 },
-  [content.proof.photo]: { slug: 'portrait', widths: [640, 1024, 1600], width: 3293, height: 4116 },
-  [content.proof.photo_2]: { slug: 'event', widths: [640, 1024, 1600], width: 2100, height: 1400 },
+  [content.hero.photo]: { slug: 'hero', widths: [640, 1024, 1600], width: 3293, height: 4116 },
+  [content.proof.photo]: { slug: 'portrait', widths: [640, 1024, 1600], width: 3859, height: 4824 },
 };
 const render = (c = content) => renderPage(c, { manifest, drafts });
 const html = render();
@@ -19,9 +18,9 @@ const withMeta = (patch) => ({ ...content, meta: { ...content.meta, ...patch } }
 const count = (text, pattern) => (text.match(pattern) || []).length;
 
 // Every text of the yaml except meta, links, the button address and the photo file names.
-const SKIP = /^(meta\.|links\.|register\.url$|hero\.photo$|proof\.photo$|proof\.photo_2$)/;
+const SKIP = /^(meta\.|links\.|register\.url$|hero\.photo$|proof\.photo$)/;
 
-test('every text from the yaml is on the page word for word; ** becomes <strong>', () => {
+test('every text from the yaml is on the page word for word (the diagram included); ** becomes <strong>', () => {
   const missing = [];
   let checked = 0;
   walkStrings(content, '', (at, text) => {
@@ -31,7 +30,7 @@ test('every text from the yaml is on the page word for word; ** becomes <strong>
     if (!html.includes(expected)) missing.push(at);
   });
   assert.deepEqual(missing, []);
-  assert.ok(checked > 60, `${checked} texts checked`);
+  assert.ok(checked > 70, `${checked} texts checked`);
   assert.ok(html.includes('<strong>vision</strong>') && html.includes('<strong>strategic focus</strong>'));
   assert.ok(!html.includes('**'));
 });
@@ -59,9 +58,10 @@ test('the button: four places with the label from the yaml, "#" and a TODO tag w
   assert.ok(!published.includes('tag--todo') && !published.includes('tag--draft'));
 });
 
-test('draft tags next to the name, the two draft headings and each quote', () => {
-  assert.equal(count(html, /tag--draft/g), 3 + content.proof.quotes.length);
+test('draft tags next to the name, the diagram label, the two draft headings and each quote', () => {
+  assert.equal(count(html, /tag--draft/g), 4 + content.proof.quotes.length);
   assert.ok(html.includes(`${esc(content.hero.name)} <span class="tag tag--draft">draft</span></p>`));
+  assert.ok(html.includes(`${esc(content.promise.diagram.inputs_label)} <span class="tag tag--draft">draft</span></p>`), 'one tag for the whole diagram');
   assert.ok(html.includes(`${esc(content.proof.heading)} <span class="tag tag--draft">draft</span></h2>`));
   assert.ok(html.includes(`${esc(content.logistics.heading)} <span class="tag tag--draft">draft</span></h2>`));
   const none = renderPage(content, { manifest, drafts: new Set() });
@@ -95,26 +95,26 @@ test('no Google fonts, no script, no absolute paths: everything comes from the s
   assert.ok(html.includes('href="styles.css"') && html.includes('href="favicon.svg"'));
 });
 
-test('three photos: every <img> has alt, width and height from the crop; the first-screen photo loads first, the others lazily', () => {
+test('two photos: every <img> has alt, width and height; the first-screen photo loads first, the portrait lazily', () => {
   const imgs = html.match(/<img\b[^>]*>/g) || [];
-  assert.equal(imgs.length, 3);
+  assert.equal(imgs.length, 2);
   for (const img of imgs) {
     for (const attr of ['alt', 'width', 'height']) assert.ok(new RegExp(` ${attr}="[^"]*"`).test(img), `${attr} in ${img}`);
   }
   assert.ok(imgs[0].includes('fetchpriority="high"') && !imgs[0].includes('loading="lazy"'));
-  assert.ok(imgs[1].includes('loading="lazy"') && imgs[2].includes('loading="lazy"'));
-  assert.equal(count(html, /<source type="image\/webp"/g), 3);
-  assert.ok(imgs[0].includes('width="1600" height="2000"'), 'the first-screen crop is 4:5');
-  assert.ok(imgs[1].includes('width="1600" height="2000"'), 'the portrait is 4:5');
-  assert.ok(imgs[2].includes('width="1600" height="1067"'), 'the event photo is 3:2');
+  assert.ok(imgs[1].includes('loading="lazy"'));
+  assert.equal(count(html, /<source type="image\/webp"/g), 2);
+  assert.ok(imgs[0].includes('width="1600" height="2000"') && imgs[1].includes('width="1600" height="2000"'), 'both 4:5');
   assert.ok(html.includes('img/hero-640.webp 640w, img/hero-1024.webp 1024w, img/hero-1600.webp 1600w'));
-  assert.ok(imgs[0].includes(`alt="${esc(content.hero.photo_alt)}"`) && imgs[2].includes(`alt="${esc(content.proof.photo_2_alt)}"`));
-  // the text comes before the photos in the markup of Meet your mentor
-  assert.ok(html.indexOf('class="proof__copy"') < html.indexOf('class="proof__photos"'));
+  assert.ok(imgs[0].includes(`alt="${esc(content.hero.photo_alt)}"`) && imgs[1].includes(`alt="${esc(content.proof.photo_alt)}"`));
+  // Meet your mentor: the heading first, then the portrait, then the paragraphs
+  const heading = html.indexOf('id="proof-title"');
+  assert.ok(heading < html.indexOf('class="proof__photos"') && html.indexOf('class="proof__photos"') < html.indexOf('class="proof__copy"'));
 });
 
-test('the facts line, the quotes with their names and roles, the legal line and the link to the main site', () => {
-  assert.ok(html.includes(content.hero.facts.map(esc).join('<span class="sep" aria-hidden="true">·</span>')));
+test('the facts line keeps each fact in one piece; the quotes, the legal line and the link to the main site', () => {
+  const facts = content.hero.facts.map((fact) => `<span class="hero__fact">${esc(fact)}</span>`).join('<span class="sep" aria-hidden="true">·</span>');
+  assert.ok(html.includes(facts));
   for (const q of content.proof.quotes) {
     assert.ok(html.includes(`<blockquote class="quote__text"><p>${esc(q.quote)}</p></blockquote>`));
     assert.ok(html.includes(`<strong class="quote__name">${esc(q.name)}</strong><span class="quote__role">${esc(q.role)}, ${esc(q.company)}</span>`));
@@ -124,9 +124,42 @@ test('the facts line, the quotes with their names and roles, the legal line and 
   assert.ok(html.includes(`<a href="${content.links.main_site}">${esc(content.footer.main_site_label)}</a>`));
 });
 
-test('mosaics: eight inline svgs, all aria-hidden, brand colours only, within 30 KB, the same in every build', () => {
+test('the Promise diagram: four tiles from light to deep with navy or on-aubergine labels, the result, three outcomes, four gold lines', () => {
+  const d = content.promise.diagram;
+  const tiles = html.match(/<li class="diagram__input[^"]*" style="--alpha: [^"]+">[^<]+<\/li>/g) || [];
+  assert.equal(tiles.length, 4);
+  tiles.forEach((tile, i) => {
+    assert.ok(tile.includes(`--alpha: ${DIAGRAM_ALPHAS[i]}`));
+    assert.ok(tile.includes(`>${esc(d.inputs[i])}<`));
+    assert.equal(tile.includes('diagram__input--dark'), DIAGRAM_ALPHAS[i] >= 0.6, `tile ${i}`);
+  });
+  assert.ok(html.includes(`<p class="diagram__result">${esc(d.result)}</p>`));
+  assert.equal(count(html, /<ul class="diagram__outcomes">/g), 1);
+  for (const text of d.outcomes) assert.ok(html.includes(`<li>${esc(text)}</li>`));
+  const lines = html.match(/<svg class="diagram__lines"[^]*?<\/svg>/)[0];
+  assert.equal(count(lines, /<line /g), 4);
+  assert.equal(count(lines, new RegExp(`stroke="${COLOURS.gold}"`, 'g')), 4);
+  assert.ok(lines.includes('aria-hidden="true"'));
+  assert.ok(!html.includes('promise__panel'));
+});
+
+// Parses every drawing of the page: the symbols of the sprite and the standalone svgs that
+// carry tiles (the placed band svgs only show a symbol through <use> and carry none).
+function drawings(page) {
+  const found = [];
+  const add = (id, width, height, body) => {
+    const rects = [...body.matchAll(/<rect x="(-?\d+)" y="(-?\d+)" width="(\d+)" height="(\d+)"/g)].map((r) => r.slice(1, 5).map(Number));
+    if (rects.length) found.push({ id, width, height, rects });
+  };
+  for (const m of page.matchAll(/<symbol id="([^"]+)" viewBox="0 0 (\d+) (\d+)">([^]*?)<\/symbol>/g)) add(m[1], Number(m[2]), Number(m[3]), m[4]);
+  for (const m of page.matchAll(/<svg class="(mosaic [^"]+)" viewBox="0 0 (\d+) (\d+)"[^>]*>([^]*?)<\/svg>/g)) add(m[1], Number(m[2]), Number(m[3]), m[4]);
+  return found;
+}
+
+test('mosaics: the fields, the corner groups and the five band drawings; every tile whole inside its viewBox; brand colours only; within 30 KB; the same every build', () => {
   const svgs = html.match(/<svg class="mosaic[^]*?<\/svg>/g) || [];
-  assert.equal(svgs.length, 8, 'first screen field and two corners, Promise panel and strip, mentor corner, band wide and tall');
+  const bands = Object.keys(BAND_VARIANTS);
+  assert.equal(svgs.length, 1 + 4 + bands.length * 2, 'the sprite, the first-screen field, two corners, the mentor field, and a left and right svg per band width');
   const bytes = svgs.reduce((n, svg) => n + Buffer.byteLength(svg), 0);
   assert.ok(bytes <= 30 * 1024, `${bytes} bytes of mosaics`);
   const allowed = new Set(Object.values(COLOURS));
@@ -134,17 +167,29 @@ test('mosaics: eight inline svgs, all aria-hidden, brand colours only, within 30
     assert.ok(svg.includes('aria-hidden="true"'));
     for (const [, fill] of svg.matchAll(/fill="(#[0-9A-Fa-f]{6})"/g)) assert.ok(allowed.has(fill), `${fill} is not a brand colour`);
     assert.ok(!/<(image|script|text|foreignObject)\b/.test(svg));
+    assert.ok(!svg.includes('slice'), 'nothing is cropped by scaling');
   }
-  assert.equal(count(html, new RegExp(`fill="${COLOURS.gold}"`, 'g')), 2, 'gold only as the dot of the two Promise panels');
+  const parts = drawings(html);
+  assert.equal(parts.length, 4 + bands.length, 'four fields and five band symbols carry tiles');
+  for (const part of parts) {
+    assert.ok(part.width > 0 && part.height > 0, `${part.id} has a viewBox`);
+    for (const [x, y, w, h] of part.rects) {
+      assert.ok(x >= 0 && y >= 0 && x + w <= part.width && y + h <= part.height, `${part.id}: tile ${x},${y} ${w}x${h} is outside ${part.width}x${part.height}`);
+    }
+  }
+  for (const name of bands) {
+    assert.ok(html.includes(`<symbol id="band-${name}" viewBox="0 0 ${BAND_VARIANTS[name].width} ${BAND_VARIANTS[name].height}">`));
+    assert.ok(html.includes(`<use href="#band-${name}"/>`) && html.includes(`<use href="#band-${name}" transform="translate(${BAND_VARIANTS[name].width} 0) scale(-1 1)"/>`));
+  }
+  assert.equal(count(html, new RegExp(`fill="${COLOURS.gold}"`, 'g')), 0, 'gold only as the lines of the diagram, never a tile');
   assert.equal(render(), html, 'the same markup every time');
-  // the Problem and Package blocks and the paragraphs stay on a clean background: no mosaic there
   for (const block of ['problem', 'package', 'process', 'pricing', 'logistics']) {
     const section = html.match(new RegExp(`<section class="section[^"]*\\b${block}\\b[^]*?</section>`))[0];
     assert.ok(!section.includes('<svg class="mosaic'), `${block} has no mosaic`);
   }
 });
 
-test('the deeper background on every second block, cards stay in the markup as before', () => {
+test('the deeper background on every second block, lead paragraphs where the task puts them', () => {
   const deep = [...html.matchAll(/<section class="section section--deep (\w+)"/g)].map((m) => m[1]);
   assert.deepEqual(deep, ['who', 'process', 'pricing', 'logistics']);
   assert.equal(count(html, /class="lead"/g), content.hero.paragraphs.length + content.promise.paragraphs.length + 1, 'lead size: first-screen paragraphs, Promise paragraphs, process.intro');

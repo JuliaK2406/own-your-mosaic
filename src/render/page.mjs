@@ -4,7 +4,7 @@
 // descriptions from its photo_alt fields. The only additions are the TODO and draft tags,
 // shown while meta.published is false, and the decorative mosaics (src/render/mosaic.mjs).
 
-import { heroField, cornerGroup, promisePanel, closingBand } from './mosaic.mjs';
+import { heroField, mentorField, cornerGroup, bandSprite, bandSvgs, diagramLines } from './mosaic.mjs';
 
 export const OG_IMAGE_FILE = 'og-image.png';
 export const OG_WIDTH = 1200;
@@ -14,6 +14,11 @@ export const OG_HEIGHT = 627;
 // each level (lighter for the first level, deeper for the third), in the manner of Snapshot.
 export const WHO_ALPHAS = [0.35, 0.55, 0.75, 1];
 export const LEVEL_ALPHAS = [[0.2, 0.35, 0.3, 0.45], [0.45, 0.6, 0.55, 0.7], [0.7, 0.85, 0.8, 1]];
+// The four input tiles of the Promise diagram, from light to deep; from 0.6 the label on the
+// tile is written in the on-aubergine colour (contrast 5.7:1 and 10.2:1), below it in navy
+// (7.8:1 and 5.3:1 on porcelain-deep).
+export const DIAGRAM_ALPHAS = [0.22, 0.42, 0.78, 1];
+export const DIAGRAM_DARK_FROM = 0.6;
 
 export const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
 // **word** becomes <strong>word</strong>; this is the only markup allowed inside a text.
@@ -97,8 +102,9 @@ function topbar(ctx) {
 </header>`;
 }
 
-// The first screen. The photo stands on a field of tiles from 900 px (CSS fades it toward
-// the text); on the phone two small groups of tiles touch two corners of the photo instead.
+// The first screen. The photo stands on a field of tiles from 900 px (the field dissolves
+// through the opacity of its tiles); on the phone two small groups of tiles touch two
+// corners of the photo instead. Each fact stays on one line, the line breaks between facts.
 function hero(ctx) {
   const h = ctx.content.hero;
   return `<section class="hero container" aria-labelledby="hero-title">
@@ -110,8 +116,8 @@ function hero(ctx) {
   </div>
   <div class="hero__photo">
     <span class="hero__field" aria-hidden="true">${heroField()}</span>
-    <span class="hero__corner hero__corner--tr" aria-hidden="true">${cornerGroup({ seed: 21 })}</span>
-    <span class="hero__corner hero__corner--bl" aria-hidden="true">${cornerGroup({ seed: 22 })}</span>
+    <span class="hero__corner hero__corner--tr" aria-hidden="true">${cornerGroup({ seed: 32, anchor: 'tr' })}</span>
+    <span class="hero__corner hero__corner--bl" aria-hidden="true">${cornerGroup({ seed: 33, anchor: 'bl' })}</span>
     <div class="hero__picture">
       ${picture(ctx, h.photo, { alt: h.photo_alt, eager: true, sizes: '(min-width: 1200px) 420px, (min-width: 900px) 36vw, (min-width: 540px) 480px, calc(100vw - 48px)' })}
     </div>
@@ -119,7 +125,7 @@ function hero(ctx) {
   <div class="hero__body">
     ${paragraphs(h.paragraphs, esc, 'lead')}
     <div class="hero__cta">${registerButton(ctx)}</div>
-    <p class="hero__facts caps">${h.facts.map(esc).join(SEP)}</p>
+    <p class="hero__facts caps">${h.facts.map((fact) => `<span class="hero__fact">${esc(fact)}</span>`).join(SEP)}</p>
   </div>
 </section>`;
 }
@@ -146,18 +152,35 @@ function problem(ctx) {
 </section>`;
 }
 
-// Promise: the text on the left and, from 900 px, a decorative panel of the same height on the
-// right (on the phone a low strip under the text): tiles scattered on the left line up into
-// one row toward the right and end in a gold dot. From the mosaic to the plan, without a word.
+// Promise: the text on the left and, from 900 px, a card with the diagram on the right (on
+// the phone the card follows the text). Every word of the diagram is in the yaml, taken from
+// the two paragraphs: what the roadmap takes into account (four tiles), the result, what
+// you will have (three points). One draft tag for the whole diagram, at its first label.
 function promise(ctx) {
   const p = ctx.content.promise;
+  const d = p.diagram;
+  const inputs = d.inputs.map((text, i) => {
+    const alpha = DIAGRAM_ALPHAS[i] ?? 1;
+    return `        <li class="diagram__input${alpha >= DIAGRAM_DARK_FROM ? ' diagram__input--dark' : ''}" style="--alpha: ${alpha}">${esc(text)}</li>`;
+  }).join('\n');
   return `<section class="section promise" aria-labelledby="promise-title">
   <div class="container promise__grid">
     <div class="promise__copy">
       <h2 id="promise-title">${esc(p.heading)}</h2>
       ${paragraphs(p.paragraphs, esc, 'lead')}
     </div>
-    <div class="promise__panel" aria-hidden="true">${promisePanel()}${promisePanel({ seed: 23, width: 720, height: 120, strip: true, transition: 0.6 })}</div>
+    <div class="diagram">
+      <p class="diagram__label caps">${esc(d.inputs_label)}${draftTag(ctx, 'promise.diagram')}</p>
+      <ul class="diagram__inputs">
+${inputs}
+      </ul>
+      ${diagramLines()}
+      <p class="diagram__result">${esc(d.result)}</p>
+      <p class="diagram__label caps">${esc(d.outcomes_label)}</p>
+      <ul class="diagram__outcomes">
+${d.outcomes.map((text) => `        <li>${esc(text)}</li>`).join('\n')}
+      </ul>
+    </div>
   </div>
 </section>`;
 }
@@ -223,10 +246,9 @@ ${tiers}
 </section>`;
 }
 
-// Meet your mentor. The text comes first in the markup (heading, four paragraphs), then the
-// two photos. From 900 px the photos form a sticky column on the left: the portrait large,
-// the event photo smaller, shifted down and right over its lower edge. On the phone CSS orders
-// the pieces: heading, portrait, two paragraphs, event photo, the other paragraphs, quotes.
+// Meet your mentor: the heading, then (from 900 px) a sticky portrait on the left standing on
+// a field of tiles, the four paragraphs on the right; on the phone one column in the same
+// order: heading, portrait, paragraphs. Then the quotes.
 function proof(ctx) {
   const p = ctx.content.proof;
   const quotes = p.quotes.map((q) => `      <figure class="quote">
@@ -236,19 +258,16 @@ function proof(ctx) {
       </figure>`).join('\n');
   return `<section class="section proof" aria-labelledby="proof-title">
   <div class="container">
+    <h2 id="proof-title">${esc(p.heading)}${draftTag(ctx, 'proof.heading')}</h2>
     <div class="proof__grid">
-      <div class="proof__copy">
-        <h2 id="proof-title">${esc(p.heading)}${draftTag(ctx, 'proof.heading')}</h2>
-        ${paragraphs(p.paragraphs, rich)}
-      </div>
       <div class="proof__photos">
-        <div class="proof__photo proof__photo--portrait">
+        <span class="proof__field" aria-hidden="true">${mentorField()}</span>
+        <div class="proof__picture">
           ${picture(ctx, p.photo, { alt: p.photo_alt, sizes: '(min-width: 1200px) 400px, (min-width: 900px) 34vw, (min-width: 540px) 480px, calc(100vw - 48px)' })}
         </div>
-        <div class="proof__photo proof__photo--event">
-          ${picture(ctx, p.photo_2, { alt: p.photo_2_alt, sizes: '(min-width: 1200px) 300px, (min-width: 900px) 26vw, (min-width: 540px) 480px, calc(100vw - 48px)' })}
-        </div>
-        <span class="proof__corner" aria-hidden="true">${cornerGroup({ seed: 24 })}</span>
+      </div>
+      <div class="proof__copy">
+        ${paragraphs(p.paragraphs, rich)}
       </div>
     </div>
     <h3 class="proof__quotes-heading">${esc(p.quotes_heading)}</h3>
@@ -272,12 +291,14 @@ ${rows}
 </section>`;
 }
 
-// The only aubergine band of the page, across the whole window, with a tone-in-tone mosaic
-// that is dense at the edges and almost absent behind the text.
+// The only aubergine band of the page, across the whole window. Tiles only at the sides,
+// outside the text column, fading toward the middle; over the upper border aubergine tiles
+// fly up onto Practical details (in the page margins only). The middle, under the text, is
+// clean. The drawings sit in a hidden sprite; one of five widths is shown by CSS.
 function closing(ctx) {
   return `<section class="closing">
-  ${closingBand()}
-  ${closingBand({ seed: 25, width: 390, height: 760, tall: true })}
+  ${bandSprite()}
+  ${bandSvgs()}
   <div class="container closing__inner">
     <p class="closing__text">${esc(ctx.content.closing.text)}</p>
     <div class="closing__cta">${registerButton(ctx)}</div>
