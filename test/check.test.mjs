@@ -17,14 +17,16 @@ test('the real content file passes: no errors, no long dashes; the TODO list is 
   assert.equal(report(content, result).ok, true);
 });
 
-test('drafts: the name on the first screen, the headings of Proof and Practical details, the whole quotes list', () => {
+test('drafts: the name on the first screen, the Promise diagram, the headings of Proof and Practical details, the whole quotes list', () => {
   const { drafts, problems } = findDrafts(raw, content);
   assert.deepEqual(problems, []);
-  assert.deepEqual(drafts.map((draft) => draft.path), ['hero.name', 'proof.heading', 'proof.quotes', 'logistics.heading']);
+  assert.deepEqual(drafts.map((draft) => draft.path), ['hero.name', 'promise.diagram', 'proof.heading', 'proof.quotes', 'logistics.heading']);
   assert.equal(drafts[0].value, content.hero.name);
-  assert.equal(drafts[2].value.length, content.proof.quotes.length);
-  assert.ok(drafts[2].note.startsWith('two quotes'));
-  assert.equal(drafts[3].value, content.logistics.heading);
+  assert.deepEqual(drafts[1].value.inputs, content.promise.diagram.inputs, 'the whole diagram is one draft');
+  assert.ok(drafts[1].note.startsWith('labels taken word for word'));
+  assert.equal(drafts[3].value.length, content.proof.quotes.length);
+  assert.ok(drafts[3].note.startsWith('two quotes'));
+  assert.equal(drafts[4].value, content.logistics.heading);
 });
 
 test('a draft marker that does not resolve to a value is a problem, not silently dropped', () => {
@@ -78,15 +80,21 @@ test('photos named in the yaml must exist in content/photos', () => {
   const d = copy();
   d.hero.photo = 'photos/julia.jpg';
   assert.ok(hasError(errorsOf(d), 'hero.photo'));
+});
+
+test('the Promise diagram: exactly four inputs and three outcomes, labels and result present', () => {
+  const c = copy();
+  c.promise.diagram.inputs.pop();
+  assert.ok(hasError(errorsOf(c), 'promise.diagram.inputs'));
+  const d = copy();
+  d.promise.diagram.outcomes.push('Extra');
+  assert.ok(hasError(errorsOf(d), 'promise.diagram.outcomes'));
   const e = copy();
-  e.proof.photo_2 = 'nobody.jpg';
-  assert.ok(hasError(checkContent(e, { photos }).errors, 'proof.photo_2'));
+  e.promise.diagram.result = '';
+  assert.ok(hasError(errorsOf(e), 'promise.diagram.result'));
   const f = copy();
-  delete f.proof.photo_2_alt;
-  assert.ok(hasError(errorsOf(f), 'proof.photo_2_alt'));
-  const g = copy();
-  g.proof.photo_2_alt = '';
-  assert.deepEqual(errorsOf(g), [], 'the description of the second photo may be empty');
+  delete f.promise.diagram;
+  assert.ok(hasError(errorsOf(f), 'promise.diagram'));
 });
 
 test('a long dash is a warning with the path of the field, not an error', () => {

@@ -60,7 +60,11 @@ const SHAPE = {
   },
   who: { heading: 'string', items: 'list:4' },
   problem: { statement: 'string' },
-  promise: { heading: 'string', paragraphs: 'list' },
+  promise: {
+    heading: 'string',
+    paragraphs: 'list',
+    diagram: { inputs_label: 'string', inputs: 'list:4', result: 'string', outcomes_label: 'string', outcomes: 'list:3' },
+  },
   process: {
     heading: 'string',
     intro: 'string',
@@ -82,8 +86,6 @@ const SHAPE = {
     paragraphs: 'list',
     photo: 'file',
     photo_alt: 'text',
-    photo_2: 'file',
-    photo_2_alt: 'text',
     quotes_heading: 'string',
     quotes: [{ quote: 'string', name: 'string', role: 'string', company: 'string' }],
   },
@@ -93,9 +95,9 @@ const SHAPE = {
 };
 
 // The only values that may be empty.
-const EMPTY_ALLOWED = new Set(['meta.site_url', 'hero.photo_alt', 'proof.photo_alt', 'proof.photo_2_alt']);
+const EMPTY_ALLOWED = new Set(['meta.site_url', 'hero.photo_alt', 'proof.photo_alt']);
 // Fields that name a photo in content/photos.
-const PHOTO_FIELDS = ['hero.photo', 'proof.photo', 'proof.photo_2'];
+const PHOTO_FIELDS = ['hero.photo', 'proof.photo'];
 
 const isString = (value) => typeof value === 'string';
 const isFilled = (value) => isString(value) && value.trim() !== '';

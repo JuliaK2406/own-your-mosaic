@@ -25,8 +25,8 @@ hero:
     - "In this programme, you'll take a fresh look at the bigger picture, identify what may be holding you back, and build a practical roadmap for moving forward."
     - "An eight-week online group programme for women leaders who are ready for their next professional ambition but aren't sure how to make it happen."
   facts: ["January 2027 pilot cohort", "Online", "Maximum 8 participants"]
-  photo: julia-krylova.jpg
-  photo_alt: "Julia Krylova in a blue dress, arms crossed, looking at the camera"
+  photo: julia-krylova-headshot.jpg
+  photo_alt: "Julia Krylova smiling, in a white jacket, her chin resting on her hand"
 
 who:
   heading: "Is this you?"
@@ -44,6 +44,15 @@ promise:
   paragraphs:
     - "By the end of the programme, you'll have a practical, personalised roadmap for moving towards your professional ambition, one that takes your career, priorities, energy and personal life into account."
     - "You'll have greater clarity about what you want, a strategy that fits your circumstances, and practical steps to help you move forward: something you can execute, not just admire."
+  diagram:   # draft: labels taken word for word from the two paragraphs above
+    inputs_label: "Takes into account"
+    inputs: ["Career", "Priorities", "Energy", "Personal life"]
+    result: "Your Next Chapter Roadmap"
+    outcomes_label: "You'll have"
+    outcomes:
+      - "Greater clarity about what you want"
+      - "A strategy that fits your circumstances"
+      - "Practical steps to help you move forward"
 
 process:
   heading: "The Mosaic of Life Method™"
@@ -102,10 +111,8 @@ proof:
       own ventures), helping them do exactly what this programme is built to do: take
       "too much, too fast, too unclear" and turn it into a concrete, workable action plan.
       The Mosaic of Life Method™ is the direct result of that experience, mine and theirs.
-  photo: julia-krylova-headshot.jpg
-  photo_alt: "Julia Krylova smiling, in a white jacket, her chin resting on her hand"
-  photo_2: gallery-event-02.jpg
-  photo_2_alt: "Julia Krylova speaking at an event, beside a screen with a slide of Ennio Morricone conducting"
+  photo: julia-krylova.jpg
+  photo_alt: "Julia Krylova in a blue dress, arms crossed, looking at the camera"
   quotes_heading: "In their own words"
   quotes:   # draft: two quotes from the speaker page, waiting for Julia's OK or her own quotes
     - quote: "The small adjustments we worked on had a much bigger impact than I expected."

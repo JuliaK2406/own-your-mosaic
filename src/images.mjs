@@ -15,9 +15,6 @@ export const CROPS = {
   // the studio portrait is horizontal (5918 x 4824): a 4:5 frame on the full height,
   // the face in the upper third, both arms and the watch whole
   'julia-krylova.jpg': { left: 1755, top: 0, width: 3859, height: 4824 },
-  // the talk with the Ennio Morricone slide: 3:2, the slide stays in the frame, Julia whole
-  // with both hands, the blurred plant and the head in the foreground are cut
-  'gallery-event-02.jpg': { left: 1400, top: 340, width: 2100, height: 1400 },
 };
 
 export const slugify = (name) => name.replace(/\.[^.]+$/, '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');

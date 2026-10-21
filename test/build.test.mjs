@@ -51,8 +51,8 @@ test('the build writes the page, the styles with the fonts, robots.txt, the font
     const images = (await readdir(path.join(dir, 'img'))).sort();
     const expected = Object.values(manifest).flatMap((m) => m.widths.flatMap((w) => [`${m.slug}-${w}.jpg`, `${m.slug}-${w}.webp`])).sort();
     assert.deepEqual(images, expected);
-    assert.equal(images.length, 18, 'three photos, three widths, webp and jpg');
-    assert.deepEqual(Object.values(manifest).map((m) => `${m.width}x${m.height}`), ['3859x4824', '3293x4116', '2100x1400'], 'the crops of src/images.mjs');
+    assert.equal(images.length, 12, 'two photos, three widths, webp and jpg');
+    assert.deepEqual(Object.values(manifest).map((m) => `${m.width}x${m.height}`), ['3293x4116', '3859x4824'], 'the first-screen photo whole, the portrait cropped as in src/images.mjs');
     assert.ok(!(await readdir(dir)).includes('CNAME'), 'no CNAME until the subdomain is chosen');
   } finally {
     await rm(dir, { recursive: true, force: true });
