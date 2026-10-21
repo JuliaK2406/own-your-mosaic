@@ -45,7 +45,9 @@ export function registerButton(ctx, { className = '' } = {}) {
 }
 
 // The registration form in the closing band (mode form). Texts from register.form; the tier
-// options from pricing.tiers plus the "not sure" option. The script reads its texts and the
+// options from pricing.tiers plus the "not sure" option. method="post" only as a guard: the
+// script always handles the submit itself; should it ever be missing, the browser would not
+// put the fields into the page address as a query string. The script reads its texts and the
 // endpoint from the data attributes of the form. While privacy_url is TODO its link leads to
 // "#" with a TODO tag; while endpoint_url is empty a TODO tag stands beside the button.
 export function registerForm(ctx) {
@@ -78,7 +80,7 @@ export function registerForm(ctx) {
     <h2 class="register__heading" id="register-heading">${esc(f.heading)}${draftTag(ctx, 'register.form')}</h2>
     <p class="register__intro">${esc(f.intro)}</p>
     <noscript><p class="register__noscript">${esc(f.noscript_note)}</p></noscript>
-    <form class="register__form" id="register-form" novalidate aria-labelledby="register-heading"${attrs}>
+    <form class="register__form" id="register-form" method="post" novalidate aria-labelledby="register-heading"${attrs}>
       <div class="register__names">
 ${field('first-name', f.first_name_label, '<input id="reg-first-name" name="first_name" type="text" autocomplete="given-name" maxlength="60" aria-describedby="reg-first-name-error">')}
 ${field('last-name', f.last_name_label, '<input id="reg-last-name" name="last_name" type="text" autocomplete="family-name" maxlength="60" aria-describedby="reg-last-name-error">')}

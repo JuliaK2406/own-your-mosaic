@@ -218,7 +218,7 @@ test('the form: fields with labels, autocomplete and error slots, four tier pill
   assert.ok(html.includes(`<h2 class="register__heading" id="register-heading">${esc(f.heading)}`));
   assert.ok(html.includes(`<noscript><p class="register__noscript">${esc(f.noscript_note)}</p></noscript>`));
   assert.ok(html.includes('<noscript><style>.register__form { display: none; }</style></noscript>'), 'without JavaScript the note replaces the form');
-  assert.ok(form.includes('novalidate') && form.includes('aria-labelledby="register-heading"'));
+  assert.ok(form.includes('method="post" novalidate') && form.includes('aria-labelledby="register-heading"'), 'post as a guard against a native submission, the script does the work');
   for (const [id, name, auto] of [['reg-first-name', 'first_name', 'given-name'], ['reg-last-name', 'last_name', 'family-name'], ['reg-email', 'email', 'email']]) {
     assert.ok(form.includes(`<label for="${id}">`), id);
     assert.ok(form.includes(`<input id="${id}" name="${name}" type="${name === 'email' ? 'email' : 'text'}" autocomplete="${auto}"`), name);
