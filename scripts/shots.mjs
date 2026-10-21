@@ -124,6 +124,13 @@ function facts(page) {
       tiles: tileBoxes.length,
       mosaics: document.querySelectorAll('svg.mosaic').length,
       closingTop: (() => { const node = document.querySelector('.closing'); return node ? Math.round(node.getBoundingClientRect().top + window.scrollY) : null; })(),
+      // the band drawings hang 200 px above the band; they must never reach below its bottom edge
+      bandOverflow: (() => {
+        const band = document.querySelector('.closing');
+        if (!band) return 0;
+        const bottom = band.getBoundingClientRect().bottom;
+        return Math.max(0, ...[...document.querySelectorAll('.closing svg.mosaic--band')].map((node) => node.getBoundingClientRect()).filter((b) => b.height > 0).map((b) => Math.round(b.bottom - bottom)));
+      })(),
     };
   });
 }
@@ -178,6 +185,7 @@ export async function takeShots({ outDir = DEFAULT_OUT_DIR, liveUrl = '', set = 
       if (broken.length) flags.push(`photos not loaded: ${broken.map((img) => img.src).join(', ')}`);
       if (f.heroFieldOverlapsText) flags.push('the tile field of the first screen overlaps the text');
       if (f.tilesOverText) flags.push(`${f.tilesOverText} tile(s) sit on a text box`);
+      if (f.bandOverflow > 0) flags.push(`the band drawing reaches ${f.bandOverflow} px below the closing band`);
       if (vp.width < 500) {
         if (!f.title || f.title.bottom > vp.height) flags.push('the title is not on the first screen');
         if (!f.subtitle || f.subtitle.bottom > vp.height) flags.push('the subtitle is not on the first screen');
