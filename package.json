@@ -1,0 +1,25 @@
+{
+  "name": "own-your-mosaic",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Own Your Mosaic of Life: the page of Julia Krylova's eight-week group programme. One YAML file holds every text; a Node script builds a static page from it.",
+  "type": "module",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "check": "node src/check.mjs",
+    "build": "node src/build.mjs",
+    "test": "node --test",
+    "serve": "node scripts/serve.mjs",
+    "shots": "node scripts/shots.mjs",
+    "og": "node scripts/og-image.mjs"
+  },
+  "dependencies": {
+    "js-yaml": "^5.4.1",
+    "sharp": "^0.35.4"
+  },
+  "devDependencies": {
+    "playwright": "1.62.1"
+  }
+}
