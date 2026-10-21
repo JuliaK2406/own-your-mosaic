@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { seeded, porcelainTile, bandTile, flyTile, heroField, mentorField, cornerGroup, bandVariant, bandSprite, bandUse, diagramLines, allMosaics, COLOURS, BAND_VARIANTS, BORDER_Y } from '../src/render/mosaic.mjs';
+import { seeded, porcelainTile, bandTile, flyTile, heroField, mentorField, cornerGroup, bandVariant, bandSprite, bandUse, allMosaics, COLOURS, BAND_VARIANTS, BORDER_Y } from '../src/render/mosaic.mjs';
 
 const rects = (svg) => [...svg.matchAll(/<rect x="(-?\d+)" y="(-?\d+)" width="(\d+)" height="(\d+)" rx="6" fill-opacity="([.\d]+)"\/>/g)].map((m) => ({ x: Number(m[1]), y: Number(m[2]), w: Number(m[3]), h: Number(m[4]), opacity: Number(m[5]) }));
 const fills = (svg) => [...svg.matchAll(/fill="(#[0-9A-Fa-f]{6})"/g)].map((m) => m[1]);
@@ -113,12 +113,4 @@ test('the band drawings: five widths; over the border only aubergine within the 
   assert.ok(bandUse('wide', 'left').includes('<use href="#band-wide"/>'));
   assert.ok(bandUse('wide', 'right').includes('<use href="#band-wide" transform="translate(292 0) scale(-1 1)"/>'));
   assert.ok(bandUse('wide', 'left').includes('width="292" height="640"'), 'placed at its own size');
-});
-
-test('the diagram lines: four thin gold lines meeting in the middle, stretched to their box with a 1 px stroke', () => {
-  const svg = diagramLines();
-  assert.equal((svg.match(/<line /g) || []).length, 4);
-  assert.equal((svg.match(new RegExp(`stroke="${COLOURS.gold}"`, 'g')) || []).length, 4);
-  assert.ok(svg.includes('preserveAspectRatio="none"') && svg.includes('vector-effect="non-scaling-stroke"') && svg.includes('aria-hidden="true"'));
-  assert.ok(!svg.includes('<rect'));
 });

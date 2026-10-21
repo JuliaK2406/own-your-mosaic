@@ -4,7 +4,7 @@
 // descriptions from its photo_alt fields. The only additions are the TODO and draft tags,
 // shown while meta.published is false, and the decorative mosaics (src/render/mosaic.mjs).
 
-import { heroField, mentorField, cornerGroup, bandSprite, bandSvgs, diagramLines } from './mosaic.mjs';
+import { heroField, mentorField, cornerGroup, bandSprite, bandSvgs } from './mosaic.mjs';
 
 export const OG_IMAGE_FILE = 'og-image.png';
 export const OG_WIDTH = 1200;
@@ -14,11 +14,10 @@ export const OG_HEIGHT = 627;
 // each level (lighter for the first level, deeper for the third), in the manner of Snapshot.
 export const WHO_ALPHAS = [0.35, 0.55, 0.75, 1];
 export const LEVEL_ALPHAS = [[0.2, 0.35, 0.3, 0.45], [0.45, 0.6, 0.55, 0.7], [0.7, 0.85, 0.8, 1]];
-// The four input tiles of the Promise diagram, from light to deep; from 0.6 the label on the
-// tile is written in the on-aubergine colour (contrast 5.7:1 and 10.2:1), below it in navy
-// (7.8:1 and 5.3:1 on porcelain-deep).
-export const DIAGRAM_ALPHAS = [0.22, 0.42, 0.78, 1];
-export const DIAGRAM_DARK_FROM = 0.6;
+// The four small tiles of the Promise diagram, from light to deep, and the 3 x 3 brand sign
+// (the same shades as the favicon and the Snapshot icon) before its result line.
+export const DIAGRAM_ALPHAS = [0.3, 0.5, 0.75, 1];
+export const SIGN_ALPHAS = [1, 0.45, 0.8, 0.3, 0.9, 0.55, 0.7, 0.2, 1];
 
 export const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
 // **word** becomes <strong>word</strong>; this is the only markup allowed inside a text.
@@ -154,15 +153,14 @@ function problem(ctx) {
 
 // Promise: the text on the left and, from 900 px, a card with the diagram on the right (on
 // the phone the card follows the text). Every word of the diagram is in the yaml, taken from
-// the two paragraphs: what the roadmap takes into account (four tiles), the result, what
-// you will have (three points). One draft tag for the whole diagram, at its first label.
+// the two paragraphs: what the roadmap takes into account (four words with small tiles,
+// hairlines between them), one gold stem down to a dot, the result in Lora behind the brand
+// sign with a short gold rule, then what you will have (three points with gold marks).
+// One draft tag for the whole diagram, at its first label.
 function promise(ctx) {
   const p = ctx.content.promise;
   const d = p.diagram;
-  const inputs = d.inputs.map((text, i) => {
-    const alpha = DIAGRAM_ALPHAS[i] ?? 1;
-    return `        <li class="diagram__input${alpha >= DIAGRAM_DARK_FROM ? ' diagram__input--dark' : ''}" style="--alpha: ${alpha}">${esc(text)}</li>`;
-  }).join('\n');
+  const inputs = d.inputs.map((text, i) => `        <li class="diagram__input"><span class="diagram__tile" style="--alpha: ${DIAGRAM_ALPHAS[i] ?? 1}" aria-hidden="true"></span><span class="diagram__word">${esc(text)}</span></li>`).join('\n');
   return `<section class="section promise" aria-labelledby="promise-title">
   <div class="container promise__grid">
     <div class="promise__copy">
@@ -174,8 +172,9 @@ function promise(ctx) {
       <ul class="diagram__inputs">
 ${inputs}
       </ul>
-      ${diagramLines()}
-      <p class="diagram__result">${esc(d.result)}</p>
+      <div class="diagram__join" aria-hidden="true"><span class="diagram__stem"></span><span class="diagram__dot"></span></div>
+      <p class="diagram__result">${tiles(SIGN_ALPHAS, 'diagram__sign')}<span class="diagram__title">${esc(d.result)}</span></p>
+      <span class="diagram__rule" aria-hidden="true"></span>
       <p class="diagram__label caps">${esc(d.outcomes_label)}</p>
       <ul class="diagram__outcomes">
 ${d.outcomes.map((text) => `        <li>${esc(text)}</li>`).join('\n')}

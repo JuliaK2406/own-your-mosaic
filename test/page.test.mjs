@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { loadContent, loadRaw, findDrafts, walkStrings } from '../src/check.mjs';
-import { renderPage, rich, esc, DIAGRAM_ALPHAS } from '../src/render/page.mjs';
+import { renderPage, rich, esc, DIAGRAM_ALPHAS, SIGN_ALPHAS } from '../src/render/page.mjs';
 import { COLOURS, BAND_VARIANTS } from '../src/render/mosaic.mjs';
 
 const content = await loadContent();
@@ -124,23 +124,21 @@ test('the facts line keeps each fact in one piece; the quotes, the legal line an
   assert.ok(html.includes(`<a href="${content.links.main_site}">${esc(content.footer.main_site_label)}</a>`));
 });
 
-test('the Promise diagram: four tiles from light to deep with navy or on-aubergine labels, the result, three outcomes, four gold lines', () => {
+test('the Promise diagram: four words with tiles from light to deep, one gold stem and dot, the result behind the brand sign, three outcomes', () => {
   const d = content.promise.diagram;
-  const tiles = html.match(/<li class="diagram__input[^"]*" style="--alpha: [^"]+">[^<]+<\/li>/g) || [];
-  assert.equal(tiles.length, 4);
-  tiles.forEach((tile, i) => {
-    assert.ok(tile.includes(`--alpha: ${DIAGRAM_ALPHAS[i]}`));
-    assert.ok(tile.includes(`>${esc(d.inputs[i])}<`));
-    assert.equal(tile.includes('diagram__input--dark'), DIAGRAM_ALPHAS[i] >= 0.6, `tile ${i}`);
+  const items = html.match(/<li class="diagram__input">[^]*?<\/li>/g) || [];
+  assert.equal(items.length, 4);
+  items.forEach((item, i) => {
+    assert.ok(item.includes(`<span class="diagram__tile" style="--alpha: ${DIAGRAM_ALPHAS[i]}" aria-hidden="true"></span>`));
+    assert.ok(item.includes(`<span class="diagram__word">${esc(d.inputs[i])}</span>`));
   });
-  assert.ok(html.includes(`<p class="diagram__result">${esc(d.result)}</p>`));
+  assert.equal(count(html, /<div class="diagram__join" aria-hidden="true"><span class="diagram__stem"><\/span><span class="diagram__dot"><\/span><\/div>/g), 1);
+  assert.ok(html.includes(`<span class="diagram__title">${esc(d.result)}</span></p>`));
+  assert.equal(count(html.match(/<p class="diagram__result">[^]*?<\/p>/)[0], /<span style="--alpha: /g), SIGN_ALPHAS.length, 'the 3 x 3 brand sign before the result');
+  assert.equal(count(html, /<span class="diagram__rule" aria-hidden="true"><\/span>/g), 1);
   assert.equal(count(html, /<ul class="diagram__outcomes">/g), 1);
   for (const text of d.outcomes) assert.ok(html.includes(`<li>${esc(text)}</li>`));
-  const lines = html.match(/<svg class="diagram__lines"[^]*?<\/svg>/)[0];
-  assert.equal(count(lines, /<line /g), 4);
-  assert.equal(count(lines, new RegExp(`stroke="${COLOURS.gold}"`, 'g')), 4);
-  assert.ok(lines.includes('aria-hidden="true"'));
-  assert.ok(!html.includes('promise__panel'));
+  assert.ok(!html.includes('diagram__lines') && !html.includes('promise__panel'));
 });
 
 // Parses every drawing of the page: the symbols of the sprite and the standalone svgs that
@@ -181,7 +179,7 @@ test('mosaics: the fields, the corner groups and the five band drawings; every t
     assert.ok(html.includes(`<symbol id="band-${name}" viewBox="0 0 ${BAND_VARIANTS[name].width} ${BAND_VARIANTS[name].height}">`));
     assert.ok(html.includes(`<use href="#band-${name}"/>`) && html.includes(`<use href="#band-${name}" transform="translate(${BAND_VARIANTS[name].width} 0) scale(-1 1)"/>`));
   }
-  assert.equal(count(html, new RegExp(`fill="${COLOURS.gold}"`, 'g')), 0, 'gold only as the lines of the diagram, never a tile');
+  assert.equal(count(html, new RegExp(`fill="${COLOURS.gold}"`, 'g')), 0, 'gold is never a tile');
   assert.equal(render(), html, 'the same markup every time');
   for (const block of ['problem', 'package', 'process', 'pricing', 'logistics']) {
     const section = html.match(new RegExp(`<section class="section[^"]*\\b${block}\\b[^]*?</section>`))[0];

@@ -257,13 +257,6 @@ export function bandSvgs() {
   return Object.keys(BAND_VARIANTS).flatMap((name) => [bandUse(name, 'left'), bandUse(name, 'right')]).join('\n  ');
 }
 
-// 4. The thin gold lines of the Promise diagram: from four points under the input tiles down
-// to the middle, where the result stands. Stretched to its box, the stroke stays 1 px.
-export function diagramLines() {
-  const lines = [12, 37, 63, 88].map((x) => `<line x1="${x}" y1="0" x2="50" y2="40" stroke="${COLOURS.gold}" stroke-width="1" vector-effect="non-scaling-stroke"/>`);
-  return `<svg class="diagram__lines" viewBox="0 0 100 40" preserveAspectRatio="none" aria-hidden="true" focusable="false">${lines.join('')}</svg>`;
-}
-
 // Every mosaic drawing of the page as a standalone svg, for the tests and the size budget.
 export function allMosaics() {
   const bands = Object.fromEntries(Object.keys(BAND_VARIANTS).map((name) => {
