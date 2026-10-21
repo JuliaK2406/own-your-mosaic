@@ -7,6 +7,8 @@
 //   design (--set design, PROMPT 02): full pages and hero at 390 and 1440, the Promise,
 //                                  Meet your mentor and closing blocks at 390 and 1440,
 //                                  Meet your mentor at 1280; 360 and 834 are checked only
+//   design2 (--set design2, PROMPT 02b): as design, with the seam of Practical details and
+//                                  the closing band (seam) instead of the closing block
 // Checks on the way: no horizontal overflow (scrollWidth equals clientWidth), Lora and Inter
 // loaded from the site itself, not one request to another origin, every photo loaded
 // (naturalWidth above zero), on the phone the title and subtitle are on the first screen and
@@ -36,6 +38,7 @@ export const VIEWPORTS = {
 export const SETS = {
   skeleton: { 360: ['full'], 390: ['full', 'hero', 'process', 'pricing'], 834: ['full'], 1440: ['full', 'hero', 'process', 'pricing'] },
   design: { 360: [], 390: ['full', 'hero', 'promise', 'mentor', 'closing'], 834: [], 1280: ['mentor'], 1440: ['full', 'hero', 'promise', 'mentor', 'closing'] },
+  design2: { 360: [], 390: ['full', 'hero', 'promise', 'mentor', 'seam'], 834: [], 1280: ['mentor'], 1440: ['full', 'hero', 'promise', 'mentor', 'seam'] },
   live: { 390: ['hero'], 1440: ['hero'] },
 };
 const BLOCKS = { process: '.process', pricing: '.pricing', promise: '.promise', mentor: '.proof', closing: '.closing' };
@@ -73,7 +76,32 @@ function facts(page) {
     const lastParagraph = [...document.querySelectorAll('.proof__copy p')].pop();
     const boxes = (selector) => [...document.querySelectorAll(selector)].map((node) => node.getBoundingClientRect());
     const intersects = (a, b) => a.left < b.right && b.left < a.right && a.top < b.bottom && b.top < a.bottom;
-    // text of the first screen must never sit on the tile field behind the photo
+    // no tile of any mosaic may sit on a text box (the tiles of the Promise diagram carry
+    // their own labels and are html, not svg, so they are not tiles here)
+    const textBoxes = boxes('main p, main h1, main h2, main h3, main li, main dt, main dd, main figcaption, main blockquote, main .btn, main .tag').filter((b) => b.width > 0 && b.height > 0);
+    const tileBoxes = [];
+    for (const svgNode of document.querySelectorAll('svg.mosaic')) {
+      const box = svgNode.getBoundingClientRect();
+      if (!box.width || !box.height) continue;
+      const use = svgNode.querySelector('use');
+      if (use) {
+        // a band drawing shown through <use>, at its own size: each tile of the symbol, mirrored on the right
+        const symbol = document.querySelector(use.getAttribute('href'));
+        const viewWidth = Number(svgNode.getAttribute('viewBox').split(' ')[2]);
+        const mirrored = use.hasAttribute('transform');
+        for (const r of symbol.querySelectorAll('rect')) {
+          const [x, y, w, h] = ['x', 'y', 'width', 'height'].map((name) => Number(r.getAttribute(name)));
+          const left = box.left + (mirrored ? viewWidth - x - w : x);
+          tileBoxes.push({ left, right: left + w, top: box.top + y, bottom: box.top + y + h, width: w, height: h });
+        }
+      } else {
+        for (const r of svgNode.querySelectorAll('rect')) {
+          const b = r.getBoundingClientRect();
+          if (b.width && b.height) tileBoxes.push(b);
+        }
+      }
+    }
+    const tilesOverText = tileBoxes.filter((t) => textBoxes.some((b) => intersects(t, b))).length;
     const field = boxes('.hero__field');
     const heroText = boxes('.hero__head, .hero__body');
     return {
@@ -92,7 +120,10 @@ function facts(page) {
       h1Lines: h1 ? Math.round(h1.getBoundingClientRect().height / parseFloat(getComputedStyle(h1).lineHeight)) : null,
       mentor: photos && lastParagraph && getComputedStyle(photos).display !== 'contents' ? { photosBottom: Math.round(photos.getBoundingClientRect().bottom + window.scrollY), textBottom: Math.round(lastParagraph.getBoundingClientRect().bottom + window.scrollY), sticky: getComputedStyle(photos).position } : null,
       heroFieldOverlapsText: field.some((f) => heroText.some((t) => intersects(f, t))),
+      tilesOverText,
+      tiles: tileBoxes.length,
       mosaics: document.querySelectorAll('svg.mosaic').length,
+      closingTop: (() => { const node = document.querySelector('.closing'); return node ? Math.round(node.getBoundingClientRect().top + window.scrollY) : null; })(),
     };
   });
 }
@@ -146,13 +177,14 @@ export async function takeShots({ outDir = DEFAULT_OUT_DIR, liveUrl = '', set = 
       const broken = f.images.filter((img) => !img.ok);
       if (broken.length) flags.push(`photos not loaded: ${broken.map((img) => img.src).join(', ')}`);
       if (f.heroFieldOverlapsText) flags.push('the tile field of the first screen overlaps the text');
+      if (f.tilesOverText) flags.push(`${f.tilesOverText} tile(s) sit on a text box`);
       if (vp.width < 500) {
         if (!f.title || f.title.bottom > vp.height) flags.push('the title is not on the first screen');
         if (!f.subtitle || f.subtitle.bottom > vp.height) flags.push('the subtitle is not on the first screen');
         if (!f.button || f.button.bottom > 2 * vp.height) flags.push(`the button is below the second screen (${f.button && f.button.bottom} px)`);
         if (f.h1Lines > 3) flags.push(`the title takes ${f.h1Lines} lines`);
       }
-      summary.push(`${prefix}: ${f.buttons} buttons, ${f.todoTags} TODO tags, ${f.draftTags} draft tags, ${f.images.length} photos, ${f.mosaics} mosaics, fonts ${f.lora && f.inter ? 'from the site' : 'MISSING'}, width ${f.scrollWidth}/${f.clientWidth}${f.button ? `, hero button bottom at ${f.button.bottom} px` : ''}, h1 on ${f.h1Lines} line(s)`);
+      summary.push(`${prefix}: ${f.buttons} buttons, ${f.todoTags} TODO tags, ${f.draftTags} draft tags, ${f.images.length} photos, ${f.mosaics} mosaics with ${f.tiles} visible tiles (${f.tilesOverText} on text), fonts ${f.lora && f.inter ? 'from the site' : 'MISSING'}, width ${f.scrollWidth}/${f.clientWidth}${f.button ? `, hero button bottom at ${f.button.bottom} px` : ''}, h1 on ${f.h1Lines} line(s)`);
       summary.push(`${prefix}: font sizes px: ${Object.entries(f.fonts).map(([k, v]) => `${k} ${v}`).join(', ')}`);
       if (f.mentor) summary.push(`${prefix}: Meet your mentor: photos end at ${f.mentor.photosBottom}, text ends at ${f.mentor.textBottom}, difference ${f.mentor.textBottom - f.mentor.photosBottom} px, photo column position ${f.mentor.sticky}`);
       if (vp.weigh || liveUrl) {
@@ -168,6 +200,7 @@ export async function takeShots({ outDir = DEFAULT_OUT_DIR, liveUrl = '', set = 
         const file = path.join(outDir, `${prefix}-${kind}.png`);
         if (kind === 'full') await page.screenshot({ path: file, fullPage: true });
         else if (kind === 'hero') await page.screenshot({ path: file });
+        else if (kind === 'seam') await page.screenshot({ path: file, fullPage: true, clip: { x: 0, y: Math.max(0, f.closingTop - 260), width: vp.width, height: 560 } });
         else await page.locator(BLOCKS[kind]).screenshot({ path: file });
         console.log(path.basename(file));
       }
