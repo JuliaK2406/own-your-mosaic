@@ -1,6 +1,8 @@
 /* Page layout. Light theme only: background and colours are set explicitly through tokens.
-   The visual language follows the speaker page: air, one type scale, hairlines, calm cards
-   on porcelain with a warm grey border, gold only for buttons and marks, one aubergine band. */
+   The visual language follows the speaker page: air, one type scale with clear steps,
+   hairlines, calm cards on porcelain with a warm grey border, gold only for buttons and
+   marks, one aubergine band. Every second block sits on porcelain-deep. Three decorative
+   mosaics (first screen, Promise, closing band) come as inline svg from the build. */
 
 *,
 *::before,
@@ -13,7 +15,7 @@ body {
   background: var(--porcelain);
   color: var(--navy);
   font-family: var(--font-body);
-  font-size: var(--text-base);
+  font-size: var(--body-size);
   line-height: var(--leading-body);
   overflow-wrap: break-word;
   -webkit-font-smoothing: antialiased;
@@ -31,9 +33,13 @@ h3 {
   font-family: var(--font-heading);
   font-weight: 500;
   color: var(--navy);
-  line-height: var(--leading-tight);
+  line-height: var(--leading-heading);
   margin: 0 0 var(--s-4);
   text-wrap: balance;
+}
+
+h1 {
+  line-height: var(--leading-h1);
 }
 
 h2 {
@@ -44,12 +50,17 @@ h2 {
 h3 {
   font-size: var(--h3-size);
   font-weight: 600;
+  line-height: var(--leading-h3);
 }
 
 p {
   margin: 0 0 var(--s-4);
-  max-width: 65ch;
+  max-width: var(--measure);
   text-wrap: pretty;
+}
+
+.lead {
+  font-size: var(--lead-size);
 }
 
 a {
@@ -75,11 +86,17 @@ a:hover {
   padding-block: calc(var(--section-gap) / 2);
 }
 
+/* Every second block sits on the deeper tone; its cards stay porcelain */
+
+.section--deep {
+  background: var(--porcelain-deep);
+}
+
 /* Small caps labels */
 
 .caps {
   font-family: var(--font-body);
-  font-size: var(--text-xs);
+  font-size: var(--caps-size);
   font-weight: 500;
   letter-spacing: var(--track-caps);
   text-transform: uppercase;
@@ -89,6 +106,12 @@ a:hover {
 .sep {
   color: var(--gold);
   margin-inline: 0.6em;
+}
+
+/* Decorative mosaics: never read, never scaled oddly */
+
+.mosaic {
+  display: block;
 }
 
 /* Buttons: gold field, navy text, 52 px high */
@@ -119,7 +142,7 @@ a:hover {
 .btn--small {
   min-height: var(--touch-min);
   padding: 0 20px;
-  font-size: var(--text-sm);
+  font-size: var(--secondary-size);
 }
 
 /* TODO and draft tags, shown while meta.published is false */
@@ -183,8 +206,9 @@ a:hover {
   }
 }
 
-/* First screen. On the phone: name and positioning, title, subtitle, photo, paragraphs,
-   button, facts. From 900 px: text left, photo right. */
+/* First screen. On the phone: name and positioning, title, subtitle, photo with two small
+   groups of tiles at its corners, paragraphs, button, facts. From 900 px: text left, photo
+   right on a field of tiles that fades toward the text. */
 
 .hero {
   display: grid;
@@ -195,7 +219,7 @@ a:hover {
 
 .hero__name {
   margin: 0 0 var(--s-1);
-  font-size: var(--text-sm);
+  font-size: var(--secondary-size);
   font-weight: 600;
 }
 
@@ -212,21 +236,51 @@ a:hover {
 .hero__subtitle {
   margin: 0;
   font-family: var(--font-heading);
-  font-size: var(--text-md);
-  line-height: 1.4;
+  font-size: var(--subtitle-size);
+  line-height: 1.3;
 }
 
-.hero__photo img {
+.hero__photo {
+  position: relative;
+  width: min(100%, 480px);
+}
+
+.hero__picture {
+  position: relative;
+  z-index: 1;
+}
+
+.hero__picture img {
   width: 100%;
-  aspect-ratio: 1 / 1;
-  max-height: min(70vh, 540px);   /* one column on a tablet: the photo stays moderate */
+  aspect-ratio: 4 / 5;
   object-fit: cover;
-  object-position: 50% 30%;
   border-radius: var(--radius);
 }
 
-.hero__body p {
-  max-width: 36em;
+.hero__field {
+  display: none;
+}
+
+.hero__corner {
+  position: absolute;
+  z-index: 0;
+  width: 132px;
+  height: 96px;
+}
+
+.hero__corner .mosaic {
+  width: 132px;
+  height: 96px;
+}
+
+.hero__corner--tr {
+  top: -20px;
+  right: -16px;
+}
+
+.hero__corner--bl {
+  bottom: -20px;
+  left: -16px;
 }
 
 .hero__cta {
@@ -246,7 +300,7 @@ a:hover {
       "body photo";
     column-gap: clamp(2.5rem, 5vw, 5rem);
     align-items: start;
-    padding-block: clamp(3rem, 6vh, 5rem) calc(var(--section-gap) / 2);
+    padding-block: clamp(3.5rem, 6vh, 5rem) calc(var(--section-gap) / 2);
   }
   .hero__head {
     grid-area: head;
@@ -257,11 +311,27 @@ a:hover {
   .hero__photo {
     grid-area: photo;
     align-self: center;
+    width: auto;
   }
-  .hero__photo img {
-    aspect-ratio: 4 / 5;
-    max-height: none;
-    object-position: 50% 20%;
+  .hero__corner {
+    display: none;
+  }
+  /* the field: 40 px wider than the photo on each side, 56 px taller above and below,
+     fading out toward the text column */
+  .hero__field {
+    display: block;
+    position: absolute;
+    top: -56px;
+    right: -40px;
+    bottom: -56px;
+    left: -40px;
+    z-index: 0;
+    -webkit-mask-image: linear-gradient(to right, rgba(0, 0, 0, 0) 0%, #000 30%);
+    mask-image: linear-gradient(to right, rgba(0, 0, 0, 0) 0%, #000 30%);
+  }
+  .hero__field .mosaic {
+    width: 100%;
+    height: 100%;
   }
 }
 
@@ -282,10 +352,12 @@ a:hover {
   padding: var(--s-5);
   border: 1px solid var(--warm-grey);
   border-radius: var(--radius);
+  background: var(--porcelain);
 }
 
 .card p {
   margin: 0;
+  max-width: none;
 }
 
 .tile {
@@ -325,7 +397,54 @@ a:hover {
   max-width: 760px;
   font-family: var(--font-heading);
   font-size: var(--statement-size);
-  line-height: 1.35;
+  line-height: 1.3;
+}
+
+/* Promise: text and, from 900 px, the decorative panel of the same height on the right.
+   On the phone the panel is a low strip under the text. */
+
+.promise__grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  row-gap: var(--s-5);
+}
+
+.promise__copy p:last-child {
+  margin-bottom: 0;
+}
+
+.promise__panel {
+  height: 120px;
+  overflow: hidden;
+  border-radius: var(--radius);
+  background: var(--porcelain-deep);
+}
+
+.promise__panel .mosaic {
+  width: 100%;
+  height: 100%;
+}
+
+.promise__panel .mosaic--promise {
+  display: none;
+}
+
+@media (min-width: 900px) {
+  .promise__grid {
+    grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr);
+    column-gap: clamp(2.5rem, 5vw, 5rem);
+    align-items: stretch;
+  }
+  .promise__panel {
+    height: auto;
+    min-height: 240px;
+  }
+  .promise__panel .mosaic--promise {
+    display: block;
+  }
+  .promise__panel .mosaic--promise-strip {
+    display: none;
+  }
 }
 
 /* Process: the path from the diagnostic through three levels to the roadmap.
@@ -372,7 +491,7 @@ a:hover {
 .path__dot {
   position: absolute;
   left: -32.5px;
-  top: calc(var(--s-1) + 5px);
+  top: calc(var(--s-1) + 6px);
   width: 9px;
   height: 9px;
   border-radius: 50%;
@@ -390,7 +509,7 @@ a:hover {
   border-radius: 50%;
   background: var(--aubergine);
   color: var(--porcelain);
-  font-size: var(--text-xs);
+  font-size: var(--caps-size);
   font-weight: 600;
 }
 
@@ -402,6 +521,7 @@ a:hover {
   padding: var(--s-5);
   border: 1px solid var(--warm-grey);
   border-radius: var(--radius);
+  background: var(--porcelain);
 }
 
 .level__name {
@@ -410,6 +530,7 @@ a:hover {
 
 .level p {
   margin: 0;
+  max-width: none;
 }
 
 .mini {
@@ -480,14 +601,14 @@ a:hover {
 .package__list li {
   position: relative;
   padding-left: 28px;
-  max-width: 36em;
+  max-width: var(--measure);
 }
 
 .package__list li::before {
   content: "";
   position: absolute;
   left: 0;
-  top: 0.85em;
+  top: 0.8em;
   width: 14px;
   height: 1px;
   background: var(--gold);
@@ -509,7 +630,8 @@ a:hover {
 .pricing__sub {
   margin: 0 0 var(--head-gap);
   font-family: var(--font-heading);
-  font-size: var(--text-md);
+  font-size: var(--subtitle-size);
+  line-height: 1.3;
   color: var(--text-muted);
 }
 
@@ -527,14 +649,15 @@ a:hover {
   padding: var(--s-5);
   border: 1px solid var(--warm-grey);
   border-radius: var(--radius);
+  background: var(--porcelain);
 }
 
 .tier__name {
   margin: 0 0 var(--s-3);
   font-family: var(--font-body);
-  font-size: var(--text-xs);
+  font-size: var(--h3-size);
   font-weight: 600;
-  letter-spacing: var(--track-caps);
+  letter-spacing: 0.08em;
   text-transform: uppercase;
 }
 
@@ -543,6 +666,7 @@ a:hover {
   align-items: baseline;
   gap: var(--s-2);
   margin: 0 0 var(--s-2);
+  max-width: none;
 }
 
 .tier__amount {
@@ -553,7 +677,7 @@ a:hover {
 }
 
 .tier__vat {
-  font-size: var(--text-sm);
+  font-size: var(--secondary-size);
   color: var(--text-muted);
 }
 
@@ -562,7 +686,7 @@ a:hover {
   align-items: center;
   gap: var(--s-2);
   margin: 0 0 var(--s-4);
-  font-size: var(--text-sm);
+  font-size: var(--secondary-size);
   color: var(--text-muted);
 }
 
@@ -576,6 +700,7 @@ a:hover {
 
 .tier__text {
   margin: 0;
+  max-width: none;
 }
 
 .pricing__note {
@@ -592,20 +717,123 @@ a:hover {
   }
 }
 
-/* Meet your mentor: photo and four paragraphs, then two quotes */
+/* Meet your mentor. The markup has the text first, then the two photos.
+   Phone: one column in this order: heading, portrait, two paragraphs, event photo,
+   the other paragraphs. From 900 px: a sticky photo column on the left (portrait large,
+   event photo smaller over its lower edge), the text on the right. Then the quotes. */
 
 .proof__grid {
-  display: grid;
-  gap: var(--s-5);
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-4);
+}
+
+.proof__copy,
+.proof__photos {
+  display: contents;
+}
+
+.proof__copy h2 {
+  order: 1;
+  margin-bottom: var(--s-3);
+}
+
+.proof__copy p {
+  margin: 0;
+}
+
+.proof__photo--portrait {
+  order: 2;
+}
+
+.proof__copy p:nth-of-type(1) {
+  order: 3;
+}
+
+.proof__copy p:nth-of-type(2) {
+  order: 4;
+}
+
+.proof__photo--event {
+  order: 5;
+}
+
+.proof__copy p:nth-of-type(n+3) {
+  order: 6;
+}
+
+.proof__corner {
+  display: none;
 }
 
 .proof__photo img {
-  width: 100%;
-  aspect-ratio: 4 / 5;
-  max-height: min(80vh, 600px);   /* one column on a tablet: the photo stays moderate */
-  object-fit: cover;
-  object-position: 50% 30%;
+  width: min(100%, 480px);
   border-radius: var(--radius);
+}
+
+.proof__photo--portrait img {
+  aspect-ratio: 4 / 5;
+  object-fit: cover;
+}
+
+.proof__photo--event img {
+  aspect-ratio: 3 / 2;
+  object-fit: cover;
+}
+
+@media (min-width: 900px) {
+  .proof__grid {
+    display: grid;
+    grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr);
+    grid-template-areas: "photos copy";
+    column-gap: clamp(2.5rem, 5vw, 5rem);
+    align-items: start;
+  }
+  .proof__copy {
+    display: block;
+    grid-area: copy;
+  }
+  .proof__copy h2 {
+    margin-bottom: var(--head-gap);
+  }
+  .proof__copy p {
+    margin: 0 0 var(--s-4);
+  }
+  .proof__photos {
+    display: block;
+    grid-area: photos;
+    position: sticky;
+    top: var(--s-5);
+    padding-bottom: 72px;
+  }
+  .proof__photo img {
+    width: 100%;
+  }
+  .proof__photo--portrait {
+    position: relative;
+    z-index: 1;
+  }
+  .proof__photo--event {
+    position: relative;
+    z-index: 2;
+    width: 70%;
+    margin: -72px -24px 0 auto;
+    border-radius: var(--radius);
+    box-shadow: 0 0 0 6px var(--porcelain), 0 12px 32px rgba(30, 42, 71, 0.1);
+  }
+  .proof__corner {
+    display: block;
+    position: absolute;
+    top: -20px;
+    left: -16px;
+    z-index: 0;
+    width: 132px;
+    height: 96px;
+  }
+  .proof__corner .mosaic {
+    width: 132px;
+    height: 96px;
+  }
 }
 
 .proof__quotes-heading {
@@ -618,24 +846,39 @@ a:hover {
 }
 
 .quote {
+  position: relative;
   margin: 0;
-  padding: var(--s-2) 0 var(--s-2) var(--s-5);
+  padding: 3.25rem var(--s-5) var(--s-5);
   border-left: 2px solid var(--aubergine);
+  border-radius: 0 var(--radius) var(--radius) 0;
+  background: var(--porcelain-deep);
+}
+
+.quote__mark {
+  position: absolute;
+  top: 2px;
+  left: var(--s-5);
+  font-family: var(--font-heading);
+  font-size: 4.5rem;
+  line-height: 1;
+  color: var(--champagne);
 }
 
 .quote__text {
-  margin: 0 0 var(--s-3);
+  position: relative;
+  margin: 0 0 var(--s-4);
   font-family: var(--font-heading);
   font-size: var(--quote-size);
-  line-height: 1.45;
+  line-height: 1.4;
 }
 
 .quote__text p {
   margin: 0;
+  max-width: none;
 }
 
 .quote__by {
-  font-size: var(--text-sm);
+  font-size: var(--secondary-size);
 }
 
 .quote__name {
@@ -646,19 +889,11 @@ a:hover {
 .quote__role {
   display: block;
   margin-top: 2px;
-  font-size: var(--text-xs);
+  font-size: var(--secondary-size);
   color: var(--text-muted);
 }
 
 @media (min-width: 900px) {
-  .proof__grid {
-    grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr);
-    column-gap: clamp(2.5rem, 5vw, 5rem);
-    align-items: start;
-  }
-  .proof__photo img {
-    max-height: none;
-  }
   .quotes {
     grid-template-columns: 1fr 1fr;
     gap: var(--s-6);
@@ -693,15 +928,39 @@ a:hover {
   }
 }
 
-/* Closing band: the only aubergine field, across the whole window */
+/* Closing band: the only aubergine field, across the whole window, with a tone-in-tone
+   mosaic dense at the edges and almost absent behind the text */
 
 .closing {
+  position: relative;
+  overflow: hidden;
   padding-block: clamp(3.5rem, 6vw, 6rem);
   background: var(--aubergine);
   color: var(--on-aubergine);
 }
 
+.closing .mosaic {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.closing .mosaic--band {
+  display: none;
+}
+
+@media (min-width: 900px) {
+  .closing .mosaic--band {
+    display: block;
+  }
+  .closing .mosaic--band-tall {
+    display: none;
+  }
+}
+
 .closing__inner {
+  position: relative;
   text-align: center;
 }
 
@@ -710,7 +969,7 @@ a:hover {
   max-width: 760px;
   font-family: var(--font-heading);
   font-size: var(--statement-size);
-  line-height: 1.4;
+  line-height: 1.35;
   color: var(--on-aubergine);
 }
 
@@ -723,7 +982,7 @@ a:hover {
 .footer {
   padding-block: var(--s-5);
   border-top: 1px solid var(--warm-grey);
-  font-size: var(--text-sm);
+  font-size: var(--secondary-size);
   color: var(--text-muted);
 }
 

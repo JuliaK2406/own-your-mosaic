@@ -2,7 +2,9 @@
 // no script on the page. Every text goes through esc() (HTML escaping) or rich() (escaping plus
 // **bold**). No word on the page is written here: the texts come from the yaml, the photo
 // descriptions from its photo_alt fields. The only additions are the TODO and draft tags,
-// shown while meta.published is false.
+// shown while meta.published is false, and the decorative mosaics (src/render/mosaic.mjs).
+
+import { heroField, cornerGroup, promisePanel, closingBand } from './mosaic.mjs';
 
 export const OG_IMAGE_FILE = 'og-image.png';
 export const OG_WIDTH = 1200;
@@ -19,7 +21,7 @@ export const rich = (s) => esc(s).replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>
 export const isTodo = (v) => typeof v === 'string' && /\bTODO\b/.test(v);
 
 const SEP = '<span class="sep" aria-hidden="true">·</span>';
-const paragraphs = (list, render = esc) => list.map((text) => `<p>${render(text)}</p>`).join('\n');
+const paragraphs = (list, render = esc, className = '') => list.map((text) => `<p${className ? ` class="${className}"` : ''}>${render(text)}</p>`).join('\n');
 const tiles = (alphas, className) => `<span class="${className}" aria-hidden="true">${alphas.map((alpha) => `<span style="--alpha: ${alpha}"></span>`).join('')}</span>`;
 const todoTag = (ctx) => (ctx.published ? '' : ' <span class="tag tag--todo">TODO</span>');
 const draftTag = (ctx, at) => (!ctx.published && ctx.drafts.has(at) ? ' <span class="tag tag--draft">draft</span>' : '');
@@ -95,6 +97,8 @@ function topbar(ctx) {
 </header>`;
 }
 
+// The first screen. The photo stands on a field of tiles from 900 px (CSS fades it toward
+// the text); on the phone two small groups of tiles touch two corners of the photo instead.
 function hero(ctx) {
   const h = ctx.content.hero;
   return `<section class="hero container" aria-labelledby="hero-title">
@@ -105,10 +109,15 @@ function hero(ctx) {
     <p class="hero__subtitle">${esc(h.subtitle)}</p>
   </div>
   <div class="hero__photo">
-    ${picture(ctx, h.photo, { alt: h.photo_alt, eager: true, sizes: '(min-width: 1200px) 420px, (min-width: 900px) 36vw, calc(100vw - 48px)' })}
+    <span class="hero__field" aria-hidden="true">${heroField()}</span>
+    <span class="hero__corner hero__corner--tr" aria-hidden="true">${cornerGroup({ seed: 21 })}</span>
+    <span class="hero__corner hero__corner--bl" aria-hidden="true">${cornerGroup({ seed: 22 })}</span>
+    <div class="hero__picture">
+      ${picture(ctx, h.photo, { alt: h.photo_alt, eager: true, sizes: '(min-width: 1200px) 420px, (min-width: 900px) 36vw, (min-width: 540px) 480px, calc(100vw - 48px)' })}
+    </div>
   </div>
   <div class="hero__body">
-    ${paragraphs(h.paragraphs)}
+    ${paragraphs(h.paragraphs, esc, 'lead')}
     <div class="hero__cta">${registerButton(ctx)}</div>
     <p class="hero__facts caps">${h.facts.map(esc).join(SEP)}</p>
   </div>
@@ -118,7 +127,7 @@ function hero(ctx) {
 function who(ctx) {
   const w = ctx.content.who;
   const cards = w.items.map((text, i) => `      <li class="card"><span class="tile" style="--alpha: ${WHO_ALPHAS[i] ?? 1}" aria-hidden="true"></span><p>${esc(text)}</p></li>`).join('\n');
-  return `<section class="section who" aria-labelledby="who-title">
+  return `<section class="section section--deep who" aria-labelledby="who-title">
   <div class="container">
     <h2 id="who-title">${esc(w.heading)}</h2>
     <ul class="cards cards--who">
@@ -137,12 +146,18 @@ function problem(ctx) {
 </section>`;
 }
 
+// Promise: the text on the left and, from 900 px, a decorative panel of the same height on the
+// right (on the phone a low strip under the text): tiles scattered on the left line up into
+// one row toward the right and end in a gold dot. From the mosaic to the plan, without a word.
 function promise(ctx) {
   const p = ctx.content.promise;
   return `<section class="section promise" aria-labelledby="promise-title">
-  <div class="container">
-    <h2 id="promise-title">${esc(p.heading)}</h2>
-    ${paragraphs(p.paragraphs)}
+  <div class="container promise__grid">
+    <div class="promise__copy">
+      <h2 id="promise-title">${esc(p.heading)}</h2>
+      ${paragraphs(p.paragraphs, esc, 'lead')}
+    </div>
+    <div class="promise__panel" aria-hidden="true">${promisePanel()}${promisePanel({ seed: 23, width: 720, height: 120, strip: true, transition: 0.6 })}</div>
   </div>
 </section>`;
 }
@@ -159,10 +174,10 @@ function process(ctx) {
             ${tiles(LEVEL_ALPHAS[i] ?? LEVEL_ALPHAS[LEVEL_ALPHAS.length - 1], 'mini')}
           </div>
         </li>`).join('\n');
-  return `<section class="section process" aria-labelledby="process-title">
+  return `<section class="section section--deep process" aria-labelledby="process-title">
   <div class="container">
     <h2 id="process-title">${esc(p.heading)}</h2>
-    <p>${esc(p.intro)}</p>
+    <p class="lead">${esc(p.intro)}</p>
     <p>${esc(p.levels_intro)}</p>
     <div class="path">
       <p class="path__end path__end--start caps"><span class="path__dot" aria-hidden="true"></span><span>${esc(p.start_label)}</span></p>
@@ -195,7 +210,7 @@ function pricing(ctx) {
         <p class="tier__spots"><span class="dot" aria-hidden="true"></span>${esc(tier.spots)}</p>
         <p class="tier__text">${esc(tier.text)}</p>
       </li>`).join('\n');
-  return `<section class="section pricing" aria-labelledby="pricing-title">
+  return `<section class="section section--deep pricing" aria-labelledby="pricing-title">
   <div class="container">
     <h2 id="pricing-title">${esc(p.heading)}</h2>
     <p class="pricing__sub">${esc(p.subheading)}</p>
@@ -208,21 +223,32 @@ ${tiers}
 </section>`;
 }
 
+// Meet your mentor. The text comes first in the markup (heading, four paragraphs), then the
+// two photos. From 900 px the photos form a sticky column on the left: the portrait large,
+// the event photo smaller, shifted down and right over its lower edge. On the phone CSS orders
+// the pieces: heading, portrait, two paragraphs, event photo, the other paragraphs, quotes.
 function proof(ctx) {
   const p = ctx.content.proof;
   const quotes = p.quotes.map((q) => `      <figure class="quote">
-        <blockquote class="quote__text"><p>&ldquo;${esc(q.quote)}&rdquo;</p></blockquote>
+        <span class="quote__mark" aria-hidden="true">&ldquo;</span>
+        <blockquote class="quote__text"><p>${esc(q.quote)}</p></blockquote>
         <figcaption class="quote__by"><strong class="quote__name">${esc(q.name)}</strong><span class="quote__role">${esc(q.role)}, ${esc(q.company)}</span>${draftTag(ctx, 'proof.quotes')}</figcaption>
       </figure>`).join('\n');
   return `<section class="section proof" aria-labelledby="proof-title">
   <div class="container">
     <div class="proof__grid">
-      <div class="proof__photo">
-        ${picture(ctx, p.photo, { alt: p.photo_alt, sizes: '(min-width: 1200px) 400px, (min-width: 900px) 34vw, calc(100vw - 48px)' })}
-      </div>
       <div class="proof__copy">
         <h2 id="proof-title">${esc(p.heading)}${draftTag(ctx, 'proof.heading')}</h2>
         ${paragraphs(p.paragraphs, rich)}
+      </div>
+      <div class="proof__photos">
+        <div class="proof__photo proof__photo--portrait">
+          ${picture(ctx, p.photo, { alt: p.photo_alt, sizes: '(min-width: 1200px) 400px, (min-width: 900px) 34vw, (min-width: 540px) 480px, calc(100vw - 48px)' })}
+        </div>
+        <div class="proof__photo proof__photo--event">
+          ${picture(ctx, p.photo_2, { alt: p.photo_2_alt, sizes: '(min-width: 1200px) 300px, (min-width: 900px) 26vw, (min-width: 540px) 480px, calc(100vw - 48px)' })}
+        </div>
+        <span class="proof__corner" aria-hidden="true">${cornerGroup({ seed: 24 })}</span>
       </div>
     </div>
     <h3 class="proof__quotes-heading">${esc(p.quotes_heading)}</h3>
@@ -236,7 +262,7 @@ ${quotes}
 function logistics(ctx) {
   const l = ctx.content.logistics;
   const rows = l.items.map((item) => `      <div class="details__row"><dt class="caps">${esc(item.label)}</dt><dd>${esc(item.value)}</dd></div>`).join('\n');
-  return `<section class="section logistics" aria-labelledby="logistics-title">
+  return `<section class="section section--deep logistics" aria-labelledby="logistics-title">
   <div class="container">
     <h2 id="logistics-title">${esc(l.heading)}${draftTag(ctx, 'logistics.heading')}</h2>
     <dl class="details">
@@ -246,9 +272,12 @@ ${rows}
 </section>`;
 }
 
-// The only aubergine band of the page, across the whole window.
+// The only aubergine band of the page, across the whole window, with a tone-in-tone mosaic
+// that is dense at the edges and almost absent behind the text.
 function closing(ctx) {
   return `<section class="closing">
+  ${closingBand()}
+  ${closingBand({ seed: 25, width: 390, height: 760, tall: true })}
   <div class="container closing__inner">
     <p class="closing__text">${esc(ctx.content.closing.text)}</p>
     <div class="closing__cta">${registerButton(ctx)}</div>

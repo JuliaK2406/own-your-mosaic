@@ -2,14 +2,16 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { loadContent, loadRaw, findDrafts, walkStrings } from '../src/check.mjs';
 import { renderPage, rich, esc } from '../src/render/page.mjs';
+import { COLOURS } from '../src/render/mosaic.mjs';
 
 const content = await loadContent();
 const raw = await loadRaw();
 const drafts = new Set(findDrafts(raw, content).drafts.map((draft) => draft.path));
-// A manifest like the one src/images.mjs returns, without running sharp.
+// A manifest like the one src/images.mjs returns (with its crops), without running sharp.
 const manifest = {
-  [content.hero.photo]: { slug: 'hero', widths: [640, 1024, 1600], width: 3293, height: 4116 },
-  [content.proof.photo]: { slug: 'proof', widths: [640, 1024, 1600], width: 4396, height: 6593 },
+  [content.hero.photo]: { slug: 'hero', widths: [640, 1024, 1600], width: 3859, height: 4824 },
+  [content.proof.photo]: { slug: 'portrait', widths: [640, 1024, 1600], width: 3293, height: 4116 },
+  [content.proof.photo_2]: { slug: 'event', widths: [640, 1024, 1600], width: 2100, height: 1400 },
 };
 const render = (c = content) => renderPage(c, { manifest, drafts });
 const html = render();
@@ -17,7 +19,7 @@ const withMeta = (patch) => ({ ...content, meta: { ...content.meta, ...patch } }
 const count = (text, pattern) => (text.match(pattern) || []).length;
 
 // Every text of the yaml except meta, links, the button address and the photo file names.
-const SKIP = /^(meta\.|links\.|register\.url$|hero\.photo$|proof\.photo$)/;
+const SKIP = /^(meta\.|links\.|register\.url$|hero\.photo$|proof\.photo$|proof\.photo_2$)/;
 
 test('every text from the yaml is on the page word for word; ** becomes <strong>', () => {
   const missing = [];
@@ -93,28 +95,59 @@ test('no Google fonts, no script, no absolute paths: everything comes from the s
   assert.ok(html.includes('href="styles.css"') && html.includes('href="favicon.svg"'));
 });
 
-test('every <img> has alt, width and height; the first-screen photo loads first, the other lazily', () => {
+test('three photos: every <img> has alt, width and height from the crop; the first-screen photo loads first, the others lazily', () => {
   const imgs = html.match(/<img\b[^>]*>/g) || [];
-  assert.equal(imgs.length, 2);
+  assert.equal(imgs.length, 3);
   for (const img of imgs) {
     for (const attr of ['alt', 'width', 'height']) assert.ok(new RegExp(` ${attr}="[^"]*"`).test(img), `${attr} in ${img}`);
   }
   assert.ok(imgs[0].includes('fetchpriority="high"') && !imgs[0].includes('loading="lazy"'));
-  assert.ok(imgs[1].includes('loading="lazy"'));
-  assert.equal(count(html, /<source type="image\/webp"/g), 2);
-  assert.ok(imgs[0].includes('width="1600" height="2000"'), 'the height follows the ratio of the original');
-  assert.ok(imgs[1].includes('width="1600" height="2400"'));
+  assert.ok(imgs[1].includes('loading="lazy"') && imgs[2].includes('loading="lazy"'));
+  assert.equal(count(html, /<source type="image\/webp"/g), 3);
+  assert.ok(imgs[0].includes('width="1600" height="2000"'), 'the first-screen crop is 4:5');
+  assert.ok(imgs[1].includes('width="1600" height="2000"'), 'the portrait is 4:5');
+  assert.ok(imgs[2].includes('width="1600" height="1067"'), 'the event photo is 3:2');
   assert.ok(html.includes('img/hero-640.webp 640w, img/hero-1024.webp 1024w, img/hero-1600.webp 1600w'));
+  assert.ok(imgs[0].includes(`alt="${esc(content.hero.photo_alt)}"`) && imgs[2].includes(`alt="${esc(content.proof.photo_2_alt)}"`));
+  // the text comes before the photos in the markup of Meet your mentor
+  assert.ok(html.indexOf('class="proof__copy"') < html.indexOf('class="proof__photos"'));
 });
 
 test('the facts line, the quotes with their names and roles, the legal line and the link to the main site', () => {
   assert.ok(html.includes(content.hero.facts.map(esc).join('<span class="sep" aria-hidden="true">·</span>')));
   for (const q of content.proof.quotes) {
-    assert.ok(html.includes(`&ldquo;${esc(q.quote)}&rdquo;`));
+    assert.ok(html.includes(`<blockquote class="quote__text"><p>${esc(q.quote)}</p></blockquote>`));
     assert.ok(html.includes(`<strong class="quote__name">${esc(q.name)}</strong><span class="quote__role">${esc(q.role)}, ${esc(q.company)}</span>`));
   }
+  assert.equal(count(html, /<span class="quote__mark" aria-hidden="true">&ldquo;<\/span>/g), content.proof.quotes.length);
   assert.ok(html.includes(`<p>${esc(content.footer.legal_line)}</p>`));
   assert.ok(html.includes(`<a href="${content.links.main_site}">${esc(content.footer.main_site_label)}</a>`));
+});
+
+test('mosaics: eight inline svgs, all aria-hidden, brand colours only, within 30 KB, the same in every build', () => {
+  const svgs = html.match(/<svg class="mosaic[^]*?<\/svg>/g) || [];
+  assert.equal(svgs.length, 8, 'first screen field and two corners, Promise panel and strip, mentor corner, band wide and tall');
+  const bytes = svgs.reduce((n, svg) => n + Buffer.byteLength(svg), 0);
+  assert.ok(bytes <= 30 * 1024, `${bytes} bytes of mosaics`);
+  const allowed = new Set(Object.values(COLOURS));
+  for (const svg of svgs) {
+    assert.ok(svg.includes('aria-hidden="true"'));
+    for (const [, fill] of svg.matchAll(/fill="(#[0-9A-Fa-f]{6})"/g)) assert.ok(allowed.has(fill), `${fill} is not a brand colour`);
+    assert.ok(!/<(image|script|text|foreignObject)\b/.test(svg));
+  }
+  assert.equal(count(html, new RegExp(`fill="${COLOURS.gold}"`, 'g')), 2, 'gold only as the dot of the two Promise panels');
+  assert.equal(render(), html, 'the same markup every time');
+  // the Problem and Package blocks and the paragraphs stay on a clean background: no mosaic there
+  for (const block of ['problem', 'package', 'process', 'pricing', 'logistics']) {
+    const section = html.match(new RegExp(`<section class="section[^"]*\\b${block}\\b[^]*?</section>`))[0];
+    assert.ok(!section.includes('<svg class="mosaic'), `${block} has no mosaic`);
+  }
+});
+
+test('the deeper background on every second block, cards stay in the markup as before', () => {
+  const deep = [...html.matchAll(/<section class="section section--deep (\w+)"/g)].map((m) => m[1]);
+  assert.deepEqual(deep, ['who', 'process', 'pricing', 'logistics']);
+  assert.equal(count(html, /class="lead"/g), content.hero.paragraphs.length + content.promise.paragraphs.length + 1, 'lead size: first-screen paragraphs, Promise paragraphs, process.intro');
 });
 
 test('rich: only **bold** is markup, everything else is escaped', () => {

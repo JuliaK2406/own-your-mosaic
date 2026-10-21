@@ -6,10 +6,11 @@
   --aubergine: #5E1A4D;        /* mosaic tiles, the quote line, the closing band */
   --aubergine-rgb: 94, 26, 77; /* the same colour for rgba() tile opacities */
   --navy: #1E2A47;             /* all text */
-  --porcelain: #FAF8F5;        /* page background */
+  --porcelain: #FAF8F5;        /* page background and cards */
+  --porcelain-deep: #F2F0EC;   /* porcelain mixed with warm grey about 65 to 35: every second block */
   --gold: #B89B5E;             /* buttons, thin lines, marks and dots only */
   --warm-grey: #E4E2DD;        /* dividers and card borders */
-  --champagne: #EFDCAC;        /* rare accent: the TODO tag only */
+  --champagne: #EFDCAC;        /* rare accent: the TODO tag, the quote marks, a few tiles */
   --text-muted: #545B70;       /* secondary text, 6.4:1 on porcelain */
   --on-aubergine: #F3E9EF;     /* text on aubergine */
 
@@ -17,20 +18,24 @@
   --font-heading: 'Lora', Georgia, 'Times New Roman', serif;
   --font-body: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
 
-  /* Type scale, as on the speaker page: base 18px */
-  --text-xs: 0.75rem;          /* 12px: small caps labels */
-  --text-sm: 0.875rem;         /* 14px: secondary lines */
-  --text-base: 1.125rem;       /* 18px: body */
-  --text-md: 1.40625rem;       /* 22.5px: subheads */
-  --h1-size: clamp(2.5rem, 5vw, 4rem);            /* 40px to 64px */
-  --h2-size: clamp(1.75rem, 3.5vw, 2.5rem);       /* 28px to 40px */
-  --h3-size: 1.375rem;                            /* 22px */
-  --statement-size: clamp(1.5rem, 1.1rem + 1.8vw, 2.125rem);  /* the Problem sentence and the closing text */
-  --price-size: clamp(2rem, 1.6rem + 1.2vw, 2.5rem);
-  --quote-size: 1.25rem;
-  --leading-body: 1.65;
-  --leading-tight: 1.15;
+  /* Type scale: each clamp() grows evenly between 390 px and 1440 px of window width */
+  --h1-size: clamp(2.75rem, 2.1rem + 2.667vw, 4.5rem);            /* 44 to 72 px */
+  --h2-size: clamp(2rem, 1.536rem + 1.905vw, 3.25rem);            /* 32 to 52 px */
+  --h3-size: clamp(1.375rem, 1.282rem + 0.381vw, 1.625rem);       /* 22 to 26 px */
+  --subtitle-size: clamp(1.375rem, 1.236rem + 0.571vw, 1.75rem);  /* 22 to 28 px, Lora */
+  --lead-size: clamp(1.1875rem, 1.118rem + 0.286vw, 1.375rem);    /* 19 to 22 px */
+  --body-size: clamp(1.0625rem, 1.016rem + 0.19vw, 1.1875rem);    /* 17 to 19 px */
+  --statement-size: clamp(1.625rem, 1.3rem + 1.333vw, 2.5rem);    /* 26 to 40 px, Lora */
+  --price-size: clamp(2.25rem, 1.971rem + 1.143vw, 3rem);         /* 36 to 48 px, Lora */
+  --quote-size: clamp(1.25rem, 1.064rem + 0.762vw, 1.75rem);      /* 20 to 28 px, Lora */
+  --secondary-size: 0.9375rem;                                    /* 15 px */
+  --caps-size: 0.8125rem;                                         /* 13 px, labels in capitals */
+  --leading-body: 1.6;
+  --leading-h1: 1.1;
+  --leading-heading: 1.15;
+  --leading-h3: 1.2;
   --track-caps: 0.14em;
+  --measure: 62ch;             /* widest paragraph, except inside cards */
 
   /* Spacing */
   --s-1: 0.25rem;
