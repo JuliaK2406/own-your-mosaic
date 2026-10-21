@@ -78,6 +78,15 @@ test('photos named in the yaml must exist in content/photos', () => {
   const d = copy();
   d.hero.photo = 'photos/julia.jpg';
   assert.ok(hasError(errorsOf(d), 'hero.photo'));
+  const e = copy();
+  e.proof.photo_2 = 'nobody.jpg';
+  assert.ok(hasError(checkContent(e, { photos }).errors, 'proof.photo_2'));
+  const f = copy();
+  delete f.proof.photo_2_alt;
+  assert.ok(hasError(errorsOf(f), 'proof.photo_2_alt'));
+  const g = copy();
+  g.proof.photo_2_alt = '';
+  assert.deepEqual(errorsOf(g), [], 'the description of the second photo may be empty');
 });
 
 test('a long dash is a warning with the path of the field, not an error', () => {

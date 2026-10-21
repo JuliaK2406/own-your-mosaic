@@ -82,6 +82,8 @@ const SHAPE = {
     paragraphs: 'list',
     photo: 'file',
     photo_alt: 'text',
+    photo_2: 'file',
+    photo_2_alt: 'text',
     quotes_heading: 'string',
     quotes: [{ quote: 'string', name: 'string', role: 'string', company: 'string' }],
   },
@@ -91,9 +93,9 @@ const SHAPE = {
 };
 
 // The only values that may be empty.
-const EMPTY_ALLOWED = new Set(['meta.site_url', 'hero.photo_alt', 'proof.photo_alt']);
+const EMPTY_ALLOWED = new Set(['meta.site_url', 'hero.photo_alt', 'proof.photo_alt', 'proof.photo_2_alt']);
 // Fields that name a photo in content/photos.
-const PHOTO_FIELDS = ['hero.photo', 'proof.photo'];
+const PHOTO_FIELDS = ['hero.photo', 'proof.photo', 'proof.photo_2'];
 
 const isString = (value) => typeof value === 'string';
 const isFilled = (value) => isString(value) && value.trim() !== '';
