@@ -27,6 +27,11 @@ img {
   display: block;
 }
 
+/* the hidden attribute wins over any display rule (the form and the thank-you swap places) */
+[hidden] {
+  display: none !important;
+}
+
 h1,
 h2,
 h3 {
@@ -74,6 +79,14 @@ a:hover {
 :focus-visible {
   outline: 2px solid var(--navy);
   outline-offset: 3px;
+}
+
+/* The buttons scroll to the form; smoothly only for people who did not ask for less motion */
+
+@media (prefers-reduced-motion: no-preference) {
+  html {
+    scroll-behavior: smooth;
+  }
 }
 
 .container {
@@ -1059,6 +1072,261 @@ a:hover {
 
 .closing .btn:focus-visible {
   outline-color: var(--porcelain);
+}
+
+/* Registration form in the closing band (mode form): a porcelain card up to 640 px wide,
+   centred under the text. Labels above the fields, fields 50 px high with the control
+   border, tier options as pills, the newsletter box empty by default. */
+
+.register {
+  display: flex;
+  justify-content: center;
+}
+
+.register__card {
+  container-type: inline-size;
+  position: relative;
+  width: 100%;
+  max-width: 640px;
+  padding: clamp(1.5rem, 1rem + 2vw, 2.5rem);
+  border-radius: var(--radius);
+  background: var(--porcelain);
+  color: var(--navy);
+  text-align: left;
+}
+
+.register__heading {
+  margin: 0 0 var(--s-3);
+  font-size: var(--h3-size);
+  font-weight: 600;
+}
+
+.register__intro {
+  margin: 0 0 var(--s-5);
+  max-width: none;
+}
+
+.register__noscript {
+  margin: 0;
+  max-width: none;
+}
+
+.register__form {
+  display: grid;
+  gap: var(--s-4);
+}
+
+.register__names {
+  display: grid;
+  gap: var(--s-4);
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.field label,
+.field legend {
+  display: block;
+  margin-bottom: 6px;
+  padding: 0;
+  font-size: var(--secondary-size);
+  font-weight: 500;
+}
+
+.field input[type="text"],
+.field input[type="email"],
+.field textarea {
+  width: 100%;
+  min-height: 50px;
+  padding: 12px 14px;
+  border: 1.5px solid var(--control-border);
+  border-radius: var(--radius);
+  background: var(--white);
+  color: var(--navy);
+  font-family: var(--font-body);
+  font-size: 1rem;
+  line-height: 1.4;
+}
+
+.field textarea {
+  min-height: 96px;
+  resize: vertical;
+}
+
+.field input:focus-visible,
+.field textarea:focus-visible {
+  outline: 2px solid var(--navy);
+  outline-offset: 2px;
+}
+
+.field input[aria-invalid="true"],
+.field textarea[aria-invalid="true"] {
+  border-color: var(--aubergine);
+  border-width: 2px;
+}
+
+/* Never display:none: the empty live region must already be in the accessibility tree
+   when the error text arrives, otherwise screen readers do not announce it. */
+.field__error {
+  margin: 6px 0 0;
+  max-width: none;
+  font-size: var(--secondary-size);
+  line-height: 1.4;
+  color: var(--aubergine);
+}
+
+.field__error:empty {
+  margin: 0;
+}
+
+.pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s-2);
+}
+
+.pill {
+  position: relative;
+  display: inline-flex;
+}
+
+/* the radio itself is kept for the keyboard and screen readers, the pill is its label */
+.pill input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: 0;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.pill span {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--touch-min);
+  padding: 0 18px;
+  border: 1.5px solid var(--control-border);
+  border-radius: 999px;
+  background: var(--white);
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.pill input:checked + span {
+  border-color: var(--navy);
+  background: var(--navy);
+  color: var(--porcelain);
+}
+
+.pill input:focus-visible + span {
+  outline: 2px solid var(--navy);
+  outline-offset: 2px;
+}
+
+.pill input[aria-invalid="true"] + span {
+  border-color: var(--aubergine);
+}
+
+.field .check {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  min-height: var(--touch-min);
+  margin: 0;
+  font-size: var(--secondary-size);
+  font-weight: 400;
+  line-height: 1.45;
+  cursor: pointer;
+}
+
+.check input {
+  flex: none;
+  width: 22px;
+  height: 22px;
+  margin: 1px 0 0;
+  accent-color: var(--navy);
+}
+
+.check input:focus-visible {
+  outline: 2px solid var(--navy);
+  outline-offset: 2px;
+}
+
+.register__trap {
+  position: absolute;
+  left: -10000px;
+  top: auto;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+}
+
+.register__send-error {
+  margin: 0;
+  max-width: none;
+  font-size: var(--secondary-size);
+  color: var(--aubergine);
+}
+
+.register__actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--s-3);
+}
+
+.register__submit {
+  width: 100%;
+}
+
+.register .btn:focus-visible {
+  outline-color: var(--navy);
+}
+
+.register__note {
+  margin: 0;
+  max-width: none;
+  font-size: var(--secondary-size);
+  color: var(--text-muted);
+}
+
+.register__note a {
+  color: var(--navy);
+}
+
+.register__success-heading {
+  margin: 0 0 var(--s-3);
+  max-width: none;
+  font-family: var(--font-heading);
+  font-size: var(--h3-size);
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+.register__success-heading:focus {
+  outline: none;
+}
+
+.register__success-text {
+  margin: 0;
+  max-width: none;
+}
+
+/* the query measures the content box of the card: 520 px inside is a card of 600 px */
+@container (min-width: 520px) {
+  .register__names {
+    grid-template-columns: 1fr 1fr;
+  }
+  .register__submit {
+    width: auto;
+  }
 }
 
 /* Footer */

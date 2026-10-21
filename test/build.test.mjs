@@ -3,10 +3,11 @@ import assert from 'node:assert/strict';
 import { readFile, writeFile, mkdtemp, rm, readdir } from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
+import vm from 'node:vm';
 import { loadRaw } from '../src/check.mjs';
-import { build, fontFaceCss, readToken, FONTS, FONT_LICENCES, ASSETS, OG_IMAGE, ROBOTS_TXT } from '../src/build.mjs';
+import { build, bundleRegister, fontFaceCss, readToken, FONTS, FONT_LICENCES, ASSETS, OG_IMAGE, ROBOTS_TXT } from '../src/build.mjs';
 
-const OUTPUT = ['index.html', 'styles.css', 'robots.txt', 'favicon.svg', 'og-image.png', 'fonts/inter-latin.woff2', 'fonts/lora-latin.woff2', 'fonts/OFL-Inter.txt', 'fonts/OFL-Lora.txt'];
+const OUTPUT = ['index.html', 'styles.css', 'robots.txt', 'register.js', 'favicon.svg', 'og-image.png', 'fonts/inter-latin.woff2', 'fonts/lora-latin.woff2', 'fonts/OFL-Inter.txt', 'fonts/OFL-Lora.txt'];
 
 test('fonts: @font-face for Inter 400, 500, 600 and Lora 500, 600 from the site, latin only, files and licences present', async () => {
   const css = fontFaceCss();
@@ -47,6 +48,10 @@ test('the build writes the page, the styles with the fonts, robots.txt, the font
     assert.ok(files['styles.css'].includes('--aubergine: #5E1A4D') && files['styles.css'].includes('.closing {'));
     assert.ok(!/googleapis|gstatic|https?:\/\//.test(files['styles.css']), 'no outside address in the styles');
     assert.equal(files['robots.txt'], ROBOTS_TXT);
+    assert.ok(files['register.js'].startsWith('// built from src/app/register-core.js and src/app/register.js'));
+    assert.ok(!/^\s*(import|export)\b/m.test(files['register.js']), 'one module without imports');
+    assert.doesNotThrow(() => new vm.Script(files['register.js']));
+    assert.ok(files['index.html'].includes('<script type="module" src="register.js"></script>'));
     for (const name of OUTPUT) assert.ok((await readFile(path.join(dir, name))).length > 0, name);
     const images = (await readdir(path.join(dir, 'img'))).sort();
     const expected = Object.values(manifest).flatMap((m) => m.widths.flatMap((w) => [`${m.slug}-${w}.jpg`, `${m.slug}-${w}.webp`])).sort();
@@ -71,7 +76,8 @@ test('a copy of the yaml with published: true and the current TODO stops the bui
     await assert.rejects(build({ distDir, contentFile: yaml, quiet: true }), /Content check failed/);
     // the same file with the addresses set and the draft marks removed: published mode
     const clean = published
-      .replace('url: "TODO"', 'url: "https://calendly.com/example/30min"')
+      .replace('privacy_url: "TODO"', 'privacy_url: "https://programme.juliakrylova.com/privacy/"')
+      .replace('endpoint_url: ""', 'endpoint_url: "https://script.google.com/macros/s/abc/exec"')
       .replace('site_url: ""', 'site_url: "https://programme.juliakrylova.com"')
       .replace(/#\s*draft[^\n]*/g, '');
     await writeFile(yaml, clean);
@@ -81,8 +87,38 @@ test('a copy of the yaml with published: true and the current TODO stops the bui
     assert.ok(!files['index.html'].includes('name="robots"'));
     assert.ok(!files['index.html'].includes('class="tag'));
     assert.ok(files['index.html'].includes('<link rel="canonical" href="https://programme.juliakrylova.com/">'));
-    assert.equal((files['index.html'].match(/href="https:\/\/calendly.com\/example\/30min"/g) || []).length, 4);
+    assert.ok(files['index.html'].includes('data-endpoint="https://script.google.com/macros/s/abc/exec"'));
+    assert.ok(files['index.html'].includes('<a href="https://programme.juliakrylova.com/privacy/" target="_blank" rel="noopener">'));
+    // published with an empty endpoint: the form would send nothing, the build refuses
+    await writeFile(yaml, clean.replace('endpoint_url: "https://script.google.com/macros/s/abc/exec"', 'endpoint_url: ""'));
+    await assert.rejects(build({ distDir, contentFile: yaml, quiet: true }), /Content check failed/);
   } finally {
     await rm(dir, { recursive: true, force: true });
   }
+});
+
+test('mode link: four buttons open the address in a new tab, no form and no script; without an address the build refuses', async () => {
+  const dir = await mkdtemp(path.join(os.tmpdir(), 'own-your-mosaic-link-'));
+  try {
+    const raw = await loadRaw();
+    const yaml = path.join(dir, 'offer.yaml');
+    const distDir = path.join(dir, 'dist');
+    await writeFile(yaml, raw.replace(/^(\s*mode:\s*)form/m, '$1link'));
+    await assert.rejects(build({ distDir, contentFile: yaml, quiet: true }), /Content check failed/);
+    await writeFile(yaml, raw.replace(/^(\s*mode:\s*)form/m, '$1link').replace('link_url: ""', 'link_url: "https://calendly.com/example/30min"'));
+    const { files } = await build({ distDir, contentFile: yaml, quiet: true });
+    assert.equal((files['index.html'].match(/<a class="btn[^"]*" href="https:\/\/calendly.com\/example\/30min" target="_blank" rel="noopener">/g) || []).length, 4);
+    assert.ok(!files['index.html'].includes('id="register-form"') && !files['index.html'].includes('<script'));
+    assert.equal(files['register.js'], undefined);
+    assert.ok(!(await readdir(distDir)).includes('register.js'));
+  } finally {
+    await rm(dir, { recursive: true, force: true });
+  }
+});
+
+test('bundleRegister joins the two app files into one parseable module', async () => {
+  const code = await bundleRegister();
+  assert.ok(code.includes('function validate(') && code.includes('function setUpRegisterForm('));
+  assert.ok(!code.includes("from './register-core.js'"));
+  assert.doesNotThrow(() => new vm.Script(code));
 });

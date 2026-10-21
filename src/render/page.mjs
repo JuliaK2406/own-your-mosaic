@@ -5,8 +5,12 @@
 // shown while meta.published is false, and the decorative mosaics (src/render/mosaic.mjs).
 
 import { heroField, mentorField, cornerGroup, bandSprite, bandSvgs } from './mosaic.mjs';
+import { TIER_UNSURE } from '../app/register-core.js';
 
 export const OG_IMAGE_FILE = 'og-image.png';
+export const REGISTER_SCRIPT = 'register.js';
+// The text of the TODO tag beside the thank-you while the form is not connected (dev only).
+export const NOT_CONNECTED = 'form not connected, nothing was sent';
 export const OG_WIDTH = 1200;
 export const OG_HEIGHT = 627;
 
@@ -30,14 +34,80 @@ const tiles = (alphas, className) => `<span class="${className}" aria-hidden="tr
 const todoTag = (ctx) => (ctx.published ? '' : ' <span class="tag tag--todo">TODO</span>');
 const draftTag = (ctx, at) => (!ctx.published && ctx.drafts.has(at) ? ' <span class="tag tag--draft">draft</span>' : '');
 
-// The "Register your interest" button. All four buttons on the page come from here, so the
-// next step (a Calendly link, or a form on this page) changes them in one place.
-// While register.url is TODO the button leads to "#" and carries a TODO tag (unpublished only).
+// The "Register your interest" button. Every button on the page comes from here. In mode form
+// it leads to the form at the end of the page (#register); in mode link it opens link_url
+// (a Calendly address, for example) in a new tab.
 export function registerButton(ctx, { className = '' } = {}) {
-  const { label, url } = ctx.content.register;
-  const todo = isTodo(url);
+  const r = ctx.content.register;
   const classes = ['btn', className].filter(Boolean).join(' ');
-  return `<a class="${classes}" href="${todo ? '#' : esc(url)}">${esc(label)}</a>${todo ? todoTag(ctx) : ''}`;
+  if (r.mode === 'link') return `<a class="${classes}" href="${esc(r.link_url)}" target="_blank" rel="noopener">${esc(r.label)}</a>`;
+  return `<a class="${classes}" href="#register">${esc(r.label)}</a>`;
+}
+
+// The registration form in the closing band (mode form). Texts from register.form; the tier
+// options from pricing.tiers plus the "not sure" option. The script reads its texts and the
+// endpoint from the data attributes of the form. While privacy_url is TODO its link leads to
+// "#" with a TODO tag; while endpoint_url is empty a TODO tag stands beside the button.
+export function registerForm(ctx) {
+  const r = ctx.content.register;
+  const f = r.form;
+  const tiers = [...ctx.content.pricing.tiers.map((tier) => ({ value: tier.name, label: tier.name })), { value: TIER_UNSURE, label: f.tier_unsure_label }];
+  const pills = tiers.map((tier) => `            <label class="pill"><input type="radio" name="tier" value="${esc(tier.value)}" aria-describedby="reg-tier-error"><span>${esc(tier.label)}</span></label>`).join('\n');
+  const privacy = isTodo(r.privacy_url)
+    ? `<a href="#">${esc(f.privacy_label)}</a>${todoTag(ctx)}`
+    : `<a href="${esc(r.privacy_url)}" target="_blank" rel="noopener">${esc(f.privacy_label)}</a>`;
+  const notConnected = String(r.endpoint_url || '').trim() === '';
+  const data = {
+    endpoint: String(r.endpoint_url || '').trim(),
+    'error-required': f.error_required,
+    'error-email': f.error_email,
+    'error-tier': f.error_tier,
+    'error-send': f.error_send,
+    sending: f.sending_label,
+    'success-heading': f.success_heading,
+    'not-connected': NOT_CONNECTED,
+  };
+  const attrs = Object.entries(data).map(([key, value]) => ` data-${key}="${esc(value)}"`).join('');
+  const field = (key, label, control) => `        <div class="field">
+          <label for="reg-${key}">${esc(label)}</label>
+          ${control}
+          <p class="field__error" id="reg-${key}-error" data-error-for="${key.replace(/-/g, '_')}" aria-live="polite"></p>
+        </div>`;
+  return `<div class="register" id="register">
+  <div class="register__card">
+    <h2 class="register__heading" id="register-heading">${esc(f.heading)}${draftTag(ctx, 'register.form')}</h2>
+    <p class="register__intro">${esc(f.intro)}</p>
+    <noscript><p class="register__noscript">${esc(f.noscript_note)}</p></noscript>
+    <form class="register__form" id="register-form" novalidate aria-labelledby="register-heading"${attrs}>
+      <div class="register__names">
+${field('first-name', f.first_name_label, '<input id="reg-first-name" name="first_name" type="text" autocomplete="given-name" maxlength="60" aria-describedby="reg-first-name-error">')}
+${field('last-name', f.last_name_label, '<input id="reg-last-name" name="last_name" type="text" autocomplete="family-name" maxlength="60" aria-describedby="reg-last-name-error">')}
+      </div>
+${field('email', f.email_label, '<input id="reg-email" name="email" type="email" autocomplete="email" inputmode="email" maxlength="254" aria-describedby="reg-email-error">')}
+      <fieldset class="field field--tier">
+        <legend>${esc(f.tier_label)}</legend>
+        <div class="pills">
+${pills}
+        </div>
+        <p class="field__error" id="reg-tier-error" data-error-for="tier" aria-live="polite"></p>
+      </fieldset>
+${field('message', f.message_label, '<textarea id="reg-message" name="message" rows="3" maxlength="1000" aria-describedby="reg-message-error"></textarea>')}
+      <div class="field field--check">
+        <label class="check"><input type="checkbox" name="newsletter" value="yes"><span>${esc(f.newsletter_label)}</span></label>
+      </div>
+      <div class="register__trap" aria-hidden="true"><input type="text" name="website" tabindex="-1" autocomplete="off"></div>
+      <p class="register__send-error" role="alert" hidden></p>
+      <div class="register__actions">
+        <button class="btn register__submit" type="submit">${esc(f.submit_label)}</button>${notConnected ? todoTag(ctx) : ''}
+      </div>
+      <p class="register__note">${esc(f.data_note)} ${privacy}</p>
+    </form>
+    <div class="register__success" id="register-success" hidden aria-live="polite">
+      <p class="register__success-heading" tabindex="-1"></p>
+      <p class="register__success-text">${esc(f.success_text)}</p>
+    </div>
+  </div>
+</div>`;
 }
 
 // A responsive photo from the manifest of src/images.mjs: webp with a jpg fallback, explicit
@@ -89,6 +159,7 @@ function head(ctx) {
     '<link rel="icon" type="image/svg+xml" href="favicon.svg">',
     '<link rel="stylesheet" href="styles.css">',
   );
+  if (ctx.mode === 'form') lines.push('<noscript><style>.register__form { display: none; }</style></noscript>');
   return lines.map((line) => `  ${line}`).join('\n');
 }
 
@@ -295,12 +366,13 @@ ${rows}
 // fly up onto Practical details (in the page margins only). The middle, under the text, is
 // clean. The drawings sit in a hidden sprite; one of five widths is shown by CSS.
 function closing(ctx) {
+  const action = ctx.mode === 'form' ? registerForm(ctx) : `<div class="closing__cta">${registerButton(ctx)}</div>`;
   return `<section class="closing">
   ${bandSprite()}
   ${bandSvgs()}
   <div class="container closing__inner">
     <p class="closing__text">${esc(ctx.content.closing.text)}</p>
-    <div class="closing__cta">${registerButton(ctx)}</div>
+    ${action}
   </div>
 </section>`;
 }
@@ -318,7 +390,7 @@ function footer(ctx) {
 // manifest: from src/images.mjs; drafts: the Set of yaml paths marked "# draft" (src/check.mjs);
 // themeColor: the page background for the browser chrome.
 export function renderPage(content, { manifest = {}, drafts = new Set(), themeColor = '#FAF8F5' } = {}) {
-  const ctx = { content, manifest, drafts, themeColor, published: content.meta.published === true };
+  const ctx = { content, manifest, drafts, themeColor, published: content.meta.published === true, mode: content.register.mode };
   return `<!doctype html>
 <html lang="en">
 <head>
@@ -339,7 +411,7 @@ ${logistics(ctx)}
 ${closing(ctx)}
 </main>
 ${footer(ctx)}
-</body>
+${ctx.mode === 'form' ? `<script type="module" src="${REGISTER_SCRIPT}"></script>\n` : ''}</body>
 </html>
 `;
 }
