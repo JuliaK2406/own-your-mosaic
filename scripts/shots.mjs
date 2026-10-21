@@ -43,16 +43,19 @@ export const SETS = {
 };
 const BLOCKS = { process: '.process', pricing: '.pricing', promise: '.promise', mentor: '.proof', closing: '.closing' };
 
-// Scrolls through the page so the lazy photos load, then back to the top.
+// Scrolls through the page so the lazy photos load, then back to the top. The page scrolls
+// smoothly for people, so the script scrolls instantly, or the lazy photo is never reached.
+// A photo that still has not loaded after eight seconds is left to the photo check.
 async function loadEverything(page) {
   await page.evaluate(async () => {
     const step = window.innerHeight;
     for (let y = 0; y < document.documentElement.scrollHeight; y += step) {
-      window.scrollTo(0, y);
-      await new Promise((resolve) => setTimeout(resolve, 60));
+      window.scrollTo({ top: y, behavior: 'instant' });
+      await new Promise((resolve) => setTimeout(resolve, 80));
     }
-    window.scrollTo(0, 0);
-    await Promise.all([...document.images].map((img) => (img.complete ? null : new Promise((resolve) => { img.onload = resolve; img.onerror = resolve; }))));
+    window.scrollTo({ top: 0, behavior: 'instant' });
+    const pending = [...document.images].filter((img) => !img.complete).map((img) => new Promise((resolve) => { img.onload = resolve; img.onerror = resolve; }));
+    await Promise.race([Promise.all(pending), new Promise((resolve) => setTimeout(resolve, 8000))]);
   });
   await page.evaluate(() => document.fonts.ready);
   await page.waitForTimeout(300);
@@ -78,7 +81,7 @@ function facts(page) {
     const intersects = (a, b) => a.left < b.right && b.left < a.right && a.top < b.bottom && b.top < a.bottom;
     // no tile of any mosaic may sit on a text box (the tiles of the Promise diagram carry
     // their own labels and are html, not svg, so they are not tiles here)
-    const textBoxes = boxes('main p, main h1, main h2, main h3, main li, main dt, main dd, main figcaption, main blockquote, main .btn, main .tag').filter((b) => b.width > 0 && b.height > 0);
+    const textBoxes = boxes('main p, main h1, main h2, main h3, main li, main dt, main dd, main figcaption, main blockquote, main .btn, main .tag, main .register__card').filter((b) => b.width > 0 && b.height > 0);
     const tileBoxes = [];
     for (const svgNode of document.querySelectorAll('svg.mosaic')) {
       const box = svgNode.getBoundingClientRect();

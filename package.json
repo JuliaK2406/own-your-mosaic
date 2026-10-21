@@ -13,7 +13,8 @@
     "test": "node --test",
     "serve": "node scripts/serve.mjs",
     "shots": "node scripts/shots.mjs",
-    "og": "node scripts/og-image.mjs"
+    "og": "node scripts/og-image.mjs",
+    "verify:form": "node scripts/verify-form.mjs"
   },
   "dependencies": {
     "js-yaml": "^5.4.1",
