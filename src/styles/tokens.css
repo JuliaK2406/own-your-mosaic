@@ -1,0 +1,60 @@
+/* Design tokens only: colours, fonts, sizes. Layout lives in page.css.
+   Colours from the Mosaic brand brief, the same values as in Snapshot. */
+
+:root {
+  /* Brand colours */
+  --aubergine: #5E1A4D;        /* mosaic tiles, the quote line, the closing band */
+  --aubergine-rgb: 94, 26, 77; /* the same colour for rgba() tile opacities */
+  --navy: #1E2A47;             /* all text */
+  --porcelain: #FAF8F5;        /* page background */
+  --gold: #B89B5E;             /* buttons, thin lines, marks and dots only */
+  --warm-grey: #E4E2DD;        /* dividers and card borders */
+  --champagne: #EFDCAC;        /* rare accent: the TODO tag only */
+  --text-muted: #545B70;       /* secondary text, 6.4:1 on porcelain */
+  --on-aubergine: #F3E9EF;     /* text on aubergine */
+
+  /* Fonts */
+  --font-heading: 'Lora', Georgia, 'Times New Roman', serif;
+  --font-body: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+
+  /* Type scale, as on the speaker page: base 18px */
+  --text-xs: 0.75rem;          /* 12px: small caps labels */
+  --text-sm: 0.875rem;         /* 14px: secondary lines */
+  --text-base: 1.125rem;       /* 18px: body */
+  --text-md: 1.40625rem;       /* 22.5px: subheads */
+  --h1-size: clamp(2.5rem, 5vw, 4rem);            /* 40px to 64px */
+  --h2-size: clamp(1.75rem, 3.5vw, 2.5rem);       /* 28px to 40px */
+  --h3-size: 1.375rem;                            /* 22px */
+  --statement-size: clamp(1.5rem, 1.1rem + 1.8vw, 2.125rem);  /* the Problem sentence and the closing text */
+  --price-size: clamp(2rem, 1.6rem + 1.2vw, 2.5rem);
+  --quote-size: 1.25rem;
+  --leading-body: 1.65;
+  --leading-tight: 1.15;
+  --track-caps: 0.14em;
+
+  /* Spacing */
+  --s-1: 0.25rem;
+  --s-2: 0.5rem;
+  --s-3: 0.75rem;
+  --s-4: 1rem;
+  --s-5: 1.5rem;
+  --s-6: 2.5rem;
+  --s-7: 4rem;
+  --section-gap: clamp(4rem, 3rem + 6vw, 8.5rem);   /* air between blocks */
+  --head-gap: clamp(2rem, 1.5rem + 1.5vw, 3rem);     /* heading to block content */
+
+  /* Layout */
+  --page-max: 1120px;
+  --gutter: 24px;
+  --radius: 10px;
+  --radius-tile: 3px;
+  --button-height: 52px;
+  --touch-min: 44px;
+  --topbar-height: 64px;
+}
+
+@media (min-width: 900px) {
+  :root {
+    --gutter: 40px;
+  }
+}
