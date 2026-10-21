@@ -9,24 +9,26 @@ const copy = () => structuredClone(content);
 const errorsOf = (c) => checkContent(c, { photos }).errors;
 const hasError = (errors, at) => errors.some((error) => error.startsWith(`${at}:`));
 
-test('the real content file passes: no errors, no long dashes; the TODO list is the button address and the empty site_url', () => {
+test('the real content file passes: no errors, no long dashes; the TODO list is the privacy notice, the empty endpoint and the empty site_url', () => {
   const result = checkContent(content, { photos, raw });
   assert.deepEqual(result.errors, []);
   assert.deepEqual(result.warnings, []);
-  assert.deepEqual(result.todos, ['register.url', 'meta.site_url (empty)']);
+  assert.deepEqual(result.todos, ['register.privacy_url', 'register.endpoint_url (empty)', 'meta.site_url (empty)']);
   assert.equal(report(content, result).ok, true);
 });
 
-test('drafts: the name on the first screen, the Promise diagram, the headings of Proof and Practical details, the whole quotes list', () => {
+test('drafts: the form texts, the name on the first screen, the Promise diagram, the headings of Proof and Practical details, the whole quotes list', () => {
   const { drafts, problems } = findDrafts(raw, content);
   assert.deepEqual(problems, []);
-  assert.deepEqual(drafts.map((draft) => draft.path), ['hero.name', 'promise.diagram', 'proof.heading', 'proof.quotes', 'logistics.heading']);
-  assert.equal(drafts[0].value, content.hero.name);
-  assert.deepEqual(drafts[1].value.inputs, content.promise.diagram.inputs, 'the whole diagram is one draft');
-  assert.ok(drafts[1].note.startsWith('labels taken word for word'));
-  assert.equal(drafts[3].value.length, content.proof.quotes.length);
-  assert.ok(drafts[3].note.startsWith('two quotes'));
-  assert.equal(drafts[4].value, content.logistics.heading);
+  assert.deepEqual(drafts.map((draft) => draft.path), ['register.form', 'hero.name', 'promise.diagram', 'proof.heading', 'proof.quotes', 'logistics.heading']);
+  assert.equal(drafts[0].value.heading, content.register.form.heading, 'the whole form is one draft');
+  assert.ok(drafts[0].note.startsWith('all texts of the form'));
+  assert.equal(drafts[1].value, content.hero.name);
+  assert.deepEqual(drafts[2].value.inputs, content.promise.diagram.inputs, 'the whole diagram is one draft');
+  assert.ok(drafts[2].note.startsWith('labels taken word for word'));
+  assert.equal(drafts[4].value.length, content.proof.quotes.length);
+  assert.ok(drafts[4].note.startsWith('two quotes'));
+  assert.equal(drafts[5].value, content.logistics.heading);
 });
 
 test('a draft marker that does not resolve to a value is a problem, not silently dropped', () => {
@@ -114,9 +116,17 @@ test('published: true with a TODO or a draft left stops the build', () => {
   assert.ok(withTodo.lines.some((line) => line.includes('TODO markers remain')));
   const d = copy();
   d.meta.published = true;
-  d.register.url = 'https://calendly.com/example/30min';
+  d.register.privacy_url = 'https://programme.juliakrylova.com/privacy/';
+  d.register.endpoint_url = 'https://script.google.com/macros/s/abc/exec';
   d.meta.site_url = 'https://programme.juliakrylova.com';
   assert.equal(report(d, checkContent(d, { photos })).ok, true, 'no TODO left and no draft markers known: ok');
+  const e = copy();
+  e.meta.published = true;
+  e.register.privacy_url = 'https://programme.juliakrylova.com/privacy/';
+  e.meta.site_url = 'https://programme.juliakrylova.com';
+  const emptyEndpoint = report(e, checkContent(e, { photos }));
+  assert.equal(emptyEndpoint.ok, false, 'published with an empty endpoint: the form would send nothing');
+  assert.ok(emptyEndpoint.lines.some((line) => line.includes('register.endpoint_url (empty)')));
   const withDrafts = report(d, checkContent(d, { photos, raw }));
   assert.equal(withDrafts.ok, false);
   assert.ok(withDrafts.lines.some((line) => line.includes('draft markers remain')));
@@ -135,4 +145,33 @@ test('addresses: main_site must be a full address, site_url empty or https; publ
   const f = copy();
   f.meta.published = 'yes';
   assert.ok(hasError(errorsOf(f), 'meta.published'));
+});
+
+test('register: mode is form or link; link needs an https link_url; a set endpoint must be https; the thank-you keeps {name}', () => {
+  const c = copy();
+  c.register.mode = 'popup';
+  assert.ok(hasError(errorsOf(c), 'register.mode'));
+  const d = copy();
+  d.register.mode = 'link';
+  assert.ok(hasError(errorsOf(d), 'register.link_url'), 'link without an address');
+  d.register.link_url = 'http://calendly.com/example';
+  assert.ok(hasError(errorsOf(d), 'register.link_url'), 'link must be https');
+  d.register.link_url = 'https://calendly.com/example/30min';
+  assert.deepEqual(errorsOf(d), []);
+  assert.ok(!checkContent(d, { photos }).todos.includes('register.endpoint_url (empty)'), 'in mode link the empty endpoint is not a TODO');
+  const e = copy();
+  e.register.endpoint_url = 'http://script.google.com/macros/s/abc/exec';
+  assert.ok(hasError(errorsOf(e), 'register.endpoint_url'));
+  e.register.endpoint_url = 'https://script.google.com/macros/s/abc/exec';
+  assert.deepEqual(errorsOf(e), []);
+  assert.ok(!checkContent(e, { photos }).todos.includes('register.endpoint_url (empty)'));
+  const f = copy();
+  f.register.form.success_heading = 'Thank you';
+  assert.ok(hasError(errorsOf(f), 'register.form.success_heading'));
+  const g = copy();
+  g.register.form.error_send = '';
+  assert.ok(hasError(errorsOf(g), 'register.form.error_send'));
+  const h = copy();
+  delete h.register.form;
+  assert.ok(hasError(errorsOf(h), 'register.form'));
 });

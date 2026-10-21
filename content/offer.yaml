@@ -13,7 +13,31 @@ links:
 
 register:
   label: "Register your interest"
-  url: "TODO"   # where the button leads. Julia decides: Calendly or a form on this page
+  mode: form          # form = the buttons lead to the form at the end of the page; link = the buttons open link_url
+  link_url: ""        # used only when mode is link, for example a Calendly address
+  endpoint_url: ""    # where the form sends registrations. Filled in when the form is connected. Empty = nothing is sent anywhere
+  privacy_url: "TODO" # the privacy notice for this form, written before launch
+  form:   # draft: all texts of the form, written by us, waiting for Julia's OK
+    heading: "Register your interest"
+    intro: "Leave your details and I'll be in touch personally about the next steps and how to secure your place."
+    first_name_label: "First name"
+    last_name_label: "Last name"
+    email_label: "Email"
+    tier_label: "Which option are you considering?"
+    tier_unsure_label: "Not sure yet"
+    message_label: "Anything you'd like me to know? (optional)"
+    newsletter_label: "Yes, I would like to receive occasional letters from Julia. I can unsubscribe at any time."
+    submit_label: "Register your interest"
+    sending_label: "Sending..."
+    data_note: "Mastermind Global B.V. uses your details to contact you about the programme."
+    privacy_label: "Privacy notice"
+    success_heading: "Thank you, {name}"
+    success_text: "I've received your registration and will be in touch personally about the next steps."
+    error_required: "Please fill in this field."
+    error_email: "Please enter a valid email address."
+    error_tier: "Please choose an option."
+    error_send: "Something went wrong. Please try again, or write to contact@juliakrylova.com."
+    noscript_note: "To register, please write to contact@juliakrylova.com."
 
 hero:
   title: "Own Your Mosaic of Life"
