@@ -12,8 +12,6 @@
   --warm-grey: #E4E2DD;        /* dividers and card borders */
   --champagne: #EFDCAC;        /* rare accent: the TODO tag, the quote marks, a few tiles */
   --text-muted: #545B70;       /* secondary text, 6.4:1 on porcelain */
-  --control-border: #8C8577;   /* borders of form fields, 3.4:1 on porcelain, as in Snapshot */
-  --white: #FFFFFF;            /* background of form fields only */
   --on-aubergine: #F3E9EF;     /* text on aubergine */
 
   /* Fonts */

@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { loadContent, loadRaw, findDrafts, walkStrings } from '../src/check.mjs';
-import { renderPage, rich, esc, DIAGRAM_ALPHAS, SIGN_ALPHAS, NOT_CONNECTED } from '../src/render/page.mjs';
+import { renderPage, registerUrl, rich, esc, DIAGRAM_ALPHAS, SIGN_ALPHAS, UTM, BUTTON_PLACES } from '../src/render/page.mjs';
 import { COLOURS, BAND_VARIANTS } from '../src/render/mosaic.mjs';
 
 const content = await loadContent();
@@ -18,8 +18,7 @@ const withMeta = (patch) => ({ ...content, meta: { ...content.meta, ...patch } }
 const count = (text, pattern) => (text.match(pattern) || []).length;
 
 // Every text of the yaml except meta, links, the button address and the photo file names.
-const SKIP = /^(meta\.|links\.|register\.(mode|link_url|endpoint_url|privacy_url)$|hero\.photo$|proof\.photo$)/;
-const linkMode = () => ({ ...content, register: { ...content.register, mode: 'link', link_url: 'https://calendly.com/example/30min' } });
+const SKIP = /^(meta\.|links\.|register\.url$|hero\.photo$|proof\.photo$)/;
 
 test('every text from the yaml is on the page word for word (the diagram included); ** becomes <strong>', () => {
   const missing = [];
@@ -31,7 +30,7 @@ test('every text from the yaml is on the page word for word (the diagram include
     if (!html.includes(expected)) missing.push(at);
   });
   assert.deepEqual(missing, []);
-  assert.ok(checked > 90, `${checked} texts checked`);
+  assert.ok(checked > 70, `${checked} texts checked`);
   assert.ok(html.includes('<strong>vision</strong>') && html.includes('<strong>strategic focus</strong>'));
   assert.ok(!html.includes('**'));
 });
@@ -40,7 +39,7 @@ test('headings: one h1 first, a h2 per block, h3 inside the cards, no level skip
   const levels = [...html.matchAll(/<h([123])\b/g)].map((match) => Number(match[1]));
   assert.equal(levels[0], 1);
   assert.equal(levels.filter((level) => level === 1).length, 1);
-  assert.equal(levels.filter((level) => level === 2).length, 8, 'seven blocks and the form heading');
+  assert.equal(levels.filter((level) => level === 2).length, 7);
   levels.reduce((previous, level) => {
     assert.ok(level <= previous + 1, `h${level} right after h${previous}`);
     return level;
@@ -48,23 +47,44 @@ test('headings: one h1 first, a h2 per block, h3 inside the cards, no level skip
   assert.ok(html.includes(`<h1 id="hero-title" class="hero__title">${esc(content.hero.title)}</h1>`));
 });
 
-test('mode form: three buttons lead to #register without TODO tags, the fourth place is the form; mode link: four buttons open the address in a new tab, no form, no script', () => {
-  const label = esc(content.register.label);
-  assert.equal(count(html, new RegExp(`<a class="btn[^"]*" href="#register">${label}</a>`, 'g')), 3);
-  assert.equal(count(html, /<a class="btn/g), 3);
-  assert.ok(!/<a class="btn[^>]*>[^<]*<\/a> <span class="tag tag--todo">/.test(html), 'no TODO tag at a button');
-  assert.equal(count(html, /tag--todo/g), 2, 'TODO at the privacy link and beside the submit button while the endpoint is empty');
-  const linked = render(linkMode());
-  assert.equal(count(linked, new RegExp(`<a class="btn[^"]*" href="https://calendly.com/example/30min" target="_blank" rel="noopener">${label}</a>`, 'g')), 4);
-  assert.ok(!linked.includes('id="register"') && !linked.includes('<form') && !linked.includes('<script') && !linked.includes('<noscript'));
-  assert.ok(!linked.includes('tag--todo'), 'in mode link nothing of the form is left');
+test('four buttons: the label from the yaml, the Calendly address with the four tags and its own utm_content, a new tab; no TODO tag anywhere', () => {
+  const r = content.register;
+  const buttons = html.match(/<a class="btn[^"]*" href="[^"]+" target="_blank" rel="noopener">[^<]+<\/a>/g) || [];
+  assert.equal(buttons.length, 4);
+  assert.equal(count(html, /<a class="btn/g), 4);
+  buttons.forEach((button, i) => {
+    const place = BUTTON_PLACES[i];
+    const expected = registerUrl(r.url, place);
+    assert.ok(button.includes(`href="${esc(expected)}"`), `${place}: ${button}`);
+    assert.ok(button.endsWith(`>${esc(r.label)}</a>`), `${place} carries the label`);
+    const params = new URL(expected).searchParams;
+    assert.equal(params.get('utm_source'), 'own-your-mosaic');
+    assert.equal(params.get('utm_medium'), 'page');
+    assert.equal(params.get('utm_campaign'), 'pilot-2027');
+    assert.equal(params.get('utm_content'), place);
+    assert.ok(expected.startsWith(`${r.url}?`), 'the tags are added to the address from the yaml');
+  });
+  assert.deepEqual(BUTTON_PLACES, ['topbar', 'hero', 'pricing', 'closing']);
+  assert.deepEqual(Object.keys(UTM), ['utm_source', 'utm_medium', 'utm_campaign']);
+  assert.ok(html.indexOf('class="closing__text"') < html.indexOf('class="closing__cta"'), 'the closing button stands under the closing text');
+  assert.equal(count(html, /tag--todo/g), 0, 'nothing about the button is a TODO');
+  assert.ok(!html.includes('#register') && !html.includes('<form') && !html.includes('<noscript'));
   const published = renderPage(withMeta({ published: true }), { manifest, drafts });
   assert.ok(!published.includes('tag--todo') && !published.includes('tag--draft'));
 });
 
+test('registerUrl keeps the parameters an address already carries and adds the tags through searchParams', () => {
+  const url = new URL(registerUrl('https://calendly.com/juliakrylova/30min?month=2027-01&hide_gdpr_banner=1', 'hero'));
+  assert.equal(url.origin + url.pathname, 'https://calendly.com/juliakrylova/30min');
+  assert.equal(url.searchParams.get('month'), '2027-01');
+  assert.equal(url.searchParams.get('hide_gdpr_banner'), '1');
+  assert.equal(url.searchParams.get('utm_content'), 'hero');
+  assert.equal([...url.searchParams.keys()].length, 6);
+  assert.equal(registerUrl('https://calendly.com/juliakrylova/30min', 'closing'), 'https://calendly.com/juliakrylova/30min?utm_source=own-your-mosaic&utm_medium=page&utm_campaign=pilot-2027&utm_content=closing');
+});
+
 test('draft tags next to the name, the diagram label, the two draft headings and each quote', () => {
-  assert.equal(count(html, /tag--draft/g), 5 + content.proof.quotes.length);
-  assert.ok(html.includes(`${esc(content.register.form.heading)} <span class="tag tag--draft">draft</span></h2>`), 'one tag for the whole form, at its heading');
+  assert.equal(count(html, /tag--draft/g), 4 + content.proof.quotes.length);
   assert.ok(html.includes(`${esc(content.hero.name)} <span class="tag tag--draft">draft</span></p>`));
   assert.ok(html.includes(`${esc(content.promise.diagram.inputs_label)} <span class="tag tag--draft">draft</span></p>`), 'one tag for the whole diagram');
   assert.ok(html.includes(`${esc(content.proof.heading)} <span class="tag tag--draft">draft</span></h2>`));
@@ -92,13 +112,11 @@ test('head: lang, title, description, og tags; noindex while unpublished; canoni
   assert.ok(live.includes('<meta name="twitter:card" content="summary_large_image">'));
 });
 
-test('no Google fonts, the only script is the form module from the site itself, no absolute paths', () => {
+test('no Google fonts, no script at all, no absolute paths: everything comes from the site itself', () => {
   assert.ok(!/fonts\.googleapis\.com|fonts\.gstatic\.com/.test(html));
-  assert.equal(count(html, /<script/g), 1);
-  assert.ok(html.includes('<script type="module" src="register.js"></script>\n</body>'));
-  assert.ok(!/<script[^>]*src="https?:/.test(html), 'no script from another domain');
+  assert.ok(!/<script/.test(html), 'not one script on the page');
   assert.ok(!/(href|src|srcset)="\/[^/]/.test(html), 'no root-absolute paths');
-  assert.ok(!/(href|src)="https?:\/\/(?!www\.juliakrylova\.com)/.test(html), 'the only outside link is the main site');
+  assert.ok(!/(href|src)="https?:\/\/(?!www\.juliakrylova\.com|calendly\.com\/juliakrylova\/30min)/.test(html), 'the only outside links are the main site and the Calendly booking');
   assert.ok(html.includes('href="styles.css"') && html.includes('href="favicon.svg"'));
 });
 
@@ -208,44 +226,4 @@ test('rich: only **bold** is markup, everything else is escaped', () => {
 
 test('the renderer refuses a photo without built versions', () => {
   assert.throws(() => renderPage(content, { manifest: {}, drafts }), /no photo versions/);
-});
-
-test('the form: fields with labels, autocomplete and error slots, four tier pills from the tiers plus the unsure option, an empty newsletter box, the trap, the texts for the script, the thank-you', () => {
-  const r = content.register;
-  const f = r.form;
-  const form = html.match(/<form class="register__form"[^]*?<\/form>/)[0];
-  assert.ok(html.includes('<div class="register" id="register">'));
-  assert.ok(html.includes(`<h2 class="register__heading" id="register-heading">${esc(f.heading)}`));
-  assert.ok(html.includes(`<noscript><p class="register__noscript">${esc(f.noscript_note)}</p></noscript>`));
-  assert.ok(html.includes('<noscript><style>.register__form { display: none; }</style></noscript>'), 'without JavaScript the note replaces the form');
-  assert.ok(form.includes('method="post" novalidate') && form.includes('aria-labelledby="register-heading"'), 'post as a guard against a native submission, the script does the work');
-  for (const [id, name, auto] of [['reg-first-name', 'first_name', 'given-name'], ['reg-last-name', 'last_name', 'family-name'], ['reg-email', 'email', 'email']]) {
-    assert.ok(form.includes(`<label for="${id}">`), id);
-    assert.ok(form.includes(`<input id="${id}" name="${name}" type="${name === 'email' ? 'email' : 'text'}" autocomplete="${auto}"`), name);
-    assert.ok(form.includes(`aria-describedby="${id}-error"`) && form.includes(`<p class="field__error" id="${id}-error" data-error-for="${name}" aria-live="polite"></p>`), `${id} error slot`);
-  }
-  assert.ok(form.includes('maxlength="60"') && form.includes('maxlength="254"') && form.includes('<textarea id="reg-message" name="message" rows="3" maxlength="1000" aria-describedby="reg-message-error">'));
-  assert.ok(form.includes(`<legend>${esc(f.tier_label)}</legend>`));
-  const pills = form.match(/<label class="pill">[^]*?<\/label>/g) || [];
-  assert.deepEqual(pills.map((pill) => pill.match(/value="([^"]+)"/)[1]), [...content.pricing.tiers.map((tier) => tier.name), 'unsure']);
-  assert.ok(pills[3].includes(`<span>${esc(f.tier_unsure_label)}</span>`));
-  for (const pill of pills) assert.ok(pill.includes('type="radio" name="tier"') && pill.includes('aria-describedby="reg-tier-error"') && !pill.includes('checked'));
-  assert.ok(form.includes('<input type="checkbox" name="newsletter" value="yes">') && !/name="newsletter"[^>]*checked/.test(form), 'the newsletter box is empty by default');
-  assert.ok(form.includes(`<span>${esc(f.newsletter_label)}</span>`));
-  assert.ok(form.includes('<div class="register__trap" aria-hidden="true"><input type="text" name="website" tabindex="-1" autocomplete="off"></div>'));
-  assert.ok(form.includes('<p class="register__send-error" role="alert" hidden></p>'));
-  assert.ok(form.includes(`<button class="btn register__submit" type="submit">${esc(f.submit_label)}</button> <span class="tag tag--todo">TODO</span>`), 'TODO beside the button while the endpoint is empty');
-  assert.ok(form.includes(`${esc(f.data_note)} <a href="#">${esc(f.privacy_label)}</a> <span class="tag tag--todo">TODO</span>`), 'the privacy link waits for its address');
-  for (const [attr, value] of [['data-endpoint', ''], ['data-error-required', f.error_required], ['data-error-email', f.error_email], ['data-error-tier', f.error_tier], ['data-error-send', f.error_send], ['data-sending', f.sending_label], ['data-success-heading', f.success_heading], ['data-not-connected', NOT_CONNECTED]]) {
-    assert.ok(form.includes(` ${attr}="${esc(value)}"`), attr);
-  }
-  assert.ok(html.includes('<div class="register__success" id="register-success" hidden aria-live="polite">'));
-  assert.ok(html.includes('<p class="register__success-heading" tabindex="-1"></p>'));
-  assert.ok(html.includes(`<p class="register__success-text">${esc(f.success_text)}</p>`));
-  assert.ok(html.includes('class="closing__text"') && html.indexOf('class="closing__text"') < html.indexOf('id="register"'), 'the form stands under the closing text');
-  // a connected form: no TODO beside the button, the privacy link opens in a new tab
-  const connected = render({ ...content, register: { ...r, endpoint_url: 'https://script.google.com/macros/s/abc/exec', privacy_url: 'https://programme.juliakrylova.com/privacy/' } });
-  assert.ok(connected.includes('data-endpoint="https://script.google.com/macros/s/abc/exec"'));
-  assert.ok(!connected.includes('tag--todo'));
-  assert.ok(connected.includes(`<a href="https://programme.juliakrylova.com/privacy/" target="_blank" rel="noopener">${esc(f.privacy_label)}</a>`));
 });

@@ -1,12 +1,10 @@
 // Build: content/offer.yaml -> check -> photo versions -> dist/ with index.html, styles.css
-// (with the @font-face rules), register.js (the form, in mode form only), the fonts and their
-// licences, favicon.svg, the link card og-image.png and, while unpublished, robots.txt.
-// Run with npm run build.
+// (with the @font-face rules), the fonts and their licences, favicon.svg, the link card
+// og-image.png and, while unpublished, robots.txt. Run with npm run build.
 
 import { readFile, writeFile, mkdir, rm, stat, copyFile } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import vm from 'node:vm';
 import { load } from 'js-yaml';
 import { ROOT, CONTENT_FILE, PHOTOS_DIR, loadRaw, listPhotos, checkContent, report } from './check.mjs';
 import { buildImages } from './images.mjs';
@@ -15,10 +13,6 @@ import { renderPage, OG_IMAGE_FILE } from './render/page.mjs';
 export const DIST = path.join(ROOT, 'dist');
 export const ASSETS = path.join(ROOT, 'assets');
 export const STYLES_DIR = path.join(ROOT, 'src', 'styles');
-export const APP_DIR = path.join(ROOT, 'src', 'app');
-// The form script on the page: register-core.js (pure logic, shared with the tests) and
-// register.js (the wiring) joined into one module without imports.
-export const REGISTER_MODULES = ['register-core.js', 'register.js'];
 // The link card for LinkedIn and the like, made by scripts/og-image.mjs (npm run og).
 export const OG_IMAGE = path.join(ASSETS, OG_IMAGE_FILE);
 // Fonts are served by the site itself, so no request leaves for Google. These are the latin
@@ -43,26 +37,6 @@ export function fontFaceCss() {
   return `/* Fonts served by the site itself (assets/fonts, SIL Open Font License) */\n${rules.join('\n')}\n\n`;
 }
 
-// Joins the two form modules into dist/register.js: the import line of register.js goes, the
-// export keywords of register-core.js go, the result must parse.
-export async function bundleRegister() {
-  const parts = [];
-  for (const name of REGISTER_MODULES) {
-    let code = await readFile(path.join(APP_DIR, name), 'utf8');
-    code = code.replace(/^import\s*\{[^}]*\}\s*from\s*'\.\/register-core\.js';\n/m, '');
-    code = code.replace(/^export\s+(?=(?:async\s+)?function\s|const\s|let\s|class\s)/gm, '');
-    if (/^\s*(import|export)\b/m.test(code)) throw new Error(`${name}: an import or export the bundler cannot handle`);
-    parts.push(`// ---- ${name} ----\n${code.trim()}\n`);
-  }
-  const output = `// built from ${REGISTER_MODULES.map((name) => `src/app/${name}`).join(' and ')}, do not edit here\n${parts.join('\n')}`;
-  try {
-    new vm.Script(output, { filename: 'register.js' });
-  } catch (error) {
-    throw new Error(`register.js does not parse: ${error.message}`);
-  }
-  return output;
-}
-
 // Reads one colour token (#rrggbb) from tokens.css, so no colour is written twice.
 export function readToken(css, name) {
   const match = css.match(new RegExp(name + '\\s*:\\s*(#[0-9A-Fa-f]{6})'));
@@ -72,8 +46,6 @@ export function readToken(css, name) {
 
 // options.distDir: where to write (default dist/); options.contentFile: another yaml (tests);
 // options.patch: a function that changes the loaded content before the check (tests only);
-// options.endpointUrl: replaces register.endpoint_url after the check, in this build only
-// (also read from REGISTER_ENDPOINT_URL), for the local sending check, never in CI;
 // options.quiet: no console output; options.forceImages: remake every photo version.
 export async function build(options = {}) {
   const distDir = options.distDir || DIST;
@@ -87,11 +59,6 @@ export async function build(options = {}) {
   log(result.lines.join('\n'));
   if (!result.ok) throw new Error('Content check failed, nothing was built');
   const published = content.meta.published === true;
-  const endpointUrl = options.endpointUrl || process.env.REGISTER_ENDPOINT_URL || '';
-  if (endpointUrl) {
-    content.register.endpoint_url = endpointUrl;
-    log(`  endpoint override: ${endpointUrl}`);
-  }
 
   await mkdir(path.join(distDir, 'fonts'), { recursive: true });
   const manifest = await buildImages({
@@ -110,9 +77,9 @@ export async function build(options = {}) {
     'styles.css': `${fontFaceCss()}/* ---- tokens.css ---- */\n${tokens}\n/* ---- page.css ---- */\n${page}`,
   };
   if (!published) files['robots.txt'] = ROBOTS_TXT;
-  if (content.register.mode === 'form') files['register.js'] = await bundleRegister();
 
   // Only the build's own files are replaced; dist/img keeps the photo versions between builds.
+  // register.js was the form script until PROMPT 03b and is removed if a build left it behind.
   for (const name of [...Object.keys(files), 'robots.txt', 'register.js', 'CNAME']) await rm(path.join(distDir, name), { force: true });
   for (const [name, body] of Object.entries(files)) await writeFile(path.join(distDir, name), body, 'utf8');
   const copies = [

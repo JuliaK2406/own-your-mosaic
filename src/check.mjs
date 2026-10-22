@@ -36,10 +36,10 @@ export async function listPhotos(dir = PHOTOS_DIR) {
 // Required fields and their kinds:
 //   'string'        a non-empty text
 //   'text'          a text that may be empty
-//   'mode'          form or link (how the Register button works)
 //   'boolean'       true or false
 //   'url'           a full web address
 //   'url-or-empty'  a full https:// address or empty
+//   'https'         a full https:// address
 //   'file'          a file name
 //   'list'          a list of non-empty texts, at least one
 //   'list:N'        exactly N non-empty texts
@@ -48,35 +48,7 @@ export async function listPhotos(dir = PHOTOS_DIR) {
 const SHAPE = {
   meta: { published: 'boolean', site_url: 'url-or-empty', title: 'string', description: 'string' },
   links: { main_site: 'url' },
-  register: {
-    label: 'string',
-    mode: 'mode',
-    link_url: 'text',
-    endpoint_url: 'text',
-    privacy_url: 'string',
-    form: {
-      heading: 'string',
-      intro: 'string',
-      first_name_label: 'string',
-      last_name_label: 'string',
-      email_label: 'string',
-      tier_label: 'string',
-      tier_unsure_label: 'string',
-      message_label: 'string',
-      newsletter_label: 'string',
-      submit_label: 'string',
-      sending_label: 'string',
-      data_note: 'string',
-      privacy_label: 'string',
-      success_heading: 'string',
-      success_text: 'string',
-      error_required: 'string',
-      error_email: 'string',
-      error_tier: 'string',
-      error_send: 'string',
-      noscript_note: 'string',
-    },
-  },
+  register: { label: 'string', url: 'https' },
   hero: {
     title: 'string',
     subtitle: 'string',
@@ -124,7 +96,7 @@ const SHAPE = {
 };
 
 // The only values that may be empty.
-const EMPTY_ALLOWED = new Set(['meta.site_url', 'hero.photo_alt', 'proof.photo_alt', 'register.link_url', 'register.endpoint_url']);
+const EMPTY_ALLOWED = new Set(['meta.site_url', 'hero.photo_alt', 'proof.photo_alt']);
 // Fields that name a photo in content/photos.
 const PHOTO_FIELDS = ['hero.photo', 'proof.photo'];
 
@@ -168,7 +140,6 @@ export function checkContent(content, { photos, raw } = {}) {
     if (/\bTODO\b/.test(value)) todos.push(at);
     if (/[\u2013\u2014]/.test(value)) warnings.push(`${at}: contains a long dash`);
   });
-  checkRegister(content.register, fail, todos);
   if (isObject(content.meta) && isString(content.meta.site_url) && content.meta.site_url.trim() === '') todos.push('meta.site_url (empty)');
   let drafts = [];
   if (isString(raw)) {
@@ -177,21 +148,6 @@ export function checkContent(content, { photos, raw } = {}) {
     for (const problem of found.problems) fail('draft marker', problem);
   }
   return { errors, todos, drafts, warnings };
-}
-
-// The Register button: in mode link the address is required (https); in mode form an empty
-// endpoint_url is a TODO (nothing is sent anywhere) and a set one must be https; the
-// thank-you heading must keep its {name}.
-function checkRegister(register, fail, todos) {
-  if (!isObject(register)) return;
-  const mode = register.mode;
-  if (mode === 'link' && !isWebUrl(register.link_url, ['https:'])) fail('register.link_url', 'must be a full https:// address when mode is link');
-  if (mode === 'form') {
-    const endpoint = isString(register.endpoint_url) ? register.endpoint_url.trim() : '';
-    if (endpoint === '') todos.push('register.endpoint_url (empty)');
-    else if (!isWebUrl(endpoint, ['https:'])) fail('register.endpoint_url', 'must be empty or a full https:// address');
-  }
-  if (isObject(register.form) && isString(register.form.success_heading) && !register.form.success_heading.includes('{name}')) fail('register.form.success_heading', 'must contain {name}');
 }
 
 function checkShape(value, shape, at, fail) {
@@ -236,8 +192,8 @@ function checkKind(value, kind, at, fail) {
       if (!isString(value)) fail(at, 'must be a text (empty is allowed)');
       else if (value.trim() !== '' && !isWebUrl(value, ['https:'])) fail(at, 'must be empty or a full https:// address');
       break;
-    case 'mode':
-      if (value !== 'form' && value !== 'link') fail(at, 'must be form or link');
+    case 'https':
+      if (!isWebUrl(value, ['https:'])) fail(at, 'must be a full address starting with https://');
       break;
     case 'file':
       if (!isFilled(value)) fail(at, 'must be a file name');
