@@ -125,7 +125,8 @@ function topbar(ctx) {
 // The first screen: name and positioning in a row of their own; then the title, subtitle and
 // tagline with the photo beside them from 900 px (its top on the line of the title, its
 // proportion from its file, its right edge past the content toward the window edge); the
-// paragraphs, the button and the facts card (navy, three cells). The tiles, if
+// paragraphs, the button and the facts strip (navy, three cells in one row where the column
+// is wide enough; the wrapper is the size container the strip queries). The tiles, if
 // any, stand alone in the top-right corner of the block at the window edge.
 function hero(ctx) {
   const h = ctx.content.hero;
@@ -149,9 +150,11 @@ ${group}  <div class="container hero__grid">
     <div class="hero__body">
       ${paragraphs(h.paragraphs, esc, 'lead')}
       <div class="hero__cta">${registerButton(ctx, 'hero')}</div>
-      <ul class="facts">
-${h.facts.map((fact) => `        <li>${esc(fact)}</li>`).join('\n')}
-      </ul>
+      <div class="facts-box">
+        <ul class="facts">
+${h.facts.map((fact) => `          <li>${esc(fact)}</li>`).join('\n')}
+        </ul>
+      </div>
     </div>
   </div>
 </section>`;

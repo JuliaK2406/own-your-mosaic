@@ -356,11 +356,16 @@ a:hover {
   margin: var(--s-5) 0 var(--s-5);
 }
 
-/* The facts card: navy, three cells divided by thin gold lines; in a row when the card is
-   wide enough, otherwise stacked */
+/* The facts strip: navy, the three facts in one slim row (the height of the button) divided
+   by thin gold lines when the text column is wide enough; otherwise three compact rows
+   divided the same way. The wrapper is the size container: a list cannot query its own
+   width, so the query sits on .facts-box and styles .facts and its cells. */
+
+.facts-box {
+  container-type: inline-size;
+}
 
 .facts {
-  container-type: inline-size;
   list-style: none;
   margin: 0;
   padding: 0;
@@ -372,25 +377,28 @@ a:hover {
 }
 
 .facts li {
-  padding: var(--s-3) var(--s-5);
+  padding: 12px 20px;
   font-family: var(--font-heading);
   font-size: 1.0625rem;
   font-weight: 500;
-  line-height: 1.35;
+  line-height: 1.3;
 }
 
 .facts li + li {
   border-top: 1px solid var(--gold);
 }
 
-@container (min-width: 480px) {
+@container (min-width: 600px) {
   .facts {
     flex-direction: row;
-    flex-wrap: wrap;
+    min-height: var(--button-height);
   }
   .facts li {
     flex: 1 1 auto;
-    padding: var(--s-4) var(--s-5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 10px 20px;
     text-align: center;
   }
   .facts li + li {
