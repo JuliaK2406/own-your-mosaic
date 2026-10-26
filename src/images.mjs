@@ -18,9 +18,9 @@ export const CROPS = {
   // the studio portrait is horizontal (5918 x 4824): a 4:5 frame on the full height,
   // the face in the upper third, both arms and the watch whole
   'julia-krylova.jpg': { left: 1755, top: 0, width: 3859, height: 4824 },
-  // the session photo (6240 x 4160): everything above the lower part of the screen goes, so no
-  // word and no picture of the other program's slide is ever served; air stays above Julia
-  'julia-krylova-mentoring.jpg': { left: 0, top: 1100, width: 6240, height: 3060 },
+  // Julia on stage with a microphone (4818 x 3614): the full width down to just above the
+  // laptop in the lower right corner, so its screen is never served
+  'julia-krylova-mentoring.jpg': { left: 0, top: 0, width: 4818, height: 2330 },
   // the group with flowers (5720 x 3522): a wide band from the tree to the sofa backs
   'julia-krylova-group.jpg': { left: 0, top: 940, width: 5720, height: 2383 },
 };
