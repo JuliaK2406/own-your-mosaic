@@ -337,20 +337,13 @@ a:hover {
   width: min(100%, 480px);
 }
 
-/* square on the phone, so the button stays within two screens; 4:5 from 540 px */
+/* the frame takes the proportion of the served file (--photo-ratio from the build), so the
+   crop made in src/images.mjs is shown whole at every width */
 .hero__photo img {
   width: 100%;
-  aspect-ratio: 1 / 1;
+  aspect-ratio: var(--photo-ratio, 4 / 5);
   object-fit: cover;
-  object-position: 50% 45%;   /* the square keeps the face and the hand with the microphone */
   border-radius: var(--radius);
-}
-
-@media (min-width: 540px) {
-  .hero__photo img {
-    aspect-ratio: 4 / 5;
-    object-position: 50% 50%;
-  }
 }
 
 .hero__cta {

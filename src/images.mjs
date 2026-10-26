@@ -18,10 +18,11 @@ export const CROPS = {
   // the studio portrait is horizontal (5918 x 4824): a 4:5 frame on the full height,
   // the face in the upper third, both arms and the watch whole
   'julia-krylova.jpg': { left: 1755, top: 0, width: 3859, height: 4824 },
-  // the first screen: Julia on stage with a microphone (4818 x 3614), a 4:5 frame above the
-  // laptop in the lower right corner (its lid starts at y 2360), so its screen is never served;
-  // the raised arm leaves the frame at the right edge
-  'julia-krylova-on-stage.jpg': { left: 1000, top: 0, width: 1872, height: 2340 },
+  // the first screen: Julia on stage with a microphone (4818 x 3614), a square frame with the
+  // raised arm and the watch up to the top edge (the fist is cut by the original itself); the
+  // bottom edge stays above the laptop in the lower right corner (its lid starts at y 2372),
+  // so its screen is never served; the hair is trimmed a little on the left, never the face
+  'julia-krylova-on-stage.jpg': { left: 1335, top: 0, width: 2340, height: 2340 },
   // the session photo (6240 x 4160): everything above the lower part of the screen goes, so no
   // word and no picture of the other program's slide is ever served; air stays above Julia
   'julia-krylova-session.jpg': { left: 0, top: 1100, width: 6240, height: 3060 },

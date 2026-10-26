@@ -15,6 +15,7 @@
 //                                  screen in both tile variants (hero-detached from dist/,
 //                                  hero-none from a temporary build); 360, 834 and 1280 checked
 //   roadmap (--set roadmap, PROMPT 04b): the Problem and Promise blocks at 390 and 1440
+//   hand (--set hand, PROMPT 04d): the first screen at 390, 900 and 1440, 360 and 1440 whole
 //   group (--set group, PROMPT 04c): What I bring with its photo at 390 and 1440, the band with
 //                                  the group photo (end of the quotes to the start of Practical
 //                                  details) at 390, 1440 and 1920, 360 and 1440 whole
@@ -57,6 +58,7 @@ export const SETS = {
   feedback: { 360: [], 390: ['full', 'hero-detached', 'who', 'shift', 'problem', 'promise', 'method', 'package', 'pricing', 'mentor', 'bring', 'quotes', 'logistics', 'closing'], 834: [], 1280: [], 1440: ['full', 'hero-detached', 'who', 'shift', 'problem', 'promise', 'method', 'package', 'pricing', 'mentor', 'bring', 'quotes', 'logistics', 'closing'] },
   roadmap: { 360: [], 390: ['problem', 'promise'], 834: [], 1280: [], 1440: ['problem', 'promise'] },
   group: { 360: ['full'], 390: ['bring', 'group'], 834: [], 1280: [], 1440: ['full', 'bring', 'group'], 1920: ['group'] },
+  hand: { 360: ['full'], 390: ['hero'], 834: [], 900: ['hero'], 1280: [], 1440: ['full', 'hero'] },
   live: { 390: ['hero'], 1440: ['hero', 'group'] },
 };
 const BLOCKS = { topbar: '.topbar', who: '.who', shift: '.shift', problem: '.problem', promise: '.promise', method: '.process', process: '.process', package: '.package', pricing: '.pricing', mentor: '.proof', bring: '.bring', quotes: '.quotes', logistics: '.logistics', closing: '.closing' };

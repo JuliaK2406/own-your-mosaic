@@ -53,6 +53,14 @@ export function registerButton(ctx, place, { className = '' } = {}) {
   return `<a class="${classes}" href="${esc(registerUrl(r.url, place))}" target="_blank" rel="noopener">${esc(r.label)}</a>`;
 }
 
+// The proportion of a served photo (width / height from the manifest), for a CSS aspect-ratio:
+// the frame of the first screen follows the file, so a new photo brings its own proportion.
+export function photoRatio(ctx, file) {
+  const m = ctx.manifest[file];
+  if (!m) throw new Error(`${file}: no photo versions were built for this file`);
+  return `${m.width} / ${m.height}`;
+}
+
 // A responsive photo from the manifest of src/images.mjs: webp with a jpg fallback, explicit
 // width and height so nothing jumps while it loads. The first-screen photo loads at once
 // (eager), the others lazily.
@@ -115,7 +123,8 @@ function topbar(ctx) {
 }
 
 // The first screen: name and positioning, title, subtitle, tagline; the photo (right from
-// 900 px); the paragraphs, the button and the facts card (navy, three cells). The tiles, if
+// 900 px, in the proportion of its file); the paragraphs, the button and the facts card
+// (navy, three cells). The tiles, if
 // any, stand alone in the top-right corner of the block at the window edge.
 function hero(ctx) {
   const h = ctx.content.hero;
@@ -131,7 +140,7 @@ ${group}  <div class="container hero__grid">
       <p class="hero__subtitle">${esc(h.subtitle)}</p>
       <p class="hero__tagline lead">${esc(h.tagline)}</p>
     </div>
-    <div class="hero__photo">
+    <div class="hero__photo" style="--photo-ratio: ${photoRatio(ctx, h.photo)}">
       ${picture(ctx, h.photo, { alt: h.photo_alt, eager: true, sizes: '(min-width: 1200px) 420px, (min-width: 900px) 36vw, (min-width: 540px) 480px, calc(100vw - 48px)' })}
     </div>
     <div class="hero__body">
