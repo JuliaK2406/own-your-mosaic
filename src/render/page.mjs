@@ -122,9 +122,10 @@ function topbar(ctx) {
 </header>`;
 }
 
-// The first screen: name and positioning, title, subtitle, tagline; the photo (right from
-// 900 px, in the proportion of its file); the paragraphs, the button and the facts card
-// (navy, three cells). The tiles, if
+// The first screen: name and positioning in a row of their own; then the title, subtitle and
+// tagline with the photo beside them from 900 px (its top on the line of the title, its
+// proportion from its file, its right edge past the content toward the window edge); the
+// paragraphs, the button and the facts card (navy, three cells). The tiles, if
 // any, stand alone in the top-right corner of the block at the window edge.
 function hero(ctx) {
   const h = ctx.content.hero;
@@ -133,15 +134,17 @@ function hero(ctx) {
 `;
   return `<section class="hero" aria-labelledby="hero-title">
 ${group}  <div class="container hero__grid">
-    <div class="hero__head">
+    <div class="hero__intro">
       <p class="hero__name">${esc(h.name)}</p>
       <p class="hero__positioning caps">${esc(h.positioning)}</p>
+    </div>
+    <div class="hero__head">
       <h1 id="hero-title" class="hero__title">${esc(h.title)}</h1>
       <p class="hero__subtitle">${esc(h.subtitle)}</p>
       <p class="hero__tagline lead">${esc(h.tagline)}</p>
     </div>
     <div class="hero__photo" style="--photo-ratio: ${photoRatio(ctx, h.photo)}">
-      ${picture(ctx, h.photo, { alt: h.photo_alt, eager: true, sizes: '(min-width: 1200px) 420px, (min-width: 900px) 36vw, (min-width: 540px) 480px, calc(100vw - 48px)' })}
+      ${picture(ctx, h.photo, { alt: h.photo_alt, eager: true, sizes: '(min-width: 1440px) 512px, (min-width: 1280px) calc(50vw - 206px), (min-width: 1200px) calc(50vw - 150px), (min-width: 900px) calc(38.1vw - 16px), (min-width: 540px) 480px, calc(100vw - 48px)' })}
     </div>
     <div class="hero__body">
       ${paragraphs(h.paragraphs, esc, 'lead')}

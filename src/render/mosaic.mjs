@@ -132,12 +132,14 @@ export function cornerGroup({ seed = 32, width = 150, height = 110, anchor = 'tr
   return svg('mosaic--corner', width, height, draw(tiles), { align: 'xMinYMin meet', size: true });
 }
 
-// The detached group of the first screen: a wide one from 900 px, a small one with 20 px tiles
-// on the phone (beside the name and positioning lines).
+// The detached group of the first screen: a wide, low one from 900 px (above the photo, which
+// starts on the line of the title), a small one with 20 px tiles on the phone (beside the name
+// and positioning lines).
+export const HERO_GROUP_SEED = 44;
 export function heroGroup({ phone = false } = {}) {
   return phone
     ? cornerGroup({ seed: 36, width: 104, height: 104, anchor: 'tr', tile: 20, gap: 5, minH: 12, maxH: 30 })
-    : cornerGroup({ seed: 44, width: 204, height: 140, anchor: 'tr' });   // 204 = six columns of 28 px tiles, the last one at the right edge
+    : cornerGroup({ seed: HERO_GROUP_SEED, width: 204, height: 84, anchor: 'tr', minH: 14, maxH: 36 });   // 204 = six columns of 28 px tiles, the last one at the right edge
 }
 
 // 6. The closing band and its seam with Practical details, for the left side of the window

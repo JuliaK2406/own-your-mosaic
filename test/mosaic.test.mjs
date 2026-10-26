@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { seeded, porcelainTile, bandTile, flyTile, cornerGroup, heroGroup, bandVariant, bandSprite, bandUse, allMosaics, COLOURS, BAND_VARIANTS, BORDER_Y } from '../src/render/mosaic.mjs';
+import { seeded, porcelainTile, bandTile, flyTile, cornerGroup, heroGroup, HERO_GROUP_SEED, bandVariant, bandSprite, bandUse, allMosaics, COLOURS, BAND_VARIANTS, BORDER_Y } from '../src/render/mosaic.mjs';
 
 const rects = (svg) => [...svg.matchAll(/<rect x="(-?\d+)" y="(-?\d+)" width="(\d+)" height="(\d+)" rx="6" fill-opacity="([.\d]+)"\/>/g)].map((m) => ({ x: Number(m[1]), y: Number(m[2]), w: Number(m[3]), h: Number(m[4]), opacity: Number(m[5]) }));
 const fills = (svg) => [...svg.matchAll(/fill="(#[0-9A-Fa-f]{6})"/g)].map((m) => m[1]);
@@ -52,7 +52,7 @@ test('every drawing is deterministic, aria-hidden, never scaled with slice, with
 
 test('the hero groups (wide and phone): porcelain palette, drawn at their own size, strong at the top-right corner, faint at the left and bottom edges', () => {
   const porcelainPalette = new Set([COLOURS.aubergine, COLOURS.champagne, COLOURS.warmGrey]);
-  for (const [svg, width, height] of [[heroGroup(), 204, 140], [heroGroup({ phone: true }), 104, 104]]) {
+  for (const [svg, width, height] of [[heroGroup(), 204, 84], [heroGroup({ phone: true }), 104, 104]]) {
     for (const fill of fills(svg)) assert.ok(porcelainPalette.has(fill), fill);
     assert.ok(svg.includes(`width="${width}" height="${height}"`), 'drawn at its own size');
     const tiles = rects(svg);
@@ -62,7 +62,7 @@ test('the hero groups (wide and phone): porcelain palette, drawn at their own si
     const edges = tiles.filter((t) => t.x <= 6 || t.y + t.h >= height - 6);
     for (const t of edges) assert.ok(t.opacity <= 0.3, `a tile at the left or bottom edge is faint (${t.opacity})`);
   }
-  assert.equal(cornerGroup({ seed: 44, width: 204, height: 140, anchor: 'tr' }), heroGroup());
+  assert.equal(cornerGroup({ seed: HERO_GROUP_SEED, width: 204, height: 84, anchor: 'tr', minH: 14, maxH: 36 }), heroGroup());
 });
 
 test('the band drawings: five widths; over the border only aubergine within the page margin, below it only on-aubergine within the side zone; some tiles straddle the border; the sprite and the mirrored uses', () => {

@@ -275,10 +275,15 @@ a:hover {
 /* First screen. The tiles stand alone in the top-right corner of the block at the window
    edge (the phone gets a small group beside the name and positioning lines). On the phone:
    name and positioning, title, subtitle, tagline, photo, paragraphs, button, facts card.
-   From 900 px: text left, photo right. */
+   From 900 px: name and positioning in a row of their own, then the text left and the photo
+   right, its top on the line of the title. The photo runs past the content edge toward the
+   window edge (--hero-bleed), leaving 24 px, so it can be large while the paragraphs keep
+   at least 55 characters per line at 1280 and 1440. */
 
 .hero {
   position: relative;
+  --hero-text: 1.53fr;   /* the text column against the photo column (1fr) from 900 px; from 1280 px a width that keeps 55 characters per line */
+  --hero-bleed: clamp(16px, calc((100vw - (var(--page-max) - 2 * var(--gutter))) / 2 - 24px), 176px);
 }
 
 .hero__tiles {
@@ -313,7 +318,7 @@ a:hover {
 }
 
 .hero__positioning {
-  margin: 0 0 var(--s-5);
+  margin: 0;
 }
 
 .hero__title {
@@ -335,6 +340,7 @@ a:hover {
 
 .hero__photo {
   width: min(100%, 480px);
+  margin-inline: auto;   /* centred on a tablet, full width on the phone */
 }
 
 /* the frame takes the proportion of the served file (--photo-ratio from the build), so the
@@ -395,7 +401,7 @@ a:hover {
 
 @media (min-width: 900px) {
   .hero__tiles {
-    top: 24px;
+    top: 12px;
     right: 24px;
   }
   .hero__tiles--phone {
@@ -405,17 +411,21 @@ a:hover {
     display: block;
   }
   .hero__grid {
-    grid-template-columns: minmax(0, 1.15fr) minmax(0, 0.85fr);
+    grid-template-columns: minmax(0, var(--hero-text)) minmax(0, 1fr);
     grid-template-areas:
+      "intro ."
       "head photo"
       "body photo";
-    column-gap: clamp(2.5rem, 5vw, 5rem);
+    column-gap: clamp(2rem, 3.5vw, 3rem);
     align-items: start;
     padding-block: clamp(3.5rem, 6vh, 5rem) calc(var(--section-gap) / 2);
   }
   .hero__name,
   .hero__positioning {
     max-width: none;
+  }
+  .hero__intro {
+    grid-area: intro;
   }
   .hero__head {
     grid-area: head;
@@ -425,8 +435,18 @@ a:hover {
   }
   .hero__photo {
     grid-area: photo;
-    align-self: center;
-    width: auto;
+    align-self: start;
+    width: calc(100% + var(--hero-bleed));
+    margin-inline: 0;
+  }
+}
+
+/* From 1280 px the text column is fixed at the width that keeps every full line of the
+   paragraphs at 55 characters or more (measured: 656 px gives 56 at 1440 and 60 at 1280);
+   the photo takes the rest of the content plus the bleed */
+@media (min-width: 1280px) {
+  .hero {
+    --hero-text: 656px;
   }
 }
 

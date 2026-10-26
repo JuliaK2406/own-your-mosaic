@@ -16,6 +16,9 @@
 //                                  hero-none from a temporary build); 360, 834 and 1280 checked
 //   roadmap (--set roadmap, PROMPT 04b): the Problem and Promise blocks at 390 and 1440
 //   hand (--set hand, PROMPT 04d): the first screen at 390, 900 and 1440, 360 and 1440 whole
+//   big (--set big, PROMPT 04e): the first screen at every width up to 1920, 360 and 1440 whole,
+//                                  1440 without tiles from a temporary build; the summary gives
+//                                  the photo size, the title-to-button height and the line lengths
 //   group (--set group, PROMPT 04c): What I bring with its photo at 390 and 1440, the band with
 //                                  the group photo (end of the quotes to the start of Practical
 //                                  details) at 390, 1440 and 1920, 360 and 1440 whole
@@ -59,6 +62,7 @@ export const SETS = {
   roadmap: { 360: [], 390: ['problem', 'promise'], 834: [], 1280: [], 1440: ['problem', 'promise'] },
   group: { 360: ['full'], 390: ['bring', 'group'], 834: [], 1280: [], 1440: ['full', 'bring', 'group'], 1920: ['group'] },
   hand: { 360: ['full'], 390: ['hero'], 834: [], 900: ['hero'], 1280: [], 1440: ['full', 'hero'] },
+  big: { 360: ['full'], 390: ['hero'], 834: ['hero'], 900: ['hero'], 1280: ['hero'], 1440: ['full', 'hero'], 1920: ['hero'] },
   live: { 390: ['hero'], 1440: ['hero', 'group'] },
 };
 const BLOCKS = { topbar: '.topbar', who: '.who', shift: '.shift', problem: '.problem', promise: '.promise', method: '.process', process: '.process', package: '.package', pricing: '.pricing', mentor: '.proof', bring: '.bring', quotes: '.quotes', logistics: '.logistics', closing: '.closing' };
@@ -154,6 +158,35 @@ function facts(page) {
       tilesOverText,
       tiles: tileBoxes.length,
       mosaics: document.querySelectorAll('svg.mosaic').length,
+      // the first screen from 900 px: the photo size and position, the title-to-button height,
+      // the characters per full line of the paragraphs (the last line of a paragraph does not count)
+      heroLayout: (() => {
+        const img = document.querySelector('.hero__photo img');
+        const h1 = document.querySelector('h1');
+        const button = document.querySelector('.hero .btn');
+        if (!img || !h1 || !button) return null;
+        const r = (node) => { const b = node.getBoundingClientRect(); return { top: Math.round(b.top + window.scrollY), bottom: Math.round(b.bottom + window.scrollY), left: Math.round(b.left), right: Math.round(b.right), width: Math.round(b.width), height: Math.round(b.height) }; };
+        const lines = [];
+        for (const p of document.querySelectorAll('.hero__body p')) {
+          const range = document.createRange();
+          const perLine = new Map();
+          const walker = document.createTreeWalker(p, NodeFilter.SHOW_TEXT);
+          let node;
+          while ((node = walker.nextNode())) {
+            for (let i = 0; i < node.length; i += 1) {
+              range.setStart(node, i);
+              range.setEnd(node, i + 1);
+              const rect = range.getClientRects()[0];
+              if (!rect || rect.width === 0) continue;
+              const key = Math.round(rect.top);
+              perLine.set(key, (perLine.get(key) || 0) + 1);
+            }
+          }
+          const counts = [...perLine.values()];
+          lines.push(...counts.slice(0, -1));
+        }
+        return { photo: r(img), h1Top: r(h1).top, buttonBottom: r(button).bottom, textWidth: Math.round(document.querySelector('.hero__body').getBoundingClientRect().width), lineMin: lines.length ? Math.min(...lines) : null, lineMean: lines.length ? Math.round(lines.reduce((n, c) => n + c, 0) / lines.length) : null, windowRight: Math.round(document.documentElement.clientWidth - img.getBoundingClientRect().right) };
+      })(),
       // the first-screen tiles must keep 48 px from the photo (Julia: tiles away from the photo)
       heroTilesToPhoto: (() => {
         const photo = document.querySelector('.hero__photo img');
@@ -227,6 +260,11 @@ export async function takeShots({ outDir = DEFAULT_OUT_DIR, liveUrl = '', set = 
       if (f.heroFieldOverlapsText) flags.push('the tile field of the first screen overlaps the text');
       if (f.tilesOverText) flags.push(`${f.tilesOverText} tile(s) sit on a text box`);
       if (f.heroTilesToPhoto !== null && f.heroTilesToPhoto < 48) flags.push(`the first-screen tiles come within ${f.heroTilesToPhoto} px of the photo`);
+      if (f.heroLayout && vp.width >= 900) {
+        if (f.heroLayout.windowRight < 24) flags.push(`the first-screen photo comes within ${f.heroLayout.windowRight} px of the window edge`);
+        if (vp.width >= 1280 && f.heroLayout.lineMin !== null && f.heroLayout.lineMin < 55) flags.push(`a full line of the first-screen paragraphs has only ${f.heroLayout.lineMin} characters`);
+        if (f.heroLayout.photo.top < f.heroLayout.h1Top - 2) flags.push(`the first-screen photo starts ${f.heroLayout.h1Top - f.heroLayout.photo.top} px above the title`);
+      }
       for (const link of f.buttonLinks) {
         if (link.cut) flags.push(`the button "${link.text}" is cut off`);
         if (link.height > 92) flags.push(`the button "${link.text}" takes more than two lines (${link.height} px)`);
@@ -236,13 +274,15 @@ export async function takeShots({ outDir = DEFAULT_OUT_DIR, liveUrl = '', set = 
       if (vp.width < 500) {
         if (!f.title || f.title.bottom > vp.height) flags.push('the title is not on the first screen');
         if (!f.subtitle || f.subtitle.bottom > vp.height) flags.push('the subtitle is not on the first screen');
-        if (!f.button || f.button.bottom > 2 * vp.height) flags.push(`the button is below the second screen (${f.button && f.button.bottom} px)`);
+        // the rule of PROMPT 01 is set at 390 x 844: the button within two screens
+        if (vp.width === 390 && (!f.button || f.button.bottom > 2 * vp.height)) flags.push(`the button is below the second screen (${f.button && f.button.bottom} px)`);
         if (f.h1Lines > 3) flags.push(`the title takes ${f.h1Lines} lines`);
       }
       summary.push(`${prefix}: ${f.buttons} buttons, ${f.todoTags} TODO tags, ${f.draftTags} draft tags, ${f.images.length} photos, ${f.mosaics} mosaics with ${f.tiles} visible tiles (${f.tilesOverText} on text${f.heroTilesToPhoto !== null ? `, first-screen tiles ${f.heroTilesToPhoto} px from the photo` : ''}), fonts ${f.lora && f.inter ? 'from the site' : 'MISSING'}, width ${f.scrollWidth}/${f.clientWidth}${f.button ? `, hero button bottom at ${f.button.bottom} px` : ''}, h1 on ${f.h1Lines} line(s)`);
       summary.push(`${prefix}: font sizes px: ${Object.entries(f.fonts).map(([k, v]) => `${k} ${v}`).join(', ')}`);
       summary.push(`${prefix}: buttons: ${f.buttonLinks.map((link) => `${link.height} px ${link.target || 'same tab'} ${link.rel || ''} ${link.href}`).join(' | ')}${f.topbar ? `; top bar button ${f.topbar.gap} px from the sign, ${f.topbar.height} px high` : ''}`);
       if (f.groupBand) summary.push(`${prefix}: the group band is ${f.groupBand.height} px high`);
+      if (f.heroLayout && vp.width >= 900) summary.push(`${prefix}: first-screen photo ${f.heroLayout.photo.width} x ${f.heroLayout.photo.height} px at y ${f.heroLayout.photo.top}-${f.heroLayout.photo.bottom}, ${f.heroLayout.windowRight} px from the window edge; title top ${f.heroLayout.h1Top}, button bottom ${f.heroLayout.buttonBottom} (${f.heroLayout.buttonBottom - f.heroLayout.h1Top} px); text column ${f.heroLayout.textWidth} px, full lines ${f.heroLayout.lineMin} to ${f.heroLayout.lineMean} characters (min, mean)`);
       if (f.mentor) summary.push(`${prefix}: Meet your mentor: photos end at ${f.mentor.photosBottom}, text ends at ${f.mentor.textBottom}, difference ${f.mentor.textBottom - f.mentor.photosBottom} px, photo column position ${f.mentor.sticky}`);
       if (vp.weigh || liveUrl) {
         const loaded = (await Promise.all(bodies)).filter(Boolean);
@@ -266,19 +306,20 @@ export async function takeShots({ outDir = DEFAULT_OUT_DIR, liveUrl = '', set = 
       if (flags.length) problems.push(`${prefix}: ${flags.join('; ')}`);
       await context.close();
     }
-    if (!liveUrl && set === 'feedback') {
+    const NONE_SHOTS = { feedback: { names: ['390', '1440'], suffix: 'hero-none' }, big: { names: ['1440'], suffix: 'hero-tiles-none' } };
+    if (!liveUrl && NONE_SHOTS[set]) {
       const dir = await mkdtemp(path.join(os.tmpdir(), 'own-your-mosaic-hero-none-'));
       const bare = await startServer(0, dir);
       try {
         await build({ distDir: dir, quiet: true, heroTiles: 'none' });
-        for (const name of ['390', '1440']) {
+        for (const name of NONE_SHOTS[set].names) {
           const vp = VIEWPORTS[name];
           const context = await browser.newContext({ viewport: { width: vp.width, height: vp.height }, deviceScaleFactor: vp.deviceScaleFactor, isMobile: vp.isMobile, hasTouch: vp.hasTouch });
           const page = await context.newPage();
           await page.goto(`${bare.url}${PREVIEW_BASE}/`, { waitUntil: 'networkidle' });
           await page.evaluate(() => document.fonts.ready);
           const tiles = await page.evaluate(() => document.querySelectorAll('.hero svg.mosaic').length);
-          const file = path.join(outDir, `${name}-hero-none.png`);
+          const file = path.join(outDir, `${name}-${NONE_SHOTS[set].suffix}.png`);
           await page.screenshot({ path: file });
           console.log(`${path.basename(file)}  ${tiles === 0 ? 'ok' : `PROBLEM: ${tiles} mosaic(s) on the first screen`}`);
           if (tiles) problems.push(`${name}-hero-none: ${tiles} mosaic(s) on the first screen`);

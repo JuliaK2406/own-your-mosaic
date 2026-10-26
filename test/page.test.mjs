@@ -10,7 +10,7 @@ const raw = await loadRaw();
 const drafts = new Set(findDrafts(raw, content).drafts.map((draft) => draft.path));
 // A manifest like the one src/images.mjs returns (with its crop), without running sharp.
 const manifest = {
-  [content.hero.photo]: { slug: 'hero', widths: [640, 1024, 1600], width: 2340, height: 2340 },
+  [content.hero.photo]: { slug: 'hero', widths: [640, 1024, 1600], width: 2709, height: 3612 },
   [content.proof.photo]: { slug: 'portrait', widths: [640, 1024, 1600], width: 3859, height: 4824 },
   [content.proof.mentoring_photo]: { slug: 'mentoring', widths: [640, 1024, 1600], width: 6240, height: 3060 },
   [content.proof.group_photo]: { slug: 'group', widths: [640, 1024, 1600, 2400], width: 5720, height: 2383 },
@@ -135,8 +135,9 @@ test('four photos: every <img> has alt, width and height; the first-screen photo
   assert.ok(imgs[0].includes('fetchpriority="high"') && !imgs[0].includes('loading="lazy"'));
   for (const img of imgs.slice(1)) assert.ok(img.includes('loading="lazy"') && img.includes('decoding="async"'));
   assert.ok(imgs[0].includes(`alt="${esc(content.hero.photo_alt)}"`) && imgs[1].includes(`alt="${esc(content.proof.photo_alt)}"`));
-  assert.ok(imgs[0].includes('width="1600" height="1600"'), 'the first-screen photo is square');
-  assert.ok(html.includes('<div class="hero__photo" style="--photo-ratio: 2340 / 2340">'), 'the frame of the first screen follows the served file');
+  assert.ok(imgs[0].includes('width="1600" height="2133"'), 'the first-screen photo is 3:4');
+  assert.ok(html.includes('<div class="hero__photo" style="--photo-ratio: 2709 / 3612">'), 'the frame of the first screen follows the served file');
+  assert.ok(html.includes('<div class="hero__intro">\n      <p class="hero__name">'), 'name and positioning in a row of their own');
   assert.ok(imgs[2].includes(`alt="${esc(content.proof.mentoring_photo_alt)}"`) && imgs[2].includes('width="1600" height="785"'), 'the session photo, 6240 x 3060 crop');
   assert.ok(imgs[3].includes(`alt="${esc(content.proof.group_photo_alt)}"`) && imgs[3].includes('width="2400" height="1000"'), 'the group band, 5720 x 2383 crop at 2400');
   assert.ok(imgs[3].includes('sizes="100vw"') && html.includes('img/group-2400.webp 2400w'));
