@@ -342,7 +342,7 @@ a:hover {
   width: 100%;
   aspect-ratio: 1 / 1;
   object-fit: cover;
-  object-position: 50% 30%;
+  object-position: 50% 45%;   /* the square keeps the face and the hand with the microphone */
   border-radius: var(--radius);
 }
 
