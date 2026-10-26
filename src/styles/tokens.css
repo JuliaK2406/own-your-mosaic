@@ -10,9 +10,10 @@
   --porcelain-deep: #F2F0EC;   /* porcelain mixed with warm grey about 65 to 35: every second block */
   --gold: #B89B5E;             /* buttons, thin lines, marks and dots only */
   --warm-grey: #E4E2DD;        /* dividers and card borders */
-  --champagne: #EFDCAC;        /* rare accent: the TODO tag, the quote marks, a few tiles */
+  --champagne: #EFDCAC;        /* fills of cards and circles since PROMPT 04 (Julia's call), the TODO tag, the quote marks, a few tiles */
   --text-muted: #545B70;       /* secondary text, 6.4:1 on porcelain */
   --on-aubergine: #F3E9EF;     /* text on aubergine */
+  --porcelain-muted: rgba(250, 248, 245, 0.78);   /* secondary text on navy, about 8.5:1 */
 
   /* Fonts */
   --font-heading: 'Lora', Georgia, 'Times New Roman', serif;

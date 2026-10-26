@@ -46,6 +46,7 @@ export function readToken(css, name) {
 
 // options.distDir: where to write (default dist/); options.contentFile: another yaml (tests);
 // options.patch: a function that changes the loaded content before the check (tests only);
+// options.heroTiles: 'detached' or 'none', the tiles of the first screen (screenshots only);
 // options.quiet: no console output; options.forceImages: remake every photo version.
 export async function build(options = {}) {
   const distDir = options.distDir || DIST;
@@ -73,7 +74,7 @@ export async function build(options = {}) {
   const page = await readFile(path.join(STYLES_DIR, 'page.css'), 'utf8');
   const drafts = new Set(checked.drafts.map((draft) => draft.path));
   const files = {
-    'index.html': renderPage(content, { manifest, drafts, themeColor: readToken(tokens, '--porcelain') }),
+    'index.html': renderPage(content, { manifest, drafts, themeColor: readToken(tokens, '--porcelain'), ...(options.heroTiles ? { heroTiles: options.heroTiles } : {}) }),
     'styles.css': `${fontFaceCss()}/* ---- tokens.css ---- */\n${tokens}\n/* ---- page.css ---- */\n${page}`,
   };
   if (!published) files['robots.txt'] = ROBOTS_TXT;

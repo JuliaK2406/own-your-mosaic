@@ -2,7 +2,8 @@
 // gives the same picture. The tile language of Snapshot: columns of rounded tiles of varying
 // height, 6 px gaps, 6 px corners. Colours: the brand aubergine at low opacity, a little
 // champagne and warm grey; on the closing band the on-aubergine colour; over its upper border
-// the aubergine itself. No pictures, no script, every svg is aria-hidden.
+// the aubergine itself. No pictures, no script, every svg is aria-hidden. Two places only:
+// a detached group in the corner of the first screen and the sides of the closing band.
 //
 // One rule for all of them: no tile is ever cut by an edge. Every tile lies whole inside its
 // viewBox (a test checks it), the svgs are never scaled with "slice" or clipped, and the
@@ -99,80 +100,44 @@ function stackTiles(rnd, { width, height, tile = TILE, gap = GAP, minH = 18, max
   return tiles;
 }
 
-// 2a and 5. The field behind a photo: a box larger than the photo (margins in px of the
-// reference layout), tiles only in the margins (behind the photo nothing is drawn), denser
-// below the photo than above it, stronger in two opposite corners (bias), dissolving to
-// nothing at every edge and most of all toward the text (textSide). Drawn with "meet", so
-// the whole picture always fits its box and nothing is cropped.
-export function photoField({ seed, photo, margins, textSide, bias, className }) {
+// A small group of whole tiles at one corner of its box: full strength at that corner (for tr
+// the top-right, where the box meets the edge of the window or the block) and dissolving along
+// the diagonal and to nothing at the two edges that face the page. Drawn at its own pixel
+// size. Since PROMPT 04 it stands alone in the top-right corner of the first screen, away from
+// the photo.
+export function cornerGroup({ seed = 32, width = 150, height = 110, anchor = 'tr', tile = TILE, gap = GAP, minH = 16, maxH = 44 } = {}) {
   const rnd = seeded(seed);
-  const W = photo.width + margins.left + margins.right;
-  const H = photo.height + margins.top + margins.bottom;
-  const inner = { x1: margins.left + 6, y1: margins.top + 6, x2: margins.left + photo.width - 6, y2: margins.top + photo.height - 6 };
-  const tiles = stackTiles(rnd, {
-    width: W,
-    height: H,
-    firstX: 8,
-    place: (t) => {
-      const hidden = t.x >= inner.x1 && t.x + t.w <= inner.x2 && t.y >= inner.y1 && t.y + t.h <= inner.y2;
-      if (hidden) return null;
-      const u = t.cx / W;
-      const v = t.cy / H;
-      const above = t.cy < margins.top;
-      const below = t.cy > margins.top + photo.height;
-      const vertical = above ? 0.5 : below ? 1 : 0.75;
-      const strong = bias === 'tr-bl' ? (u > 0.5 && v < 0.5) || (u < 0.5 && v > 0.5) : (u < 0.5 && v < 0.5) || (u > 0.5 && v > 0.5);
-      const density = 0.92 * vertical * (strong ? 1 : 0.6);
-      // distances from the tile's own edges to the edges of the field
-      const toText = textSide === 'left' ? t.x : W - (t.x + t.w);
-      const away = textSide === 'left' ? W - (t.x + t.w) : t.x;
-      // next to the photo the tiles stand at full strength; toward every edge of the field they
-      // fade to nothing (vertically over the whole margin, sideways over the last 26 px)
-      const fade = Math.min(edgeFade(t.y + 6, margins.top - 4), edgeFade(H - (t.y + t.h) + 6, margins.bottom - 10), edgeFade(toText, 0.32 * W), edgeFade(away + 12, 26));
-      if (rnd() >= density || fade < 0.05) return null;
-      const tile = porcelainTile(rnd);
-      return { ...t, fill: tile.fill, opacity: tile.opacity * fade };
-    },
-  });
-  return svg(className, W, H, draw(tiles));
-}
-
-// The first screen at the reference width 1440: photo 411 x 514, 40 px of field at the sides,
-// 48 px above (sparse) and 90 px below (denser); the text stands on the left.
-export function heroField({ seed = 31 } = {}) {
-  return photoField({ seed, photo: { width: 411, height: 514 }, margins: { top: 48, right: 40, bottom: 90, left: 40 }, textSide: 'left', bias: 'tr-bl', className: 'mosaic--field' });
-}
-
-// Meet your mentor at 1440: portrait 387 x 484, the text stands on the right, the strong
-// corners are the top-left and the bottom-right (the mirror of the first screen).
-export function mentorField({ seed = 34 } = {}) {
-  return photoField({ seed, photo: { width: 387, height: 484 }, margins: { top: 40, right: 40, bottom: 90, left: 40 }, textSide: 'right', bias: 'tl-br', className: 'mosaic--field' });
-}
-
-// The phone version of the first screen: a small group of whole tiles at a corner of the
-// photo, strongest next to the corner and melting away from it. Drawn at its own pixel size.
-// anchor tr: the group sits over the top-right corner (24 px above, 16 px to the right);
-// anchor bl: over the bottom-left corner.
-export function cornerGroup({ seed = 32, width = 150, height = 110, anchor = 'tr' } = {}) {
-  const rnd = seeded(seed);
-  const [ax, ay] = anchor === 'tr' ? [width - 16, 24] : [16, height - 24];
-  const reach = 0.85 * Math.max(width, height);
+  const [ax, ay] = anchor === 'tr' ? [width, 0] : [0, height];
+  const reach = Math.hypot(width, height);
   const tiles = stackTiles(rnd, {
     width,
     height,
-    minH: 16,
-    maxH: 44,
-    startMax: 14,
+    tile,
+    gap,
+    minH,
+    maxH,
+    startMax: 10,
+    firstX: 4,
     place: (t) => {
-      const radial = 1 - smooth(clamp01((Math.hypot(t.cx - ax, t.cy - ay) - 0.15 * reach) / (0.85 * reach)));
-      const outer = anchor === 'tr' ? Math.min(edgeFade(t.y, 16), edgeFade(width - (t.x + t.w), 12)) : Math.min(edgeFade(height - (t.y + t.h), 16), edgeFade(t.x, 12));
+      const radial = 1 - smooth(clamp01((Math.hypot(t.cx - ax, t.cy - ay) - 0.25 * reach) / (0.7 * reach)));
+      const outer = anchor === 'tr'
+        ? Math.min(edgeFade(t.x, 22), edgeFade(height - (t.y + t.h), 22))
+        : Math.min(edgeFade(width - (t.x + t.w), 22), edgeFade(t.y, 22));
       const fade = Math.min(radial, outer);
-      if (rnd() >= 0.9 || fade < 0.05) return null;
+      if (rnd() >= 0.92 || fade < 0.05) return null;
       const tile = porcelainTile(rnd);
       return { ...t, fill: tile.fill, opacity: tile.opacity * fade };
     },
   });
   return svg('mosaic--corner', width, height, draw(tiles), { align: 'xMinYMin meet', size: true });
+}
+
+// The detached group of the first screen: a wide one from 900 px, a small one with 20 px tiles
+// on the phone (beside the name and positioning lines).
+export function heroGroup({ phone = false } = {}) {
+  return phone
+    ? cornerGroup({ seed: 36, width: 104, height: 104, anchor: 'tr', tile: 20, gap: 5, minH: 12, maxH: 30 })
+    : cornerGroup({ seed: 44, width: 204, height: 140, anchor: 'tr' });   // 204 = six columns of 28 px tiles, the last one at the right edge
 }
 
 // 6. The closing band and its seam with Practical details, for the left side of the window
@@ -185,11 +150,11 @@ export function cornerGroup({ seed = 32, width = 150, height = 110, anchor = 'tr
 // the page margin (fly), below it in the side zone outside the text column plus 48 px (side).
 export const BORDER_Y = 200;
 export const BAND_VARIANTS = {
-  phone: { width: 24, fly: 24, side: 24, height: 800, tile: 16, gap: 4, minH: 12, maxH: 32 },   // under 480 px
-  tablet: { width: 24, fly: 24, side: 24, height: 540, tile: 16, gap: 4, minH: 12, maxH: 32 },  // 480 to 899 px
-  narrow: { width: 40, fly: 40, side: 40, height: 640, tile: 24, gap: 6, minH: 16, maxH: 44 },  // 900 to 1279 px
-  mid: { width: 212, fly: 80, side: 212, height: 640, tile: 36, gap: 6, minH: 24, maxH: 70 },   // 1280 to 1439 px
-  wide: { width: 292, fly: 160, side: 292, height: 640, tile: 36, gap: 6, minH: 24, maxH: 70 }, // 1440 px and up
+  phone: { width: 24, fly: 24, side: 24, height: 580, tile: 16, gap: 4, minH: 12, maxH: 32 },   // under 480 px
+  tablet: { width: 24, fly: 24, side: 24, height: 480, tile: 16, gap: 4, minH: 12, maxH: 32 },  // 480 to 899 px
+  narrow: { width: 40, fly: 40, side: 40, height: 480, tile: 24, gap: 6, minH: 16, maxH: 44 },  // 900 to 1279 px
+  mid: { width: 212, fly: 80, side: 212, height: 480, tile: 36, gap: 6, minH: 24, maxH: 70 },   // 1280 to 1439 px
+  wide: { width: 292, fly: 160, side: 292, height: 480, tile: 36, gap: 6, minH: 24, maxH: 70 }, // 1440 px and up
 };
 const BAND_SEEDS = { phone: 41, tablet: 42, narrow: 43, mid: 44, wide: 45 };
 
@@ -217,7 +182,7 @@ export function bandVariant(name, seed = BAND_SEEDS[name]) {
         if (!fitsFly) return null;
         const lift = (BORDER_Y - t.y) / BORDER_Y; // 0 at the border, 1 at the top of the picture
         const fade = (1 - smooth(clamp01((lift - 0.05) / 0.9))) * towardPage;
-        if (rnd() >= 0.75 * (1 - 0.55 * lift) || fade < 0.05) return null;
+        if (rnd() >= (oneColumn ? 0.85 : 0.75) * (1 - 0.55 * lift) || fade < 0.05) return null;
         const tile = flyTile(rnd);
         return { ...t, fill: tile.fill, opacity: tile.opacity * fade };
       }
@@ -229,7 +194,7 @@ export function bandVariant(name, seed = BAND_SEEDS[name]) {
       }
       if (!fitsSide) return null;
       const fade = (oneColumn ? 1 : edgeFade(v.side - (t.x + t.w), 0.6 * v.side)) * edgeFade(v.height - (t.y + t.h), 70);
-      if (rnd() >= 0.8 * (1 - 0.45 * (t.cx / v.side)) || fade < 0.05) return null;
+      if (rnd() >= (oneColumn ? 0.92 : 0.8 * (1 - 0.45 * (t.cx / v.side))) || fade < 0.05) return null;
       const tile = bandTile(rnd);
       return { ...t, fill: tile.fill, opacity: tile.opacity * fade };
     },
@@ -264,10 +229,8 @@ export function allMosaics() {
     return [`band_${name}`, svg(`mosaic--band-${name}`, v.width, v.height, v.body)];
   }));
   return {
-    heroField: heroField(),
-    heroCornerTopRight: cornerGroup({ seed: 32, anchor: 'tr' }),
-    heroCornerBottomLeft: cornerGroup({ seed: 33, anchor: 'bl' }),
-    mentorField: mentorField(),
+    heroGroup: heroGroup(),
+    heroGroupPhone: heroGroup({ phone: true }),
     ...bands,
   };
 }

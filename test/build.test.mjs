@@ -52,6 +52,9 @@ test('the build writes the page, the styles with the fonts, robots.txt, the font
     for (const name of OUTPUT) assert.ok((await readFile(path.join(dir, name))).length > 0, name);
     const written = await readdir(dir);
     assert.ok(!written.includes('register.js') && !written.includes('CNAME'), 'no form script, no CNAME until the subdomain is chosen');
+    assert.ok(files['index.html'].includes('hero__tiles--wide'), 'the detached tile group by default');
+    const bare = await build({ distDir: dir, quiet: true, heroTiles: 'none' });
+    assert.ok(!bare.files['index.html'].includes('hero__tiles'), 'heroTiles none: no tiles on the first screen');
     const images = (await readdir(path.join(dir, 'img'))).sort();
     const expected = Object.values(manifest).flatMap((m) => m.widths.flatMap((w) => [`${m.slug}-${w}.jpg`, `${m.slug}-${w}.webp`])).sort();
     assert.deepEqual(images, expected);
@@ -74,7 +77,7 @@ test('a copy of the yaml with published: true and the current TODO (the empty si
     await assert.rejects(build({ distDir, contentFile: yaml, quiet: true }), /Content check failed/);
     // the same file with the addresses set and the draft marks removed: published mode
     const clean = published
-      .replace('site_url: ""', 'site_url: "https://programme.juliakrylova.com"')
+      .replace('site_url: ""', 'site_url: "https://program.juliakrylova.com"')
       .replace(/#\s*draft[^\n]*/g, '');
     await writeFile(yaml, clean);
     const { files } = await build({ distDir, contentFile: yaml, quiet: true });
@@ -82,7 +85,7 @@ test('a copy of the yaml with published: true and the current TODO (the empty si
     assert.ok(!(await readdir(distDir)).includes('robots.txt'));
     assert.ok(!files['index.html'].includes('name="robots"'));
     assert.ok(!files['index.html'].includes('class="tag'));
-    assert.ok(files['index.html'].includes('<link rel="canonical" href="https://programme.juliakrylova.com/">'));
+    assert.ok(files['index.html'].includes('<link rel="canonical" href="https://program.juliakrylova.com/">'));
     assert.equal((files['index.html'].match(/href="https:\/\/calendly\.com\/juliakrylova\/30min\?utm_source=own-your-mosaic/g) || []).length, 4);
   } finally {
     await rm(dir, { recursive: true, force: true });
