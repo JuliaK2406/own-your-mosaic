@@ -47,9 +47,9 @@
 - сиреневая **draft**: этот текст или эту группу собрали мы (в основном из ваших
   слайдов), и она ждёт вашего «да». Сейчас это короткие заголовки карточек «Is this
   you?», блок «The shift we work toward», схема в блоке Promise, полоса цифр в «What's
-  included», строка «8 spots in total» и места в тарифах Plus и Premium, цифры 15
-  и 51% в «Meet your mentor», картинка «too much, too fast, too unclear», две цитаты
-  (заглушки до ваших) и карточки с линией времени в «Practical details». Чтобы снять
+  included», цифры 15 и 51% в «Meet your mentor», картинка «too much, too fast, too
+  unclear», две цитаты (заглушки до ваших) и карточки с линией времени в «Practical
+  details». Чтобы снять
   плашку, Стас убирает пометку `# draft` в файле; чтобы заменить текст, просто
   поправьте его.
 
@@ -71,7 +71,7 @@ draft, сборка нарочно останавливается: недопи�
 Блоки идут в порядке страницы: `hero` (первый экран, с `tagline` под подзаголовком
 и `facts` в карточке), `who` (карточки с заголовком `title` и текстом `text`), `shift`
 (четыре строки «From ... to ...»), `problem` (две фразы на тёмной полосе), `promise`
-(вступление, абзац, схема `diagram`, четыре `outcomes`), `process` (путь метода с
+(абзац, схема `diagram`, четыре `outcomes`), `process` (путь метода с
 неделями `weeks`), `package` (полоса цифр `stats` и восемь пунктов), `pricing` (строка
 `total_spots`, три тарифа, у Core строка `spots` пустая, и строки нет), `proof` (цифры
 `stats`, два абзаца, пять `strengths`, абзац `mentoring` и его картинка `shift_visual`,
@@ -156,6 +156,12 @@ npm run shots -- --set calendly --out "../screenshots 03б - Calendly"
 
 ```bash
 npm run shots -- --set feedback --out "../screenshots 04 - цвет и тексты/after"
+```
+
+Набор `roadmap` (PROMPT 04б: блоки Problem и Promise на 390 и 1440):
+
+```bash
+npm run shots -- --set roadmap --out "../screenshots 04 - цвет и тексты/after-04б"
 ```
 
 То же с живого превью, только первый экран на 390 и 1440 (`live-390-hero.png`,

@@ -52,12 +52,11 @@ shift:
     - { from: "holding an ambition alongside an overloaded life", to: "having a practical roadmap that takes both into account" }
 
 problem:
-  statement: "The ambition is real and it isn't going away."
-  statement_more: "What's missing isn't drive, it's a clear, workable path that actually fits the life you're living, not an idealized version of it."
+  statement: "The ambition is real."
+  statement_more: "What's missing is a playbook for deciding what to focus on and how to move forward."
 
 promise:
   heading: "Your Next Chapter Roadmap"
-  intro: "The ambition is real. What's missing is a playbook for deciding what to focus on and how to move forward."
   paragraphs:
     - "By the end of the program, you'll have a personalized roadmap for pursuing your next professional ambition, one that takes your career or business, priorities, energy, and personal life into account. You'll also have tools to help you put the plan into action."
   diagram:   # draft: labels taken word for word from the paragraph above
@@ -110,7 +109,7 @@ package:
 pricing:
   heading: "Founding Members"
   subheading: "Pilot Cohort, January 2027"
-  total_spots: "8 spots in total"   # draft: our proposal, Julia asked us to suggest
+  total_spots: "8 spots in total"
   vat_label: "+ VAT"
   tiers:
     - name: "Core"
@@ -119,11 +118,11 @@ pricing:
       text: "Your complete eight-week Mosaic of Life group program, including the diagnostic, weekly sessions, practical tools, interactive masterminds and community support."
     - name: "Plus"
       price: "€1,095"
-      spots: "Up to 5 spots"   # draft
+      spots: "Up to 5 spots"
       text: "Everything in Core, plus one private mentoring session to explore your personal challenges and decisions in greater depth."
     - name: "Premium"
       price: "€1,895"
-      spots: "Only 2 spots"   # draft
+      spots: "Only 2 spots"
       text: "Everything in Core, plus four private mentoring sessions: two during the program and two during the following two months, helping you implement your roadmap and adjust your strategy."
   note: "Included in all three tiers: access to the tools library and all session recordings throughout the program and for one additional month after it ends."
 

@@ -554,7 +554,7 @@ a:hover {
 /* Problem: a navy band, a gold rule, the statement large in Lora, the rest in champagne italic */
 
 .problem {
-  padding-block: clamp(3rem, 6vw, 5.5rem);
+  padding-block: clamp(2.5rem, 5vw, 4.5rem);
 }
 
 .problem__inner {
@@ -597,13 +597,6 @@ a:hover {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
   row-gap: var(--s-5);
-}
-
-.promise__intro {
-  margin: 0 0 var(--s-4);
-  font-family: var(--font-heading);
-  font-size: var(--subtitle-size);
-  line-height: 1.35;
 }
 
 .promise__copy p:last-child {
@@ -759,7 +752,7 @@ a:hover {
   .promise__grid {
     grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
     column-gap: clamp(2.5rem, 5vw, 5rem);
-    align-items: stretch;
+    align-items: start;
   }
   .diagram {
     justify-content: space-between;

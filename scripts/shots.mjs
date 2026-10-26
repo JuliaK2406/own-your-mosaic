@@ -14,6 +14,7 @@
 //   feedback (--set feedback, PROMPT 04): full pages and every block at 390 and 1440, the first
 //                                  screen in both tile variants (hero-detached from dist/,
 //                                  hero-none from a temporary build); 360, 834 and 1280 checked
+//   roadmap (--set roadmap, PROMPT 04b): the Problem and Promise blocks at 390 and 1440
 // Checks on the way: no horizontal overflow (scrollWidth equals clientWidth), Lora and Inter
 // loaded from the site itself, not one request to another origin, every photo loaded
 // (naturalWidth above zero), on the phone the title and subtitle are on the first screen and
@@ -50,6 +51,7 @@ export const SETS = {
   design2: { 360: [], 390: ['full', 'hero', 'promise', 'mentor', 'seam'], 834: [], 1280: ['mentor'], 1440: ['full', 'hero', 'promise', 'mentor', 'seam'] },
   calendly: { 360: ['full'], 390: ['hero', 'pricing', 'closing'], 834: [], 900: ['topbar'], 1280: ['topbar'], 1440: ['hero', 'pricing', 'closing'] },
   feedback: { 360: [], 390: ['full', 'hero-detached', 'who', 'shift', 'problem', 'promise', 'method', 'package', 'pricing', 'mentor', 'bring', 'quotes', 'logistics', 'closing'], 834: [], 1280: [], 1440: ['full', 'hero-detached', 'who', 'shift', 'problem', 'promise', 'method', 'package', 'pricing', 'mentor', 'bring', 'quotes', 'logistics', 'closing'] },
+  roadmap: { 360: [], 390: ['problem', 'promise'], 834: [], 1280: [], 1440: ['problem', 'promise'] },
   live: { 390: ['hero'], 1440: ['hero'] },
 };
 const BLOCKS = { topbar: '.topbar', who: '.who', shift: '.shift', problem: '.problem', promise: '.promise', method: '.process', process: '.process', package: '.package', pricing: '.pricing', mentor: '.proof', bring: '.bring', quotes: '.quotes', logistics: '.logistics', closing: '.closing' };

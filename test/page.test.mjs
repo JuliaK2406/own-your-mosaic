@@ -86,12 +86,12 @@ test('registerUrl keeps the parameters an address already carries and adds the t
   assert.equal([...url.searchParams.keys()].length, 6);
 });
 
-test('draft tags: one per group, ten in all; none at the name, Meet your mentor or Practical details (approved)', () => {
-  assert.equal(count(html, /tag--draft/g), 10);
+test('draft tags: one per group, nine in all; none at the name, Meet your mentor, Practical details or the spots (approved)', () => {
+  assert.equal(count(html, /tag--draft/g), 9);
   assert.ok(html.includes(`${esc(content.who.heading)} <span class="tag tag--draft">draft</span></h2>`), 'who: at the block heading');
   assert.ok(html.includes(`${esc(content.shift.heading)} <span class="tag tag--draft">draft</span></h2>`));
   assert.ok(html.includes(`${esc(content.promise.diagram.inputs_label)} <span class="tag tag--draft">draft</span></p>`));
-  assert.ok(html.includes(`${esc(content.pricing.total_spots)} <span class="tag tag--draft">draft</span></p>`));
+  assert.ok(html.includes(`<p class="pricing__total caps">${esc(content.pricing.total_spots)}</p>`), 'the total spots line without a tag');
   assert.ok(html.includes(`${esc(content.proof.quotes_heading)} <span class="tag tag--draft">draft</span></h2>`));
   assert.ok(html.includes(`${esc(content.logistics.heading)} <span class="tag tag--draft">draft</span></h2>`), 'logistics: the cards tag at the heading');
   assert.equal(count(html, /<p class="draft-line"><span class="tag tag--draft">draft<\/span><\/p>/g), 4, 'package stats, proof stats, the shift picture, the timeline');
@@ -182,11 +182,11 @@ test('Problem: a navy band with the rule, the statement and the second sentence'
   assert.ok(problem.includes(`<p class="problem__more">${esc(content.problem.statement_more)}</p>`));
 });
 
-test('Promise: the intro as the thesis, the paragraph as a lead, the diagram with four inputs, the result behind the sign and four numbered outcomes', () => {
+test('Promise: the heading straight to the paragraph as a lead, the diagram with four inputs, the result behind the sign and four numbered outcomes', () => {
   const promise = section('promise');
   const d = content.promise.diagram;
-  assert.ok(promise.includes(`<p class="promise__intro">${esc(content.promise.intro)}</p>`));
-  assert.ok(promise.includes(`<p class="lead">${esc(content.promise.paragraphs[0])}</p>`));
+  assert.ok(!promise.includes('promise__intro'), 'no intro line since 26 October');
+  assert.ok(promise.includes(`<h2 id="promise-title">${esc(content.promise.heading)}</h2>\n      <p class="lead">${esc(content.promise.paragraphs[0])}</p>`));
   const items = promise.match(/<li class="diagram__input">[^]*?<\/li>/g) || [];
   assert.equal(items.length, 4);
   items.forEach((item, i) => {

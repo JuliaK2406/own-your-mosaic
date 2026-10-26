@@ -196,9 +196,9 @@ function problem(ctx) {
 </section>`;
 }
 
-// Promise: the heading, the intro as the thesis of the block (Lora), the paragraph as a lead;
-// on the right the diagram card: four inputs with tiles, a gold stem to the result behind the
-// brand sign, then the four outcomes with numbers in aubergine circles.
+// Promise: the heading and the paragraph as a lead; on the right the diagram card: four
+// inputs with tiles, a gold stem to the result behind the brand sign, then the four outcomes
+// with numbers in aubergine circles.
 function promise(ctx) {
   const p = ctx.content.promise;
   const d = p.diagram;
@@ -208,7 +208,6 @@ function promise(ctx) {
   <div class="container promise__grid">
     <div class="promise__copy">
       <h2 id="promise-title">${esc(p.heading)}</h2>
-      <p class="promise__intro">${esc(p.intro)}</p>
       ${paragraphs(p.paragraphs, esc, 'lead')}
     </div>
     <div class="diagram">

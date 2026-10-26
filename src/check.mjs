@@ -65,7 +65,6 @@ const SHAPE = {
   problem: { statement: 'string', statement_more: 'string' },
   promise: {
     heading: 'string',
-    intro: 'string',
     paragraphs: 'list',
     diagram: { inputs_label: 'string', inputs: 'list:4', result: 'string' },
     outcomes_intro: 'string',
