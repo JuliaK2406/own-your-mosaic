@@ -97,10 +97,14 @@ const SHAPE = {
     strengths: 'list:5',
     mentoring: 'string',
     shift_visual: { from: 'list:3', to: 'string' },
+    mentoring_photo: 'file',
+    mentoring_photo_alt: 'string',
     photo: 'file',
     photo_alt: 'text',
     quotes_heading: 'string',
     quotes: [{ quote: 'string', name: 'string', role: 'string', company: 'string' }],
+    group_photo: 'file',
+    group_photo_alt: 'string',
   },
   logistics: {
     heading: 'string',
@@ -117,7 +121,7 @@ const EMPTY_ALLOWED = new Set(['meta.site_url', 'hero.photo_alt', 'proof.photo_a
 const EMPTY_ALLOWED_PATTERNS = [/^pricing\.tiers\[\d+\]\.spots$/];
 const emptyAllowed = (at) => EMPTY_ALLOWED.has(at) || EMPTY_ALLOWED_PATTERNS.some((pattern) => pattern.test(at));
 // Fields that name a photo in content/photos.
-const PHOTO_FIELDS = ['hero.photo', 'proof.photo'];
+const PHOTO_FIELDS = ['hero.photo', 'proof.photo', 'proof.mentoring_photo', 'proof.group_photo'];
 
 const isString = (value) => typeof value === 'string';
 const isFilled = (value) => isString(value) && value.trim() !== '';

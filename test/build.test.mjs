@@ -58,8 +58,10 @@ test('the build writes the page, the styles with the fonts, robots.txt, the font
     const images = (await readdir(path.join(dir, 'img'))).sort();
     const expected = Object.values(manifest).flatMap((m) => m.widths.flatMap((w) => [`${m.slug}-${w}.jpg`, `${m.slug}-${w}.webp`])).sort();
     assert.deepEqual(images, expected);
-    assert.equal(images.length, 12, 'two photos, three widths, webp and jpg');
-    assert.deepEqual(Object.values(manifest).map((m) => `${m.width}x${m.height}`), ['3293x4116', '3859x4824'], 'the first-screen photo whole, the portrait cropped as in src/images.mjs');
+    assert.equal(images.length, 26, 'four photos: three widths each, four for the group band, webp and jpg');
+    assert.deepEqual(Object.values(manifest).map((m) => `${m.width}x${m.height}`), ['3293x4116', '3859x4824', '6240x3060', '5720x2383'], 'the first-screen photo whole, the three others cropped as in src/images.mjs');
+    assert.deepEqual(manifest['julia-krylova-group.jpg'].widths, [640, 1024, 1600, 2400], 'the band gets a 2400 px version');
+    assert.deepEqual(manifest['julia-krylova-mentoring.jpg'].widths, [640, 1024, 1600]);
   } finally {
     await rm(dir, { recursive: true, force: true });
   }

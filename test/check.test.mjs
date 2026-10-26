@@ -92,10 +92,22 @@ test('an empty text is reported with its path; site_url, photo_alt and a tier\'s
   assert.ok(hasError(errorsOf(i), 'hero.tagline'));
 });
 
-test('photos named in the yaml must exist in content/photos', () => {
+test('photos named in the yaml must exist in content/photos; the two group photos and their descriptions are required', () => {
   const c = copy();
   c.proof.photo = 'missing.jpg';
   assert.ok(hasError(checkContent(c, { photos }).errors, 'proof.photo'));
+  for (const field of ['mentoring_photo', 'group_photo']) {
+    const e = copy();
+    e.proof[field] = 'nobody.jpg';
+    assert.ok(hasError(checkContent(e, { photos }).errors, `proof.${field}`), `${field} must exist`);
+    const f = copy();
+    f.proof[`${field}_alt`] = '';
+    assert.ok(hasError(errorsOf(f), `proof.${field}_alt`), `${field}_alt may not be empty`);
+    const g = copy();
+    delete g.proof[field];
+    assert.ok(hasError(errorsOf(g), `proof.${field}`), `${field} is required`);
+  }
+  assert.ok(photos.has(content.proof.mentoring_photo) && photos.has(content.proof.group_photo));
   assert.deepEqual(checkContent(c, {}).errors, [], 'without the photo list the names are not checked');
   const d = copy();
   d.hero.photo = 'photos/julia.jpg';

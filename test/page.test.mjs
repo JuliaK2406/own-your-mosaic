@@ -12,6 +12,8 @@ const drafts = new Set(findDrafts(raw, content).drafts.map((draft) => draft.path
 const manifest = {
   [content.hero.photo]: { slug: 'hero', widths: [640, 1024, 1600], width: 3293, height: 4116 },
   [content.proof.photo]: { slug: 'portrait', widths: [640, 1024, 1600], width: 3859, height: 4824 },
+  [content.proof.mentoring_photo]: { slug: 'mentoring', widths: [640, 1024, 1600], width: 6240, height: 3060 },
+  [content.proof.group_photo]: { slug: 'group', widths: [640, 1024, 1600, 2400], width: 5720, height: 2383 },
 };
 const render = (c = content, options = {}) => renderPage(c, { manifest, drafts, ...options });
 const html = render();
@@ -20,7 +22,7 @@ const count = (text, pattern) => (text.match(pattern) || []).length;
 const section = (name) => html.match(new RegExp(`<section class="[^"]*\\b${name}\\b[^"]*"[^]*?</section>`))[0];
 
 // Every text of the yaml except meta, links, the button address and the photo file names.
-const SKIP = /^(meta\.|links\.|register\.url$|hero\.photo$|proof\.photo$)/;
+const SKIP = /^(meta\.|links\.|register\.url$|hero\.photo$|proof\.(photo|mentoring_photo|group_photo)$)/;
 
 test('every text from the yaml is on the page word for word (the new blocks included)', () => {
   const missing = [];
@@ -124,15 +126,28 @@ test('no Google fonts, no script at all, no absolute paths: everything comes fro
   assert.ok(html.includes('href="styles.css"') && html.includes('href="favicon.svg"'));
 });
 
-test('two photos: every <img> has alt, width and height; the first-screen photo loads first, the portrait lazily', () => {
+test('four photos: every <img> has alt, width and height; the first-screen photo loads first, the three others lazily, with their alts word for word', () => {
   const imgs = html.match(/<img\b[^>]*>/g) || [];
-  assert.equal(imgs.length, 2);
+  assert.equal(imgs.length, 4);
   for (const img of imgs) {
     for (const attr of ['alt', 'width', 'height']) assert.ok(new RegExp(` ${attr}="[^"]*"`).test(img), `${attr} in ${img}`);
   }
   assert.ok(imgs[0].includes('fetchpriority="high"') && !imgs[0].includes('loading="lazy"'));
-  assert.ok(imgs[1].includes('loading="lazy"'));
+  for (const img of imgs.slice(1)) assert.ok(img.includes('loading="lazy"') && img.includes('decoding="async"'));
   assert.ok(imgs[0].includes(`alt="${esc(content.hero.photo_alt)}"`) && imgs[1].includes(`alt="${esc(content.proof.photo_alt)}"`));
+  assert.ok(imgs[2].includes(`alt="${esc(content.proof.mentoring_photo_alt)}"`) && imgs[2].includes('width="1600" height="785"'), 'the session photo, 6240 x 3060 crop');
+  assert.ok(imgs[3].includes(`alt="${esc(content.proof.group_photo_alt)}"`) && imgs[3].includes('width="2400" height="1000"'), 'the group band, 5720 x 2383 crop at 2400');
+  assert.ok(imgs[3].includes('sizes="100vw"') && html.includes('img/group-2400.webp 2400w'));
+});
+
+test('the session photo closes What I bring under both columns; the group band stands between the quotes and Practical details without a heading or caption', () => {
+  const bring = section('bring');
+  assert.ok(bring.indexOf('class="shift-visual"') < bring.indexOf('<div class="container bring__photo">'), 'the photo comes after the picture of the paragraph');
+  assert.ok(bring.includes(`alt="${esc(content.proof.mentoring_photo_alt)}"`));
+  const band = html.match(/<div class="group-photo">[^]*?<\/div>/)[0];
+  assert.ok(html.indexOf('class="section quotes"') < html.indexOf('<div class="group-photo">') && html.indexOf('<div class="group-photo">') < html.indexOf('class="section section--deep logistics"'));
+  assert.ok(!/<h[1-6]|<figcaption|<p\b/.test(band), 'no words beside the photo');
+  assert.equal(band.replace(/<[^>]+>/g, '').trim(), '', 'the band carries no text');
 });
 
 test('first screen: tagline under the subtitle, the facts card with three cells, the tile group in the corner in detached mode and none in none mode', () => {

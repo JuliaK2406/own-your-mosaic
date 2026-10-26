@@ -330,7 +330,7 @@ ${stats}
 // What I bring: an aubergine panel with the five strengths and icons on the left; on the right
 // the mentoring paragraph and, under it, its picture: three struck-through pills, a gold arrow
 // and a navy plaque with the result. The picture repeats the words of the paragraph, so it is
-// hidden from screen readers.
+// hidden from screen readers. Under both columns, the photo of Julia leading a session.
 function bring(ctx) {
   const p = ctx.content.proof;
   const strengths = p.strengths.map((text, i) => `        <li>${circle(`strength-${i}`, 'circle--outline')}<span>${esc(text)}</span></li>`).join('\n');
@@ -355,7 +355,19 @@ ${strengths}
       </div>
     </div>
   </div>
+  <div class="container bring__photo">
+    ${picture(ctx, p.mentoring_photo, { alt: p.mentoring_photo_alt, sizes: '(min-width: 1200px) 1040px, (min-width: 900px) calc(100vw - 80px), calc(100vw - 48px)' })}
+  </div>
 </section>`;
+}
+
+// The group photo: a band across the whole window between the quotes and Practical details,
+// no heading, no caption, no rounded corners.
+function group(ctx) {
+  const p = ctx.content.proof;
+  return `<div class="group-photo">
+  ${picture(ctx, p.group_photo, { alt: p.group_photo_alt, sizes: '100vw' })}
+</div>`;
 }
 
 // In their own words: two quotes on cards (placeholders until Julia sends her own).
@@ -453,6 +465,7 @@ ${pricing(ctx)}
 ${proof(ctx)}
 ${bring(ctx)}
 ${quotes(ctx)}
+${group(ctx)}
 ${logistics(ctx)}
 ${closing(ctx)}
 </main>

@@ -65,7 +65,7 @@ export async function build(options = {}) {
   const manifest = await buildImages({
     photosDir: PHOTOS_DIR,
     distDir,
-    files: [content.hero.photo, content.proof.photo],
+    files: [content.hero.photo, content.proof.photo, content.proof.mentoring_photo, content.proof.group_photo],
     force: Boolean(options.forceImages),
     log,
   });

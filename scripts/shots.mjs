@@ -15,6 +15,9 @@
 //                                  screen in both tile variants (hero-detached from dist/,
 //                                  hero-none from a temporary build); 360, 834 and 1280 checked
 //   roadmap (--set roadmap, PROMPT 04b): the Problem and Promise blocks at 390 and 1440
+//   group (--set group, PROMPT 04c): What I bring with its photo at 390 and 1440, the band with
+//                                  the group photo (end of the quotes to the start of Practical
+//                                  details) at 390, 1440 and 1920, 360 and 1440 whole
 // Checks on the way: no horizontal overflow (scrollWidth equals clientWidth), Lora and Inter
 // loaded from the site itself, not one request to another origin, every photo loaded
 // (naturalWidth above zero), on the phone the title and subtitle are on the first screen and
@@ -43,7 +46,8 @@ export const VIEWPORTS = {
   834: { width: 834, height: 1194, deviceScaleFactor: 2, isMobile: true, hasTouch: true },
   900: { width: 900, height: 700, deviceScaleFactor: 1, isMobile: false, hasTouch: false },
   1280: { width: 1280, height: 800, deviceScaleFactor: 1, isMobile: false, hasTouch: false },
-  1440: { width: 1440, height: 900, deviceScaleFactor: 1, isMobile: false, hasTouch: false },
+  1440: { width: 1440, height: 900, deviceScaleFactor: 1, isMobile: false, hasTouch: false, weigh: true },
+  1920: { width: 1920, height: 1080, deviceScaleFactor: 1, isMobile: false, hasTouch: false },
 };
 export const SETS = {
   skeleton: { 360: ['full'], 390: ['full', 'hero', 'process', 'pricing'], 834: ['full'], 1440: ['full', 'hero', 'process', 'pricing'] },
@@ -52,7 +56,8 @@ export const SETS = {
   calendly: { 360: ['full'], 390: ['hero', 'pricing', 'closing'], 834: [], 900: ['topbar'], 1280: ['topbar'], 1440: ['hero', 'pricing', 'closing'] },
   feedback: { 360: [], 390: ['full', 'hero-detached', 'who', 'shift', 'problem', 'promise', 'method', 'package', 'pricing', 'mentor', 'bring', 'quotes', 'logistics', 'closing'], 834: [], 1280: [], 1440: ['full', 'hero-detached', 'who', 'shift', 'problem', 'promise', 'method', 'package', 'pricing', 'mentor', 'bring', 'quotes', 'logistics', 'closing'] },
   roadmap: { 360: [], 390: ['problem', 'promise'], 834: [], 1280: [], 1440: ['problem', 'promise'] },
-  live: { 390: ['hero'], 1440: ['hero'] },
+  group: { 360: ['full'], 390: ['bring', 'group'], 834: [], 1280: [], 1440: ['full', 'bring', 'group'], 1920: ['group'] },
+  live: { 390: ['hero'], 1440: ['hero', 'group'] },
 };
 const BLOCKS = { topbar: '.topbar', who: '.who', shift: '.shift', problem: '.problem', promise: '.promise', method: '.process', process: '.process', package: '.package', pricing: '.pricing', mentor: '.proof', bring: '.bring', quotes: '.quotes', logistics: '.logistics', closing: '.closing' };
 
@@ -94,7 +99,7 @@ function facts(page) {
     const intersects = (a, b) => a.left < b.right && b.left < a.right && a.top < b.bottom && b.top < a.bottom;
     // no tile of any mosaic may sit on a text box (the tiles of the Promise diagram carry
     // their own labels and are html, not svg, so they are not tiles here)
-    const textBoxes = boxes('main p, main h1, main h2, main h3, main li, main dt, main dd, main figcaption, main blockquote, main .btn, main .tag').filter((b) => b.width > 0 && b.height > 0);
+    const textBoxes = boxes('main p, main h1, main h2, main h3, main li, main dt, main dd, main figcaption, main blockquote, main .btn, main .tag, main img').filter((b) => b.width > 0 && b.height > 0);
     const tileBoxes = [];
     for (const svgNode of document.querySelectorAll('svg.mosaic')) {
       const box = svgNode.getBoundingClientRect();
@@ -157,6 +162,7 @@ function facts(page) {
         return Math.round(Math.min(...boxesOfTiles.map(gap)));
       })(),
       closingTop: (() => { const node = document.querySelector('.closing'); return node ? Math.round(node.getBoundingClientRect().top + window.scrollY) : null; })(),
+      groupBand: (() => { const node = document.querySelector('.group-photo'); if (!node) return null; const b = node.getBoundingClientRect(); return { top: Math.round(b.top + window.scrollY), bottom: Math.round(b.bottom + window.scrollY), height: Math.round(b.height) }; })(),
       // the band drawings hang 200 px above the band; they must never reach below its bottom edge
       bandOverflow: (() => {
         const band = document.querySelector('.closing');
@@ -234,6 +240,7 @@ export async function takeShots({ outDir = DEFAULT_OUT_DIR, liveUrl = '', set = 
       summary.push(`${prefix}: ${f.buttons} buttons, ${f.todoTags} TODO tags, ${f.draftTags} draft tags, ${f.images.length} photos, ${f.mosaics} mosaics with ${f.tiles} visible tiles (${f.tilesOverText} on text${f.heroTilesToPhoto !== null ? `, first-screen tiles ${f.heroTilesToPhoto} px from the photo` : ''}), fonts ${f.lora && f.inter ? 'from the site' : 'MISSING'}, width ${f.scrollWidth}/${f.clientWidth}${f.button ? `, hero button bottom at ${f.button.bottom} px` : ''}, h1 on ${f.h1Lines} line(s)`);
       summary.push(`${prefix}: font sizes px: ${Object.entries(f.fonts).map(([k, v]) => `${k} ${v}`).join(', ')}`);
       summary.push(`${prefix}: buttons: ${f.buttonLinks.map((link) => `${link.height} px ${link.target || 'same tab'} ${link.rel || ''} ${link.href}`).join(' | ')}${f.topbar ? `; top bar button ${f.topbar.gap} px from the sign, ${f.topbar.height} px high` : ''}`);
+      if (f.groupBand) summary.push(`${prefix}: the group band is ${f.groupBand.height} px high`);
       if (f.mentor) summary.push(`${prefix}: Meet your mentor: photos end at ${f.mentor.photosBottom}, text ends at ${f.mentor.textBottom}, difference ${f.mentor.textBottom - f.mentor.photosBottom} px, photo column position ${f.mentor.sticky}`);
       if (vp.weigh || liveUrl) {
         const loaded = (await Promise.all(bodies)).filter(Boolean);
@@ -249,6 +256,7 @@ export async function takeShots({ outDir = DEFAULT_OUT_DIR, liveUrl = '', set = 
         if (kind === 'full') await page.screenshot({ path: file, fullPage: true });
         else if (kind === 'hero' || kind === 'hero-detached') await page.screenshot({ path: file });
         else if (kind === 'seam') await page.screenshot({ path: file, fullPage: true, clip: { x: 0, y: Math.max(0, f.closingTop - 260), width: vp.width, height: 560 } });
+        else if (kind === 'group') await page.screenshot({ path: file, fullPage: true, clip: { x: 0, y: Math.max(0, f.groupBand.top - 200), width: vp.width, height: f.groupBand.height + 400 } });
         else await page.locator(BLOCKS[kind]).screenshot({ path: file });
         console.log(path.basename(file));
       }
