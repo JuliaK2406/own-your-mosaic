@@ -24,7 +24,7 @@ export const CROPS = {
   'julia-krylova-on-stage.jpg': { left: 1000, top: 0, width: 1872, height: 2340 },
   // the session photo (6240 x 4160): everything above the lower part of the screen goes, so no
   // word and no picture of the other program's slide is ever served; air stays above Julia
-  'julia-krylova-mentoring.jpg': { left: 0, top: 1100, width: 6240, height: 3060 },
+  'julia-krylova-session.jpg': { left: 0, top: 1100, width: 6240, height: 3060 },
   // the group with flowers (5720 x 3522): a wide band from the tree to the sofa backs
   'julia-krylova-group.jpg': { left: 0, top: 940, width: 5720, height: 2383 },
 };

@@ -61,7 +61,7 @@ test('the build writes the page, the styles with the fonts, robots.txt, the font
     assert.equal(images.length, 26, 'four photos: three widths each, four for the group band, webp and jpg');
     assert.deepEqual(Object.values(manifest).map((m) => `${m.width}x${m.height}`), ['1872x2340', '3859x4824', '6240x3060', '5720x2383'], 'all four cropped as in src/images.mjs');
     assert.deepEqual(manifest['julia-krylova-group.jpg'].widths, [640, 1024, 1600, 2400], 'the band gets a 2400 px version');
-    assert.deepEqual(manifest['julia-krylova-mentoring.jpg'].widths, [640, 1024, 1600]);
+    assert.deepEqual(manifest['julia-krylova-session.jpg'].widths, [640, 1024, 1600]);
   } finally {
     await rm(dir, { recursive: true, force: true });
   }
