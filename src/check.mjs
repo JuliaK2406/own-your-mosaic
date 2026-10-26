@@ -52,51 +52,71 @@ const SHAPE = {
   hero: {
     title: 'string',
     subtitle: 'string',
+    tagline: 'string',
     name: 'string',
     positioning: 'string',
     paragraphs: 'list',
-    facts: 'list',
+    facts: 'list:3',
     photo: 'file',
     photo_alt: 'text',
   },
-  who: { heading: 'string', items: 'list:4' },
-  problem: { statement: 'string' },
+  who: { heading: 'string', items: [{ title: 'string', text: 'string' }, 4] },
+  shift: { heading: 'string', from_label: 'string', to_label: 'string', items: [{ from: 'string', to: 'string' }, 4] },
+  problem: { statement: 'string', statement_more: 'string' },
   promise: {
     heading: 'string',
+    intro: 'string',
     paragraphs: 'list',
-    diagram: { inputs_label: 'string', inputs: 'list:4', result: 'string', outcomes_label: 'string', outcomes: 'list:3' },
+    diagram: { inputs_label: 'string', inputs: 'list:4', result: 'string' },
+    outcomes_intro: 'string',
+    outcomes: 'list:4',
   },
   process: {
     heading: 'string',
     intro: 'string',
     levels_intro: 'string',
     start_label: 'string',
+    start_weeks: 'string',
     finish_label: 'string',
-    levels: [{ name: 'string', text: 'string' }, 3],
+    finish_weeks: 'string',
+    levels: [{ name: 'string', weeks: 'string', text: 'string' }, 3],
   },
-  package: { heading: 'string', items: 'list:8' },
+  package: { heading: 'string', stats: [{ value: 'string', label: 'string' }, 4], items: 'list:8' },
   pricing: {
     heading: 'string',
     subheading: 'string',
+    total_spots: 'string',
     vat_label: 'string',
-    tiers: [{ name: 'string', price: 'string', spots: 'string', text: 'string' }, 3],
+    tiers: [{ name: 'string', price: 'string', spots: 'text', text: 'string' }, 3],
     note: 'string',
   },
   proof: {
     heading: 'string',
+    stats: [{ value: 'string', label: 'string' }, 2],
     paragraphs: 'list',
+    strengths_intro: 'string',
+    strengths: 'list:5',
+    mentoring: 'string',
+    shift_visual: { from: 'list:3', to: 'string' },
     photo: 'file',
     photo_alt: 'text',
     quotes_heading: 'string',
     quotes: [{ quote: 'string', name: 'string', role: 'string', company: 'string' }],
   },
-  logistics: { heading: 'string', items: [{ label: 'string', value: 'string' }, 7] },
+  logistics: {
+    heading: 'string',
+    cards: [{ value: 'string', label: 'string' }, 3],
+    timeline: [{ when: 'string', title: 'string', text: 'string' }, 4],
+  },
   closing: { text: 'string' },
   footer: { legal_line: 'string', main_site_label: 'string' },
 };
 
-// The only values that may be empty.
+// The only values that may be empty: the final address until the subdomain is chosen, the photo
+// descriptions, and the spots line of a tier (Core has none).
 const EMPTY_ALLOWED = new Set(['meta.site_url', 'hero.photo_alt', 'proof.photo_alt']);
+const EMPTY_ALLOWED_PATTERNS = [/^pricing\.tiers\[\d+\]\.spots$/];
+const emptyAllowed = (at) => EMPTY_ALLOWED.has(at) || EMPTY_ALLOWED_PATTERNS.some((pattern) => pattern.test(at));
 // Fields that name a photo in content/photos.
 const PHOTO_FIELDS = ['hero.photo', 'proof.photo'];
 
@@ -239,7 +259,7 @@ function checkGroupList(value, shape, count, at, fail) {
 
 function checkNoEmptyValues(value, at, fail) {
   if (isString(value)) {
-    if (value.trim() === '' && !EMPTY_ALLOWED.has(at)) fail(at, 'is empty');
+    if (value.trim() === '' && !emptyAllowed(at)) fail(at, 'is empty');
     return;
   }
   if (Array.isArray(value)) {

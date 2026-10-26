@@ -4,9 +4,9 @@
 
 meta:
   published: false   # false = hidden from search engines, TODO and draft marks are visible. Set true on launch day
-  site_url: ""       # the final address, e.g. https://programme.juliakrylova.com. Empty until the subdomain is chosen
+  site_url: ""       # the final address, e.g. https://program.juliakrylova.com. Empty until the subdomain is chosen
   title: "Own Your Mosaic of Life | Julia Krylova"
-  description: "An eight-week online group programme for women leaders who are ready for their next professional ambition but aren't sure how to make it happen."
+  description: "An eight-week online group program for women leaders who are ready for their next professional ambition but aren't sure how to make it happen."
 
 links:
   main_site: https://www.juliakrylova.com
@@ -18,58 +18,85 @@ register:
 hero:
   title: "Own Your Mosaic of Life"
   subtitle: "Build a Roadmap for Your Next Ambition"
-  name: "Julia Krylova"   # draft
+  tagline: "Clarify your next professional ambition, build a strategy that fits your life, and make your value more visible."
+  name: "Julia Krylova"
   positioning: "Strategic Mentor for Ambitious Women Leaders at Their Next Big Chapter"
   paragraphs:
     - "You've built a career and achieved a lot. But right now, you may feel stretched in too many directions, uncertain about your next step, or unsure how to make your value more visible."
-    - "In this programme, you'll take a fresh look at the bigger picture, identify what may be holding you back, and build a practical roadmap for moving forward."
-    - "An eight-week online group programme for women leaders who are ready for their next professional ambition but aren't sure how to make it happen."
+    - "In this program, you'll take a fresh look at the bigger picture, identify what may be holding you back, and build a practical roadmap for moving forward."
+    - "An eight-week online group program for women leaders who are ready for their next professional ambition but aren't sure how to make it happen."
   facts: ["January 2027 pilot cohort", "Online", "Maximum 8 participants"]
   photo: julia-krylova-headshot.jpg
   photo_alt: "Julia Krylova smiling, in a white jacket, her chin resting on her hand"
 
 who:
   heading: "Is this you?"
+  items:   # draft: the short titles come from Julia's slides
+    - title: "Stretched too thin"
+      text: "You're doing well, maybe better than ever on paper, but you're stretched across too many directions to think straight about what's actually next."
+    - title: "Ready for bigger"
+      text: "You're ready for a bigger role, a bigger bet, a bigger version of what you're already doing. You just haven't built the bridge to get there yet."
+    - title: "The best-kept secret"
+      text: "People respect what you do, but somehow your real value still isn't fully recognized, and you're tired of being the best-kept secret in the room."
+    - title: "A plan for everyone but you"
+      text: "You can build a plan for anyone: your team, your clients, your family. Building one for yourself, without it costing you everything else, is the part you haven't cracked."
+
+shift:
+  heading: "The shift we work toward"   # draft
+  from_label: "From"
+  to_label: "to"
   items:
-    - "You're doing well, maybe better than ever on paper, but you're stretched across too many directions to think straight about what's actually next."
-    - "You're ready for a bigger role, a bigger bet, a bigger version of what you're already doing. You just haven't built the bridge to get there yet."
-    - "People respect what you do, but somehow your real value still isn't fully recognised, and you're tired of being the best-kept secret in the room."
-    - "You can build a plan for anyone: your team, your clients, your family. Building one for yourself, without it costing you everything else, is the part you haven't cracked."
+    - { from: "feeling pulled in too many directions", to: "knowing what deserves your focus" }
+    - { from: "wondering what your next step should be", to: "having a strategy that fits your circumstances" }
+    - { from: "being valued for what you deliver", to: "communicating the wider value you bring" }
+    - { from: "holding an ambition alongside an overloaded life", to: "having a practical roadmap that takes both into account" }
 
 problem:
-  statement: "The ambition is real and it isn't going away. What's missing isn't drive, it's a clear, workable path that actually fits the life you're living, not an idealised version of it."
+  statement: "The ambition is real and it isn't going away."
+  statement_more: "What's missing isn't drive, it's a clear, workable path that actually fits the life you're living, not an idealized version of it."
 
 promise:
   heading: "Your Next Chapter Roadmap"
+  intro: "The ambition is real. What's missing is a playbook for deciding what to focus on and how to move forward."
   paragraphs:
-    - "By the end of the programme, you'll have a practical, personalised roadmap for moving towards your professional ambition, one that takes your career, priorities, energy and personal life into account."
-    - "You'll have greater clarity about what you want, a strategy that fits your circumstances, and practical steps to help you move forward: something you can execute, not just admire."
-  diagram:   # draft: labels taken word for word from the two paragraphs above
+    - "By the end of the program, you'll have a personalized roadmap for pursuing your next professional ambition, one that takes your career or business, priorities, energy, and personal life into account. You'll also have tools to help you put the plan into action."
+  diagram:   # draft: labels taken word for word from the paragraph above
     inputs_label: "Takes into account"
-    inputs: ["Career", "Priorities", "Energy", "Personal life"]
+    inputs: ["Career or business", "Priorities", "Energy", "Personal life"]
     result: "Your Next Chapter Roadmap"
-    outcomes_label: "You'll have"
-    outcomes:
-      - "Greater clarity about what you want"
-      - "A strategy that fits your circumstances"
-      - "Practical steps to help you move forward"
+  outcomes_intro: "The program will enable you to:"
+  outcomes:
+    - "Clarify professional ambition you want to focus on, whether that's a bigger role, a new direction or growing your business."
+    - "Decide which opportunities and priorities need your attention now, and which can wait."
+    - "Identify what may need to shift in your workload, routines or support to make room for this ambition."
+    - "Plan your next steps, ready to put into action."
 
 process:
   heading: "The Mosaic of Life Method™"
   intro: "We begin with the Mosaic of Life diagnostic, a helicopter view of where you are today: what's working well, where you feel stretched, and what may be holding you back."
   levels_intro: "Then, over eight weeks, we work through three levels:"
-  start_label: "Mosaic of Life diagnostic"    # infographic label, words from the intro above
-  finish_label: "Your Next Chapter Roadmap"   # infographic label, the promise heading
+  start_label: "Mosaic of Life diagnostic"
+  start_weeks: "Week 1"
+  finish_label: "Your Next Chapter Roadmap"
+  finish_weeks: "Week 8"
   levels:
     - name: "Life Foundation"
+      weeks: "Weeks 2-3"
       text: "Look at your time, energy and support systems. Identify what needs to change so your life can better support your ambitions."
     - name: "Professional Strategy"
+      weeks: "Weeks 4-5"
       text: "Clarify your professional goals, explore opportunities and identify the steps that can move you closer to your ambition."
     - name: "Visibility & Influence"
+      weeks: "Weeks 6-7"
       text: "Explore how to communicate your value, strengthen your presence and influence, and become more visible at work."
 
 package:
   heading: "What's included, in every tier"
+  stats:   # draft: from Julia's slides
+    - { value: "8 × 90 min", label: "Live group sessions" }
+    - { value: "30 min", label: "Private 1:1 with me" }
+    - { value: "1", label: "Personal diagnostic" }
+    - { value: "+1 month", label: "Recordings access after" }
   items:
     - "Eight weekly online group sessions, 90 minutes each"
     - "A 30-minute private 1:1 session with me, included for every participant"
@@ -77,44 +104,52 @@ package:
     - "Practical teaching, tools you can apply directly to your own situation, live Q&A and interactive mastermind discussions"
     - "The opportunity to bring your own questions and challenges, receive guidance, and learn from other women navigating the same leap"
     - "A library of practical tools and resources"
-    - "A private community chat for exchanging ideas, sharing insights and receiving guidance from me throughout the programme"
-    - "Session recordings, available during the programme and for one additional month afterwards"
+    - "A private community chat for exchanging ideas, sharing insights and receiving guidance from me throughout the program"
+    - "Session recordings, available during the program and for one additional month afterwards"
 
 pricing:
   heading: "Founding Members"
   subheading: "Pilot Cohort, January 2027"
+  total_spots: "8 spots in total"   # draft: our proposal, Julia asked us to suggest
   vat_label: "+ VAT"
   tiers:
     - name: "Core"
       price: "€795"
-      spots: "8 spots"
-      text: "Your complete eight-week Mosaic of Life group programme, including the diagnostic, weekly sessions, practical tools, interactive masterminds and community support."
+      spots: ""
+      text: "Your complete eight-week Mosaic of Life group program, including the diagnostic, weekly sessions, practical tools, interactive masterminds and community support."
     - name: "Plus"
       price: "€1,095"
-      spots: "5 spots available"
+      spots: "Up to 5 spots"   # draft
       text: "Everything in Core, plus one private mentoring session to explore your personal challenges and decisions in greater depth."
     - name: "Premium"
       price: "€1,895"
-      spots: "2 spots available"
-      text: "Everything in Core, plus four private mentoring sessions: two during the programme and two during the following two months, helping you implement your roadmap and adjust your strategy."
-  note: "Included in all three tiers: access to the tools library and all session recordings throughout the programme and for one additional month after it ends."
+      spots: "Only 2 spots"   # draft
+      text: "Everything in Core, plus four private mentoring sessions: two during the program and two during the following two months, helping you implement your roadmap and adjust your strategy."
+  note: "Included in all three tiers: access to the tools library and all session recordings throughout the program and for one additional month after it ends."
 
 proof:
-  heading: "Meet your mentor"   # draft
+  heading: "Meet your mentor"
+  stats:   # draft: from Julia's slides
+    - { value: "15", label: "The team I grew, from a production company I co-built from the ground up" }
+    - { value: "51%", label: "Acquisition of the company by Sony" }
   paragraphs:
     - "My approach doesn't come from theory. It comes from building and scaling complex, high-pressure ventures myself. I co-built a production company from the ground up, grew it to a team of 15 (including working alongside names like Ennio Morricone), eventually leading to a 51% acquisition by Sony. I know what it actually takes to turn an ambitious idea into a working, resourced, resilient system, not just a plan on paper."
     - "And I know this from the inside, not only from a boardroom. I'm a mother. I know what it actually takes to hold a real ambition while still showing up for your children and your partner, and over the years, I've learned how to navigate that balance, not just talk about it."
-    - "What producing gave me, and what I bring directly into this work: **vision**, **strategy**, **creative thinking**, **resourcefulness**, and **strategic focus**."
-    - >-
-      Since then, I've mentored ambitious women across industries (concertmasters and
-      conductors, producers on major international productions, founders building their
-      own ventures), helping them do exactly what this programme is built to do: take
-      "too much, too fast, too unclear" and turn it into a concrete, workable action plan.
-      The Mosaic of Life Method™ is the direct result of that experience, mine and theirs.
+  strengths_intro: "What producing gave me, and what I bring directly into this work:"
+  strengths: ["Vision", "Strategy", "Creative thinking", "Resourcefulness", "Strategic focus"]
+  mentoring: >-
+    Since then, I've mentored ambitious women across industries (concertmasters and
+    conductors, producers on major international productions, founders building their
+    own ventures), helping them do exactly what this program is built to do: take
+    "too much, too fast, too unclear" and turn it into a concrete, workable action plan.
+    The Mosaic of Life Method™ is the direct result of that experience, mine and theirs.
+  shift_visual:   # draft: a picture of the sentence above, words taken from it
+    from: ["too much", "too fast", "too unclear"]
+    to: "a concrete, workable action plan"
   photo: julia-krylova.jpg
   photo_alt: "Julia Krylova in a blue dress, arms crossed, looking at the camera"
   quotes_heading: "In their own words"
-  quotes:   # draft: two quotes from the speaker page, waiting for Julia's OK or her own quotes
+  quotes:   # draft: placeholders until Julia sends her own quotes
     - quote: "The small adjustments we worked on had a much bigger impact than I expected."
       name: "Angela Weigend"
       role: "Customer Care Program Manager"
@@ -125,15 +160,16 @@ proof:
       company: "GEAlive, Sony Masterworks"
 
 logistics:
-  heading: "Practical details"   # draft
-  items:
-    - { label: "Start", value: "Mid-January 2027" }
-    - { label: "Duration", value: "8 weeks, one 90-minute online session per week" }
-    - { label: "Schedule", value: "Weekday evenings, exact day and time to be confirmed" }
-    - { label: "Group", value: "Maximum 8 participants" }
-    - { label: "Enrollment", value: "Short registration form plus a €200 + VAT deposit to secure a place" }
-    - { label: "Final payment", value: "Remaining balance due by 18 December 2026" }
-    - { label: "Onboarding", value: "Welcome email, short questionnaire, and access to the community five days prior to the start" }
+  heading: "Practical details"
+  cards:   # draft: wording from Julia's slides
+    - { value: "8 weeks", label: "One 90-minute online session per week" }
+    - { value: "Weekday evenings", label: "Exact day and time to be confirmed" }
+    - { value: "Max 8 women", label: "A small, focused group" }
+  timeline:   # draft: steps from Julia's slides, the enrollment line proposed by us
+    - { when: "Now", title: "Enrollment", text: "Program fit call, followed by a €200 + VAT deposit to secure your place" }
+    - { when: "18 December 2026", title: "Final payment", text: "Remaining balance due" }
+    - { when: "5 days before start", title: "Onboarding", text: "Welcome email, short questionnaire, and access to the community" }
+    - { when: "Mid-January 2027", title: "We begin", text: "Your first live session" }
 
 closing:
   text: "There's something about January: a year that hasn't been written yet, a clean page to actually start from. Imagine walking into it already holding a real plan, built alongside other women doing the same thing, instead of figuring it out alone in your head again. This is your chance to know, from day one, exactly how you're going to bring this year's ambition to life."

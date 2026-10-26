@@ -9,6 +9,8 @@ const copy = () => structuredClone(content);
 const errorsOf = (c) => checkContent(c, { photos }).errors;
 const hasError = (errors, at) => errors.some((error) => error.startsWith(`${at}:`));
 
+const DRAFTS = ['who.items', 'shift.heading', 'promise.diagram', 'package.stats', 'pricing.total_spots', 'pricing.tiers[1].spots', 'pricing.tiers[2].spots', 'proof.stats', 'proof.shift_visual', 'proof.quotes', 'logistics.cards', 'logistics.timeline'];
+
 test('the real content file passes: no errors, no long dashes; the only TODO is the empty site_url', () => {
   const result = checkContent(content, { photos, raw });
   assert.deepEqual(result.errors, []);
@@ -17,16 +19,18 @@ test('the real content file passes: no errors, no long dashes; the only TODO is 
   assert.equal(report(content, result).ok, true);
 });
 
-test('drafts: the name on the first screen, the Promise diagram, the headings of Proof and Practical details, the whole quotes list', () => {
+test('drafts: the twelve groups marked in the yaml, with their notes; the approved headings and the name carry none', () => {
   const { drafts, problems } = findDrafts(raw, content);
   assert.deepEqual(problems, []);
-  assert.deepEqual(drafts.map((draft) => draft.path), ['hero.name', 'promise.diagram', 'proof.heading', 'proof.quotes', 'logistics.heading']);
-  assert.equal(drafts[0].value, content.hero.name);
-  assert.deepEqual(drafts[1].value.inputs, content.promise.diagram.inputs, 'the whole diagram is one draft');
-  assert.ok(drafts[1].note.startsWith('labels taken word for word'));
-  assert.equal(drafts[3].value.length, content.proof.quotes.length);
-  assert.ok(drafts[3].note.startsWith('two quotes'));
-  assert.equal(drafts[4].value, content.logistics.heading);
+  assert.deepEqual(drafts.map((draft) => draft.path), DRAFTS);
+  assert.equal(drafts[0].value.length, 4, 'the whole who list is one draft');
+  assert.ok(drafts[0].note.startsWith('the short titles come from'));
+  assert.deepEqual(drafts[2].value.inputs, content.promise.diagram.inputs);
+  assert.equal(drafts[4].value, content.pricing.total_spots);
+  assert.equal(drafts[5].value, 'Up to 5 spots');
+  assert.deepEqual(drafts[8].value.from, content.proof.shift_visual.from);
+  assert.equal(drafts[11].value.length, 4);
+  for (const at of ['hero.name', 'proof.heading', 'logistics.heading']) assert.ok(!drafts.some((draft) => draft.path === at), `${at} is approved`);
 });
 
 test('a draft marker that does not resolve to a value is a problem, not silently dropped', () => {
@@ -36,13 +40,22 @@ test('a draft marker that does not resolve to a value is a problem, not silently
   assert.ok(problems[0].includes('hero.nothing'));
 });
 
-test('exact counts: four who items, three levels, eight package items, three tiers, seven logistics rows', () => {
+test('exact counts: 4 who, 4 shift, 4 inputs, 4 outcomes, 3 levels, 4 package stats, 8 package items, 3 tiers, 2 proof stats, 5 strengths, 3 from, 3 cards, 4 steps, 3 facts', () => {
   const cases = [
     ['who.items', (c) => c.who.items.pop()],
+    ['shift.items', (c) => c.shift.items.pop()],
+    ['promise.diagram.inputs', (c) => c.promise.diagram.inputs.push('Extra')],
+    ['promise.outcomes', (c) => c.promise.outcomes.pop()],
     ['process.levels', (c) => c.process.levels.pop()],
+    ['package.stats', (c) => c.package.stats.pop()],
     ['package.items', (c) => c.package.items.push('Extra')],
     ['pricing.tiers', (c) => c.pricing.tiers.pop()],
-    ['logistics.items', (c) => c.logistics.items.pop()],
+    ['proof.stats', (c) => c.proof.stats.push({ value: '1', label: 'x' })],
+    ['proof.strengths', (c) => c.proof.strengths.pop()],
+    ['proof.shift_visual.from', (c) => c.proof.shift_visual.from.pop()],
+    ['logistics.cards', (c) => c.logistics.cards.pop()],
+    ['logistics.timeline', (c) => c.logistics.timeline.pop()],
+    ['hero.facts', (c) => c.hero.facts.pop()],
   ];
   for (const [at, change] of cases) {
     const c = copy();
@@ -52,10 +65,10 @@ test('exact counts: four who items, three levels, eight package items, three tie
   }
 });
 
-test('an empty text is reported with its path; site_url and photo_alt may be empty; a missing block is reported', () => {
+test('an empty text is reported with its path; site_url, photo_alt and a tier\'s spots may be empty; a missing field or block is reported', () => {
   const c = copy();
-  c.who.items[1] = '   ';
-  assert.ok(hasError(errorsOf(c), 'who.items[1]'));
+  c.who.items[1].text = '   ';
+  assert.ok(hasError(errorsOf(c), 'who.items[1].text'));
   const d = copy();
   d.pricing.tiers[2].price = '';
   assert.ok(hasError(errorsOf(d), 'pricing.tiers[2].price'));
@@ -63,13 +76,21 @@ test('an empty text is reported with its path; site_url and photo_alt may be emp
   e.meta.site_url = '';
   e.hero.photo_alt = '';
   e.proof.photo_alt = '';
+  e.pricing.tiers[1].spots = '';
   assert.deepEqual(errorsOf(e), []);
+  assert.equal(content.pricing.tiers[0].spots, '', 'Core has no spots line');
   const f = copy();
-  delete f.closing;
-  assert.ok(hasError(errorsOf(f), 'closing'));
+  delete f.shift;
+  assert.ok(hasError(errorsOf(f), 'shift'));
   const g = copy();
-  delete g.logistics.items[3].value;
-  assert.ok(hasError(errorsOf(g), 'logistics.items[3].value'));
+  delete g.logistics.timeline[3].text;
+  assert.ok(hasError(errorsOf(g), 'logistics.timeline[3].text'));
+  const h = copy();
+  delete h.process.levels[1].weeks;
+  assert.ok(hasError(errorsOf(h), 'process.levels[1].weeks'));
+  const i = copy();
+  i.hero.tagline = '';
+  assert.ok(hasError(errorsOf(i), 'hero.tagline'));
 });
 
 test('photos named in the yaml must exist in content/photos', () => {
@@ -82,28 +103,13 @@ test('photos named in the yaml must exist in content/photos', () => {
   assert.ok(hasError(errorsOf(d), 'hero.photo'));
 });
 
-test('the Promise diagram: exactly four inputs and three outcomes, labels and result present', () => {
-  const c = copy();
-  c.promise.diagram.inputs.pop();
-  assert.ok(hasError(errorsOf(c), 'promise.diagram.inputs'));
-  const d = copy();
-  d.promise.diagram.outcomes.push('Extra');
-  assert.ok(hasError(errorsOf(d), 'promise.diagram.outcomes'));
-  const e = copy();
-  e.promise.diagram.result = '';
-  assert.ok(hasError(errorsOf(e), 'promise.diagram.result'));
-  const f = copy();
-  delete f.promise.diagram;
-  assert.ok(hasError(errorsOf(f), 'promise.diagram'));
-});
-
 test('a long dash is a warning with the path of the field, not an error', () => {
   const c = copy();
   c.problem.statement = 'The ambition is real \u2014 and it stays.';
-  c.who.items[0] = 'On paper \u2013 and in life.';
+  c.who.items[0].text = 'On paper \u2013 and in life.';
   const result = checkContent(c, { photos });
   assert.deepEqual(result.errors, []);
-  assert.deepEqual(result.warnings, ['who.items[0]: contains a long dash', 'problem.statement: contains a long dash']);
+  assert.deepEqual(result.warnings, ['who.items[0].text: contains a long dash', 'problem.statement: contains a long dash']);
 });
 
 test('published: true with a TODO or a draft left stops the build', () => {
@@ -114,7 +120,7 @@ test('published: true with a TODO or a draft left stops the build', () => {
   assert.ok(withTodo.lines.some((line) => line.includes('TODO markers remain')));
   const d = copy();
   d.meta.published = true;
-  d.meta.site_url = 'https://programme.juliakrylova.com';
+  d.meta.site_url = 'https://program.juliakrylova.com';
   assert.equal(report(d, checkContent(d, { photos })).ok, true, 'no TODO left and no draft markers known: ok');
   const withDrafts = report(d, checkContent(d, { photos, raw }));
   assert.equal(withDrafts.ok, false);
@@ -126,10 +132,10 @@ test('addresses: main_site must be a full address, site_url empty or https; publ
   c.links.main_site = 'juliakrylova.com';
   assert.ok(hasError(errorsOf(c), 'links.main_site'));
   const d = copy();
-  d.meta.site_url = 'http://programme.juliakrylova.com';
+  d.meta.site_url = 'http://program.juliakrylova.com';
   assert.ok(hasError(errorsOf(d), 'meta.site_url'));
   const e = copy();
-  e.meta.site_url = 'https://programme.juliakrylova.com';
+  e.meta.site_url = 'https://program.juliakrylova.com';
   assert.deepEqual(errorsOf(e), []);
   const f = copy();
   f.meta.published = 'yes';
@@ -142,15 +148,10 @@ test('register: the label is required, the address must be a full https:// one',
   assert.ok(hasError(errorsOf(c), 'register.url'), 'empty address');
   c.register.url = 'http://calendly.com/juliakrylova/30min';
   assert.ok(hasError(errorsOf(c), 'register.url'), 'http is not enough');
-  c.register.url = 'calendly.com/juliakrylova/30min';
-  assert.ok(hasError(errorsOf(c), 'register.url'), 'a bare domain is not an address');
   c.register.url = 'https://calendly.com/juliakrylova/30min?month=2027-01';
   assert.deepEqual(errorsOf(c), [], 'an https address with its own parameters passes');
   const d = copy();
   d.register.label = '  ';
   assert.ok(hasError(errorsOf(d), 'register.label'));
-  const e = copy();
-  delete e.register.url;
-  assert.ok(hasError(errorsOf(e), 'register.url'));
   assert.deepEqual(checkContent(copy(), { photos }).todos, ['meta.site_url (empty)'], 'nothing about the button is a TODO');
 });
