@@ -196,6 +196,19 @@ a:hover {
   font-size: var(--secondary-size);
 }
 
+/* The second button: a gold outline on the light blocks, champagne on the aubergine band */
+
+.btn--outline {
+  border: 1.5px solid var(--gold);
+  background: transparent;
+  color: var(--navy);
+}
+
+.btn--outline:hover {
+  background: var(--champagne);
+  filter: none;
+}
+
 /* TODO and draft tags, shown while meta.published is false */
 
 .tag {
@@ -1151,8 +1164,40 @@ a:hover {
   border-top-color: rgba(250, 248, 245, 0.25);
 }
 
+/* Under the tiers: the note and the call button; beside them, for those who have decided,
+   the deposit (a lead line in Lora, the outline button, its note). One column on the phone
+   with the deposit under a thin line; two columns from 900 px, the deposit behind a thin
+   vertical line. */
+
+.pricing__actions {
+  display: grid;
+  gap: var(--s-5);
+  margin-top: var(--s-5);
+}
+
 .pricing__note {
-  margin: var(--s-5) 0;
+  margin: 0 0 var(--s-4);
+}
+
+.deposit {
+  padding-top: var(--s-5);
+  border-top: 1px solid var(--warm-grey);
+}
+
+.deposit__lead {
+  margin: 0 0 var(--s-3);
+  max-width: none;
+  font-family: var(--font-heading);
+  font-size: var(--h3-size);
+  line-height: 1.3;
+  color: var(--navy);
+}
+
+.deposit__note {
+  margin: var(--s-3) 0 0;
+  max-width: none;
+  font-size: var(--secondary-size);
+  color: var(--text-muted);
 }
 
 @media (min-width: 900px) {
@@ -1160,8 +1205,16 @@ a:hover {
     grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: var(--s-5);
   }
-  .pricing__note {
+  .pricing__actions {
+    grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
+    column-gap: clamp(2rem, 4vw, 3.5rem);
+    align-items: start;
     margin-top: var(--s-6);
+  }
+  .deposit {
+    padding: 0 0 0 clamp(2rem, 4vw, 3.5rem);
+    border-top: 0;
+    border-left: 1px solid var(--warm-grey);
   }
 }
 
@@ -1392,20 +1445,22 @@ a:hover {
   }
 }
 
-/* In their own words: two quote cards */
-
-.quotes__grid {
-  display: grid;
-  gap: var(--s-5);
-}
+/* A client's quote inside a block: a card with the mark, the paragraphs in Lora at lead size,
+   the name and, under it, the role and the company. Porcelain-deep on the light blocks,
+   porcelain on the deeper ones; at most 46 rem wide, at the left edge of the content. */
 
 .quote {
   position: relative;
-  margin: 0;
+  margin: var(--s-6) 0 0;
+  max-width: 46rem;
   padding: 3.25rem var(--s-5) var(--s-5);
   border-left: 2px solid var(--aubergine);
   border-radius: 0 var(--radius) var(--radius) 0;
   background: var(--porcelain-deep);
+}
+
+.section--deep .quote {
+  background: var(--porcelain);
 }
 
 .quote__mark {
@@ -1422,13 +1477,17 @@ a:hover {
   position: relative;
   margin: 0 0 var(--s-4);
   font-family: var(--font-heading);
-  font-size: var(--quote-size);
-  line-height: 1.4;
+  font-size: var(--lead-size);
+  line-height: 1.5;
 }
 
 .quote__text p {
   margin: 0;
   max-width: none;
+}
+
+.quote__text p + p {
+  margin-top: var(--s-3);
 }
 
 .quote__by {
@@ -1445,13 +1504,6 @@ a:hover {
   margin-top: 2px;
   font-size: var(--secondary-size);
   color: var(--text-muted);
-}
-
-@media (min-width: 900px) {
-  .quotes__grid {
-    grid-template-columns: 1fr 1fr;
-    gap: var(--s-6);
-  }
 }
 
 /* Practical details: three filled cards and a timeline of four steps */
@@ -1690,6 +1742,39 @@ a:hover {
   font-size: var(--lead-size);
   line-height: 1.5;
   color: var(--on-aubergine);
+}
+
+/* the two buttons side by side (stacked on a narrow phone), the deposit note under its button */
+
+.closing__actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: flex-start;
+  gap: var(--s-4);
+}
+
+.closing__deposit {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.closing .deposit__note {
+  margin: var(--s-2) 0 0;
+  text-align: center;
+  color: var(--on-aubergine);
+  opacity: 0.85;
+}
+
+.closing .btn--outline {
+  border-color: var(--champagne);
+  color: var(--champagne);
+}
+
+.closing .btn--outline:hover {
+  background: rgba(239, 220, 172, 0.14);
+  color: var(--champagne);
 }
 
 .closing .btn:focus-visible {

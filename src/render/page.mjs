@@ -13,6 +13,10 @@ export const OG_IMAGE_FILE = 'og-image.png';
 // (Calendly: Calendar, Filter, Tracking IDs). utm_content names the place on the page.
 export const UTM = { utm_source: 'own-your-mosaic', utm_medium: 'page', utm_campaign: 'pilot-2027' };
 export const BUTTON_PLACES = ['topbar', 'hero', 'pricing', 'closing'];
+// The places of the two deposit buttons (never the first screen or the top bar).
+export const DEPOSIT_PLACES = ['pricing', 'closing'];
+// The blocks that can take a client's quote (quotes[].at in the yaml).
+export const QUOTE_BLOCKS = ['shift', 'promise', 'process', 'package', 'pricing', 'logistics'];
 // Tiles on the first screen: 'detached' = a small group in the top-right corner of the block,
 // away from the photo; 'none' = no tiles there. Julia asked for them away from the photo.
 export const HERO_TILES = 'detached';
@@ -35,8 +39,9 @@ const circle = (place, className) => `<span class="circle ${className}" aria-hid
 // A thin gold arrow (the sign of the shift): points right, CSS turns it down on the phone.
 const ARROW = '<svg class="arrow" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M4 12h15"/><path d="m13 6 6 6-6 6"/></svg>';
 
-// The address of the Calendly booking with the tracking tags, built through URL and
-// searchParams, so an address that carries parameters of its own works as well.
+// The address of a tagged link (the Calendly booking, the Stripe deposit) with the tracking
+// tags, built through URL and searchParams, so an address that carries parameters of its own
+// works as well.
 export function registerUrl(base, place) {
   const url = new URL(base);
   for (const [key, value] of Object.entries(UTM)) url.searchParams.set(key, value);
@@ -44,13 +49,38 @@ export function registerUrl(base, place) {
   return url.toString();
 }
 
-// The "Book a program fit call" button. Every button on the page comes from here: a link to
-// Julia's Calendly in a new tab, tagged with the place it stands in (topbar, hero, pricing,
-// closing). The label comes from register.label.
+// The call button. Every call button on the page comes from here: a link to Julia's Calendly
+// in a new tab, tagged with the place it stands in (topbar, hero, pricing, closing). The label
+// comes from register.label (20 minutes on the button; the link stays the 30-minute meeting).
 export function registerButton(ctx, place, { className = '' } = {}) {
   const r = ctx.content.register;
   const classes = ['btn', className].filter(Boolean).join(' ');
   return `<a class="${classes}" href="${esc(registerUrl(r.url, place))}" target="_blank" rel="noopener">${esc(r.label)}</a>`;
+}
+
+// The deposit button: a link to the Stripe payment of the deposit in a new tab, outline style
+// (the call stays the main button), tagged like the call button with the place it stands in
+// (pricing, closing). The label comes from deposit.label; its note is printed by the block.
+export function depositButton(ctx, place) {
+  const d = ctx.content.deposit;
+  return `<a class="btn btn--outline" href="${esc(registerUrl(d.url, place))}" target="_blank" rel="noopener">${esc(d.label)}</a>`;
+}
+
+// A client's quote (quotes[] in the yaml), printed by the block that quotes[].at names: the
+// mark, the paragraphs in Lora, the name and, under it, the role and the company. A block with
+// no quote prints nothing; container: true wraps the figures in a container of their own (for
+// a block whose own container is a grid).
+function quotesIn(ctx, at, { container = false } = {}) {
+  const figures = ctx.content.quotes.filter((q) => q.at === at).map((q) => `    <figure class="quote">
+      <span class="quote__mark" aria-hidden="true">&ldquo;</span>
+      <blockquote class="quote__text">
+${q.text.map((p) => `        <p>${esc(p)}</p>`).join('\n')}
+      </blockquote>
+      <figcaption class="quote__by"><strong class="quote__name">${esc(q.name)}</strong><span class="quote__role">${esc(q.role)}, ${esc(q.company)}</span></figcaption>
+    </figure>`);
+  if (!figures.length) return '';
+  const body = figures.join('\n');
+  return container ? `\n  <div class="container">\n${body}\n  </div>` : `\n${body}`;
 }
 
 // The proportion of a served photo (width / height from the manifest), for a CSS aspect-ratio:
@@ -193,7 +223,7 @@ function shift(ctx) {
     <h2 id="shift-title">${esc(s.heading)}${draftTag(ctx, 'shift.heading')}</h2>
     <ol class="shift__list">
 ${rows}
-    </ol>
+    </ol>${quotesIn(ctx, 'shift')}
   </div>
 </section>`;
 }
@@ -238,7 +268,7 @@ ${inputs}
 ${outcomes}
       </ol>
     </div>
-  </div>
+  </div>${quotesIn(ctx, 'promise', { container: true })}
 </section>`;
 }
 
@@ -266,7 +296,7 @@ function process(ctx) {
 ${levels}
       </ol>
       <div class="path__end path__end--finish"><span class="path__dot" aria-hidden="true"></span><span class="path__weeks caps">${esc(p.finish_weeks)}</span><span class="path__end-label caps">${esc(p.finish_label)}</span></div>
-    </div>
+    </div>${quotesIn(ctx, 'process')}
   </div>
 </section>`;
 }
@@ -286,15 +316,18 @@ ${stats}
     </ul>
     <ul class="package__list">
 ${items}
-    </ul>
+    </ul>${quotesIn(ctx, 'package')}
   </div>
 </section>`;
 }
 
 // Pricing: three filled cards (champagne, navy, aubergine) with a gold line on top, the spots
-// under the price where a tier has them, the total above the cards.
+// under the price where a tier has them, the total above the cards. Under the cards the note
+// and the call button; beside them, for those who have decided, the deposit: a lead line, the
+// outline button and its note.
 function pricing(ctx) {
   const p = ctx.content.pricing;
+  const d = ctx.content.deposit;
   const kinds = ['core', 'plus', 'premium'];
   const tiers = p.tiers.map((tier, i) => `      <li class="tier tier--${kinds[i] || 'core'}">
         <h3 class="tier__name">${esc(tier.name)}</h3>
@@ -309,8 +342,17 @@ ${String(tier.spots || '').trim() ? `        <p class="tier__spots">${esc(tier.s
     <ul class="tiers">
 ${tiers}
     </ul>
-    <p class="pricing__note">${esc(p.note)}</p>
-    <div class="pricing__cta">${registerButton(ctx, 'pricing')}</div>
+    <div class="pricing__actions">
+      <div class="pricing__call">
+        <p class="pricing__note">${esc(p.note)}</p>
+        <div class="pricing__cta">${registerButton(ctx, 'pricing')}</div>
+      </div>
+      <div class="deposit">
+        <p class="deposit__lead">${esc(d.lead)}</p>
+        ${depositButton(ctx, 'pricing')}
+        <p class="deposit__note">${esc(d.note)}</p>
+      </div>
+    </div>${quotesIn(ctx, 'pricing')}
   </div>
 </section>`;
 }
@@ -385,24 +427,6 @@ function group(ctx) {
 </div>`;
 }
 
-// In their own words: two quotes on cards (placeholders until Julia sends her own).
-function quotes(ctx) {
-  const p = ctx.content.proof;
-  const items = p.quotes.map((q) => `      <figure class="quote">
-        <span class="quote__mark" aria-hidden="true">&ldquo;</span>
-        <blockquote class="quote__text"><p>${esc(q.quote)}</p></blockquote>
-        <figcaption class="quote__by"><strong class="quote__name">${esc(q.name)}</strong><span class="quote__role">${esc(q.role)}, ${esc(q.company)}</span></figcaption>
-      </figure>`).join('\n');
-  return `<section class="section quotes" aria-labelledby="quotes-title">
-  <div class="container">
-    <h2 id="quotes-title">${esc(p.quotes_heading)}${draftTag(ctx, 'proof.quotes')}</h2>
-    <div class="quotes__grid">
-${items}
-    </div>
-  </div>
-</section>`;
-}
-
 // Practical details: three filled cards with an icon, a value in Lora and a label, then the
 // timeline of four steps on a thin gold line (vertical on the phone).
 function logistics(ctx) {
@@ -428,21 +452,29 @@ ${cards}
     ${draftLine(ctx, 'logistics.timeline')}
     <ol class="timeline">
 ${steps}
-    </ol>
+    </ol>${quotesIn(ctx, 'logistics')}
   </div>
 </section>`;
 }
 
 // The closing band: aubergine, modest since PROMPT 04 (a friendly reminder, not a statement):
-// the text at lead size up to 640 px wide and the button. Tiles only at the sides, outside the
-// text, and over the upper border onto Practical details; the drawings sit in a hidden sprite.
+// the text at lead size up to 640 px wide, the call button and, next to it, the outline deposit
+// button with its note. Tiles only at the sides, outside the text, and over the upper border
+// onto Practical details; the drawings sit in a hidden sprite.
 function closing(ctx) {
+  const d = ctx.content.deposit;
   return `<section class="closing">
   ${bandSprite()}
   ${bandSvgs()}
   <div class="container closing__inner">
     <p class="closing__text">${esc(ctx.content.closing.text)}</p>
-    <div class="closing__cta">${registerButton(ctx, 'closing')}</div>
+    <div class="closing__actions">
+      <div class="closing__cta">${registerButton(ctx, 'closing')}</div>
+      <div class="closing__deposit">
+        ${depositButton(ctx, 'closing')}
+        <p class="deposit__note">${esc(d.note)}</p>
+      </div>
+    </div>
   </div>
 </section>`;
 }
@@ -461,6 +493,9 @@ function footer(ctx) {
 // themeColor: the page background for the browser chrome; heroTiles: HERO_TILES or an override.
 export function renderPage(content, { manifest = {}, drafts = new Set(), themeColor = '#FAF8F5', heroTiles = HERO_TILES } = {}) {
   const ctx = { content, manifest, drafts, themeColor, heroTiles, published: content.meta.published === true };
+  for (const q of content.quotes || []) {
+    if (!QUOTE_BLOCKS.includes(q.at)) throw new Error(`quotes: "${q.at}" (${q.name}) is not a block that takes a quote: ${QUOTE_BLOCKS.join(', ')}`);
+  }
   return `<!doctype html>
 <html lang="en">
 <head>
@@ -479,7 +514,6 @@ ${pack(ctx)}
 ${pricing(ctx)}
 ${proof(ctx)}
 ${bring(ctx)}
-${quotes(ctx)}
 ${group(ctx)}
 ${logistics(ctx)}
 ${closing(ctx)}

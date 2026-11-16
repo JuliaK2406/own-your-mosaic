@@ -9,7 +9,7 @@ const copy = () => structuredClone(content);
 const errorsOf = (c) => checkContent(c, { photos }).errors;
 const hasError = (errors, at) => errors.some((error) => error.startsWith(`${at}:`));
 
-const DRAFTS = ['who.items', 'shift.heading', 'promise.diagram', 'package.stats', 'proof.stats', 'proof.shift_visual', 'proof.quotes', 'logistics.cards', 'logistics.timeline'];
+const DRAFTS = ['who.items', 'shift.heading', 'promise.diagram', 'package.stats', 'proof.stats', 'proof.shift_visual', 'logistics.cards', 'logistics.timeline'];
 
 test('the real content file passes: no errors, no long dashes; the only TODO is the empty site_url', () => {
   const result = checkContent(content, { photos, raw });
@@ -19,7 +19,7 @@ test('the real content file passes: no errors, no long dashes; the only TODO is 
   assert.equal(report(content, result).ok, true);
 });
 
-test('drafts: the nine groups marked in the yaml, with their notes; the approved headings, the name and the spots lines carry none', () => {
+test('drafts: the eight groups marked in the yaml, with their notes; the approved headings, the name, the spots lines and the quotes carry none', () => {
   const { drafts, problems } = findDrafts(raw, content);
   assert.deepEqual(problems, []);
   assert.deepEqual(drafts.map((draft) => draft.path), DRAFTS);
@@ -27,7 +27,7 @@ test('drafts: the nine groups marked in the yaml, with their notes; the approved
   assert.ok(drafts[0].note.startsWith('the short titles come from'));
   assert.deepEqual(drafts[2].value.inputs, content.promise.diagram.inputs);
   assert.deepEqual(drafts[5].value.from, content.proof.shift_visual.from);
-  assert.equal(drafts[8].value.length, 4);
+  assert.equal(drafts[7].value.length, 4);
   for (const at of ['hero.name', 'proof.heading', 'logistics.heading', 'pricing.total_spots', 'pricing.tiers[1].spots', 'pricing.tiers[2].spots']) assert.ok(!drafts.some((draft) => draft.path === at), `${at} is approved`);
   assert.ok(!('intro' in content.promise), 'the Promise intro left with the Problem repetition');
 });
@@ -165,4 +165,22 @@ test('register: the label is required, the address must be a full https:// one',
   d.register.label = '  ';
   assert.ok(hasError(errorsOf(d), 'register.label'));
   assert.deepEqual(checkContent(copy(), { photos }).todos, ['meta.site_url (empty)'], 'nothing about the button is a TODO');
+});
+
+test('deposit and quotes: the deposit needs a lead, a label, a note and an https address; every quote names its block in "at" and carries paragraphs, a name, a role and a company', () => {
+  const c = copy();
+  c.deposit.url = 'http://buy.stripe.com/x';
+  assert.ok(hasError(errorsOf(c), 'deposit.url'), 'http is not enough');
+  const d = copy();
+  d.deposit.note = '';
+  assert.ok(hasError(errorsOf(d), 'deposit.note'));
+  const e = copy();
+  e.quotes[0].text = 'not a list';
+  assert.ok(hasError(errorsOf(e), 'quotes[0].text'));
+  const f = copy();
+  delete f.quotes[1].at;
+  assert.ok(hasError(errorsOf(f), 'quotes[1].at'));
+  assert.equal(content.quotes.length, 5);
+  assert.deepEqual(content.quotes.map((q) => q.text.length), [1, 2, 1, 1, 2], 'two of the quotes keep their two paragraphs');
+  assert.deepEqual(checkContent(copy(), { photos }).todos, ['meta.site_url (empty)']);
 });

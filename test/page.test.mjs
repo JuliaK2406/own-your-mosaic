@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { loadContent, loadRaw, findDrafts, walkStrings } from '../src/check.mjs';
-import { renderPage, registerUrl, rich, esc, DIAGRAM_ALPHAS, SIGN_ALPHAS, UTM, BUTTON_PLACES, HERO_TILES } from '../src/render/page.mjs';
+import { renderPage, registerUrl, rich, esc, DIAGRAM_ALPHAS, SIGN_ALPHAS, UTM, BUTTON_PLACES, DEPOSIT_PLACES, QUOTE_BLOCKS, HERO_TILES } from '../src/render/page.mjs';
 import { COLOURS, BAND_VARIANTS } from '../src/render/mosaic.mjs';
 import { ICONS } from '../src/render/icons.mjs';
 
@@ -22,7 +22,7 @@ const count = (text, pattern) => (text.match(pattern) || []).length;
 const section = (name) => html.match(new RegExp(`<section class="[^"]*\\b${name}\\b[^"]*"[^]*?</section>`))[0];
 
 // Every text of the yaml except meta, links, the button address and the photo file names.
-const SKIP = /^(meta\.|links\.|register\.url$|hero\.photo$|proof\.(photo|mentoring_photo|group_photo)$)/;
+const SKIP = /^(meta\.|links\.|register\.url$|deposit\.url$|quotes\[\d+\]\.at$|hero\.photo$|proof\.(photo|mentoring_photo|group_photo)$)/;
 
 test('every text from the yaml is on the page word for word (the new blocks included)', () => {
   const missing = [];
@@ -39,42 +39,54 @@ test('every text from the yaml is on the page word for word (the new blocks incl
   assert.ok(!/programme/.test(html), 'American spelling everywhere, as Julia asked');
 });
 
-test('headings: one h1 first, a h2 per block (nine), h3 inside the cards, no level skipped', () => {
+test('headings: one h1 first, a h2 per block (eight), h3 inside the cards, no level skipped', () => {
   const levels = [...html.matchAll(/<h([123])\b/g)].map((match) => Number(match[1]));
   assert.equal(levels[0], 1);
   assert.equal(levels.filter((level) => level === 1).length, 1);
-  assert.equal(levels.filter((level) => level === 2).length, 9, 'who, shift, promise, process, package, pricing, proof, quotes, logistics');
+  assert.equal(levels.filter((level) => level === 2).length, 8, 'who, shift, promise, process, package, pricing, proof, logistics');
   assert.equal(levels.filter((level) => level === 3).length, 4 + 3 + 3 + 4, 'who titles, levels, tiers, timeline steps');
   levels.reduce((previous, level) => {
     assert.ok(level <= previous + 1, `h${level} right after h${previous}`);
     return level;
   }, 0);
   assert.ok(html.includes(`<h1 id="hero-title" class="hero__title">${esc(content.hero.title)}</h1>`));
-  const order = ['hero', 'who', 'shift', 'problem', 'promise', 'process', 'package', 'pricing', 'proof', 'bring', 'quotes', 'logistics', 'closing'].map((name) => html.indexOf(`<section class="${name === 'hero' ? 'hero' : name === 'problem' ? 'problem' : name === 'closing' ? 'closing' : `section`}`));
+  const order = ['hero', 'who', 'shift', 'problem', 'promise', 'process', 'package', 'pricing', 'proof', 'bring', 'logistics', 'closing'].map((name) => html.indexOf(`<section class="${name === 'hero' ? 'hero' : name === 'problem' ? 'problem' : name === 'closing' ? 'closing' : `section`}`));
   assert.ok(html.indexOf('class="hero"') < html.indexOf('class="section section--deep who"') && html.indexOf('who"') < html.indexOf('class="section shift"') && html.indexOf('shift"') < html.indexOf('class="problem band band--navy"') && html.indexOf('band--navy"') < html.indexOf('class="section promise"'), 'the shift follows Is this you?, the problem band follows the shift');
-  assert.ok(html.indexOf('class="section proof band band--navy"') < html.indexOf('class="section bring"') && html.indexOf('class="section bring"') < html.indexOf('class="section quotes"') && html.indexOf('class="section quotes"') < html.indexOf('class="section section--deep logistics"'));
-  assert.ok(order.length === 13);
+  assert.ok(html.indexOf('class="section proof band band--navy"') < html.indexOf('class="section bring"') && html.indexOf('class="section bring"') < html.indexOf('class="section section--deep logistics"'));
+  assert.ok(!html.includes('class="section quotes"'), 'no block of quotes since 16 November: the quotes stand inside the blocks');
+  assert.ok(order.length === 12);
 });
 
-test('four buttons: the label from the yaml, the Calendly address with the four tags and its own utm_content, a new tab; no TODO tag anywhere', () => {
+test('six buttons: four call buttons to Calendly with the label from the yaml, two outline deposit buttons to Stripe; all with the four tags and their own utm_content, all in a new tab; no TODO tag anywhere', () => {
   const r = content.register;
-  const buttons = html.match(/<a class="btn[^"]*" href="[^"]+" target="_blank" rel="noopener">[^<]+<\/a>/g) || [];
-  assert.equal(buttons.length, 4);
-  assert.equal(count(html, /<a class="btn/g), 4);
-  buttons.forEach((button, i) => {
-    const place = BUTTON_PLACES[i];
-    const expected = registerUrl(r.url, place);
+  const d = content.deposit;
+  const all = html.match(/<a class="btn[^"]*" href="[^"]+" target="_blank" rel="noopener">[^<]+<\/a>/g) || [];
+  assert.equal(all.length, 6);
+  assert.equal(count(html, /<a class="btn/g), 6);
+  const calls = all.filter((button) => !button.includes('btn--outline'));
+  const deposits = all.filter((button) => button.includes('btn--outline'));
+  assert.equal(calls.length, 4);
+  assert.equal(deposits.length, 2);
+  const check = (button, base, place, label) => {
+    const expected = registerUrl(base, place);
     assert.ok(button.includes(`href="${esc(expected)}"`), `${place}: ${button}`);
-    assert.ok(button.endsWith(`>${esc(r.label)}</a>`), `${place} carries the label`);
+    assert.ok(button.endsWith(`>${esc(label)}</a>`), `${place} carries the label`);
     const params = new URL(expected).searchParams;
     assert.equal(params.get('utm_source'), 'own-your-mosaic');
     assert.equal(params.get('utm_medium'), 'page');
     assert.equal(params.get('utm_campaign'), 'pilot-2027');
     assert.equal(params.get('utm_content'), place);
-  });
+  };
+  calls.forEach((button, i) => check(button, r.url, BUTTON_PLACES[i], r.label));
+  deposits.forEach((button, i) => check(button, d.url, DEPOSIT_PLACES[i], d.label));
+  assert.ok(r.label.includes('20-minute'), 'the call button says 20 minutes');
+  assert.ok(r.url.endsWith('/30min'), 'the link stays the 30-minute meeting');
+  assert.ok(d.url.startsWith('https://buy.stripe.com/'), 'the deposit goes to Stripe');
   assert.deepEqual(BUTTON_PLACES, ['topbar', 'hero', 'pricing', 'closing']);
+  assert.deepEqual(DEPOSIT_PLACES, ['pricing', 'closing']);
   assert.deepEqual(Object.keys(UTM), ['utm_source', 'utm_medium', 'utm_campaign']);
   assert.ok(html.indexOf('class="closing__text"') < html.indexOf('class="closing__cta"'), 'the closing button stands under the closing text');
+  assert.ok(!section('hero').includes('btn--outline') && !html.slice(0, html.indexOf('<main>')).includes('btn--outline'), 'no deposit button on the first screen or in the top bar');
   assert.equal(count(html, /tag--todo/g), 0, 'nothing on the page is a TODO');
   const published = render(withMeta({ published: true }));
   assert.ok(!published.includes('tag--todo') && !published.includes('tag--draft'));
@@ -88,13 +100,12 @@ test('registerUrl keeps the parameters an address already carries and adds the t
   assert.equal([...url.searchParams.keys()].length, 6);
 });
 
-test('draft tags: one per group, nine in all; none at the name, Meet your mentor, Practical details or the spots (approved)', () => {
-  assert.equal(count(html, /tag--draft/g), 9);
+test('draft tags: one per group, eight in all; none at the name, Meet your mentor, Practical details, the spots or the quotes', () => {
+  assert.equal(count(html, /tag--draft/g), 8);
   assert.ok(html.includes(`${esc(content.who.heading)} <span class="tag tag--draft">draft</span></h2>`), 'who: at the block heading');
   assert.ok(html.includes(`${esc(content.shift.heading)} <span class="tag tag--draft">draft</span></h2>`));
   assert.ok(html.includes(`${esc(content.promise.diagram.inputs_label)} <span class="tag tag--draft">draft</span></p>`));
   assert.ok(html.includes(`<p class="pricing__total caps">${esc(content.pricing.total_spots)}</p>`), 'the total spots line without a tag');
-  assert.ok(html.includes(`${esc(content.proof.quotes_heading)} <span class="tag tag--draft">draft</span></h2>`));
   assert.ok(html.includes(`${esc(content.logistics.heading)} <span class="tag tag--draft">draft</span></h2>`), 'logistics: the cards tag at the heading');
   assert.equal(count(html, /<p class="draft-line"><span class="tag tag--draft">draft<\/span><\/p>/g), 4, 'package stats, proof stats, the shift picture, the timeline');
   assert.ok(!html.includes(`${esc(content.hero.name)} <span class="tag`), 'the name is approved');
@@ -122,7 +133,7 @@ test('no Google fonts, no script at all, no absolute paths: everything comes fro
   assert.ok(!/fonts\.googleapis\.com|fonts\.gstatic\.com/.test(html));
   assert.ok(!/<script/.test(html), 'not one script on the page');
   assert.ok(!/(href|src|srcset)="\/[^/]/.test(html), 'no root-absolute paths');
-  assert.ok(!/(href|src)="https?:\/\/(?!www\.juliakrylova\.com|calendly\.com\/juliakrylova\/30min)/.test(html), 'the only outside links are the main site and the Calendly booking');
+  assert.ok(!/(href|src)="https?:\/\/(?!www\.juliakrylova\.com|calendly\.com\/juliakrylova\/30min|buy\.stripe\.com\/)/.test(html), 'the only outside links are the main site, the Calendly booking and the Stripe deposit');
   assert.ok(html.includes('href="styles.css"') && html.includes('href="favicon.svg"'));
 });
 
@@ -143,12 +154,12 @@ test('four photos: every <img> has alt, width and height; the first-screen photo
   assert.ok(imgs[3].includes('sizes="100vw"') && html.includes('img/group-2400.webp 2400w'));
 });
 
-test('the session photo closes What I bring under both columns; the group band stands between the quotes and Practical details without a heading or caption', () => {
+test('the session photo closes What I bring under both columns; the group band stands between What I bring and Practical details without a heading or caption', () => {
   const bring = section('bring');
   assert.ok(bring.indexOf('class="shift-visual"') < bring.indexOf('<div class="container bring__photo">'), 'the photo comes after the picture of the paragraph');
   assert.ok(bring.includes(`alt="${esc(content.proof.mentoring_photo_alt)}"`));
   const band = html.match(/<div class="group-photo">[^]*?<\/div>/)[0];
-  assert.ok(html.indexOf('class="section quotes"') < html.indexOf('<div class="group-photo">') && html.indexOf('<div class="group-photo">') < html.indexOf('class="section section--deep logistics"'));
+  assert.ok(html.indexOf('class="section bring"') < html.indexOf('<div class="group-photo">') && html.indexOf('<div class="group-photo">') < html.indexOf('class="section section--deep logistics"'));
   assert.ok(!/<h[1-6]|<figcaption|<p\b/.test(band), 'no words beside the photo');
   assert.equal(band.replace(/<[^>]+>/g, '').trim(), '', 'the band carries no text');
 });
@@ -277,13 +288,39 @@ test('What I bring: the aubergine panel with five strengths and icons, the mento
   assert.ok(bring.indexOf('<p class="draft-line">') < bring.indexOf('<div class="shift-visual"'), 'the draft tag stands outside the hidden picture');
 });
 
-test('In their own words: its own block with the two placeholder quotes', () => {
-  const quotes = section('quotes');
-  for (const q of content.proof.quotes) {
-    assert.ok(quotes.includes(`<blockquote class="quote__text"><p>${esc(q.quote)}</p></blockquote>`));
-    assert.ok(quotes.includes(`<strong class="quote__name">${esc(q.name)}</strong><span class="quote__role">${esc(q.role)}, ${esc(q.company)}</span>`));
+test('five quotes, each inside the block its "at" names, with every paragraph, the name and the role with the company; no block of their own', () => {
+  assert.equal(content.quotes.length, 5);
+  assert.deepEqual(content.quotes.map((q) => q.at), ['shift', 'promise', 'process', 'package', 'logistics']);
+  assert.ok(!html.includes('quotes__grid') && !html.includes('quotes-title'));
+  for (const q of content.quotes) {
+    assert.ok(QUOTE_BLOCKS.includes(q.at));
+    const block = section(q.at);
+    const figures = block.split('<figure class="quote">').slice(1).map((f) => f.split('</figure>')[0]);
+    const figure = figures.find((f) => f.includes(`<strong class="quote__name">${esc(q.name)}</strong>`));
+    assert.ok(figure, `${q.name} stands in ${q.at}`);
+    for (const p of q.text) assert.ok(figure.includes(`<p>${esc(p)}</p>`), `${q.name}: every paragraph`);
+    assert.ok(figure.includes(`<span class="quote__role">${esc(q.role)}, ${esc(q.company)}</span>`));
+    assert.ok(figure.includes('<span class="quote__mark" aria-hidden="true">&ldquo;</span>'));
+    assert.ok(block.lastIndexOf('<figure class="quote">') > block.lastIndexOf('</ol>', block.indexOf('<figure class="quote">')) || q.at === 'package' || q.at === 'promise', `${q.at}: the quote comes after the list`);
   }
-  assert.equal(count(quotes, /<span class="quote__mark" aria-hidden="true">&ldquo;<\/span>/g), content.proof.quotes.length);
+  assert.equal(count(html, /<figure class="quote">/g), 5);
+  assert.ok(section('promise').includes('</div>\n  <div class="container">\n    <figure class="quote">'), 'in Promise the quote gets a container of its own under the grid');
+  assert.throws(() => render({ ...content, quotes: [{ ...content.quotes[0], at: 'footer' }] }), /footer/);
+});
+
+test('the deposit: under the tiers the note and the call button, then the lead line, the outline button and its note; in the closing band the outline button with its note beside the call button', () => {
+  const d = content.deposit;
+  const pricing = section('pricing');
+  assert.ok(pricing.indexOf('<ul class="tiers">') < pricing.indexOf('<div class="pricing__actions">'));
+  assert.ok(pricing.indexOf('class="pricing__note"') < pricing.indexOf('class="pricing__cta"') && pricing.indexOf('class="pricing__cta"') < pricing.indexOf('<div class="deposit">'));
+  assert.ok(pricing.includes(`<p class="deposit__lead">${esc(d.lead)}</p>\n        <a class="btn btn--outline"`), 'the lead line stands right above the deposit button');
+  assert.ok(pricing.includes(`<p class="deposit__note">${esc(d.note)}</p>`));
+  const closing = html.match(/<section class="closing">[^]*?<\/section>/)[0];
+  assert.ok(closing.indexOf('class="closing__cta"') < closing.indexOf('<div class="closing__deposit">'), 'the call button first, the deposit second');
+  assert.ok(closing.includes(`<a class="btn btn--outline" href="${esc(registerUrl(d.url, 'closing'))}" target="_blank" rel="noopener">${esc(d.label)}</a>\n        <p class="deposit__note">${esc(d.note)}</p>`));
+  assert.ok(!closing.includes('deposit__lead'), 'no lead line in the closing band');
+  assert.equal(count(html, /deposit__note/g), 2);
+  assert.ok(!/refund/i.test(html), 'nothing about refunds');
 });
 
 test('Practical details: three coloured cards with icons and the timeline of four steps', () => {
@@ -304,10 +341,11 @@ test('Practical details: three coloured cards with icons and the timeline of fou
   });
 });
 
-test('the closing band: the text and the button, nothing else', () => {
+test('the closing band: the text and the two buttons, nothing else', () => {
   const closing = html.match(/<section class="closing">[^]*?<\/section>/)[0];
   assert.ok(closing.includes(`<p class="closing__text">${esc(content.closing.text)}</p>`));
-  assert.equal(count(closing, /<a class="btn/g), 1);
+  assert.equal(count(closing, /<a class="btn/g), 2);
+  assert.equal(count(closing, /<p\b/g), 2, 'the text and the deposit note');
 });
 
 test('icons: twenty places, every icon an inline svg with one stroke, aria-hidden, without text; the footer and the legal line', () => {
@@ -358,7 +396,7 @@ test('mosaics: the two hero groups and the five band drawings; every tile whole 
   }
   assert.equal(count(html, new RegExp(`fill="${COLOURS.gold}"`, 'g')), 0, 'gold is never a tile');
   assert.equal(render(), html, 'the same markup every time');
-  for (const block of ['who', 'shift', 'problem', 'promise', 'package', 'process', 'pricing', 'proof', 'bring', 'quotes', 'logistics']) {
+  for (const block of ['who', 'shift', 'problem', 'promise', 'package', 'process', 'pricing', 'proof', 'bring', 'logistics']) {
     assert.ok(!section(block).includes('<svg class="mosaic'), `${block} has no mosaic`);
   }
 });

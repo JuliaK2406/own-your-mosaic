@@ -16,11 +16,14 @@
 //                                  hero-none from a temporary build); 360, 834 and 1280 checked
 //   roadmap (--set roadmap, PROMPT 04b): the Problem and Promise blocks at 390 and 1440
 //   hand (--set hand, PROMPT 04d): the first screen at 390, 900 and 1440, 360 and 1440 whole
+//   buttons (--set buttons, 16 Nov): the first screen, the top bar at 900 and 1280 and every block
+//                                  with a quote or a deposit button at 390 and 1440 (the summary
+//                                  lists the address of every button)
 //   big (--set big, PROMPT 04e): the first screen at every width up to 1920, 360 and 1440 whole,
 //                                  1440 without tiles from a temporary build; the summary gives
 //                                  the photo size, the title-to-button height and the line lengths
 //   group (--set group, PROMPT 04c): What I bring with its photo at 390 and 1440, the band with
-//                                  the group photo (end of the quotes to the start of Practical
+//                                  the group photo (end of What I bring to the start of Practical
 //                                  details) at 390, 1440 and 1920, 360 and 1440 whole
 // Checks on the way: no horizontal overflow (scrollWidth equals clientWidth), Lora and Inter
 // loaded from the site itself, not one request to another origin, every photo loaded
@@ -58,14 +61,15 @@ export const SETS = {
   design: { 360: [], 390: ['full', 'hero', 'promise', 'mentor', 'closing'], 834: [], 1280: ['mentor'], 1440: ['full', 'hero', 'promise', 'mentor', 'closing'] },
   design2: { 360: [], 390: ['full', 'hero', 'promise', 'mentor', 'seam'], 834: [], 1280: ['mentor'], 1440: ['full', 'hero', 'promise', 'mentor', 'seam'] },
   calendly: { 360: ['full'], 390: ['hero', 'pricing', 'closing'], 834: [], 900: ['topbar'], 1280: ['topbar'], 1440: ['hero', 'pricing', 'closing'] },
-  feedback: { 360: [], 390: ['full', 'hero-detached', 'who', 'shift', 'problem', 'promise', 'method', 'package', 'pricing', 'mentor', 'bring', 'quotes', 'logistics', 'closing'], 834: [], 1280: [], 1440: ['full', 'hero-detached', 'who', 'shift', 'problem', 'promise', 'method', 'package', 'pricing', 'mentor', 'bring', 'quotes', 'logistics', 'closing'] },
+  feedback: { 360: [], 390: ['full', 'hero-detached', 'who', 'shift', 'problem', 'promise', 'method', 'package', 'pricing', 'mentor', 'bring', 'logistics', 'closing'], 834: [], 1280: [], 1440: ['full', 'hero-detached', 'who', 'shift', 'problem', 'promise', 'method', 'package', 'pricing', 'mentor', 'bring', 'logistics', 'closing'] },
   roadmap: { 360: [], 390: ['problem', 'promise'], 834: [], 1280: [], 1440: ['problem', 'promise'] },
   group: { 360: ['full'], 390: ['bring', 'group'], 834: [], 1280: [], 1440: ['full', 'bring', 'group'], 1920: ['group'] },
   hand: { 360: ['full'], 390: ['hero'], 834: [], 900: ['hero'], 1280: [], 1440: ['full', 'hero'] },
   big: { 360: ['full'], 390: ['hero'], 834: ['hero'], 900: ['hero'], 1280: ['hero'], 1440: ['full', 'hero'], 1920: ['hero'] },
+  buttons: { 360: ['full'], 390: ['hero', 'shift', 'promise', 'method', 'package', 'pricing', 'logistics', 'closing'], 834: [], 900: ['topbar'], 1280: ['topbar'], 1440: ['full', 'hero', 'shift', 'promise', 'method', 'package', 'pricing', 'logistics', 'closing'] },
   live: { 390: ['hero'], 1440: ['hero', 'group'] },
 };
-const BLOCKS = { topbar: '.topbar', who: '.who', shift: '.shift', problem: '.problem', promise: '.promise', method: '.process', process: '.process', package: '.package', pricing: '.pricing', mentor: '.proof', bring: '.bring', quotes: '.quotes', logistics: '.logistics', closing: '.closing' };
+const BLOCKS = { topbar: '.topbar', who: '.who', shift: '.shift', problem: '.problem', promise: '.promise', method: '.process', process: '.process', package: '.package', pricing: '.pricing', mentor: '.proof', bring: '.bring', logistics: '.logistics', closing: '.closing' };
 
 // Scrolls through the page so the lazy photos load, then back to the top. The page scrolls
 // smoothly for people, so the script scrolls instantly, or the lazy photo is never reached.

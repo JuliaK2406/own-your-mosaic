@@ -5,7 +5,7 @@
 //            Shown as a yellow tag on the page while meta.published is false.
 //   # draft  a text we wrote ourselves that Julia has not approved yet: an inline "# draft"
 //            comment on the line of the value. Shown as an aubergine "draft" tag on the page.
-//            On a key that opens a list (quotes:   # draft) it marks the whole list.
+//            On a key that opens a list (stats:   # draft) it marks the whole list.
 //
 // Both are only reminders while meta.published is false. With published: true any TODO or
 // draft stops the build, so unfinished text never reaches the published page.
@@ -49,6 +49,7 @@ const SHAPE = {
   meta: { published: 'boolean', site_url: 'url-or-empty', title: 'string', description: 'string' },
   links: { main_site: 'url' },
   register: { label: 'string', url: 'https' },
+  deposit: { lead: 'string', label: 'string', note: 'string', url: 'https' },
   hero: {
     title: 'string',
     subtitle: 'string',
@@ -101,11 +102,10 @@ const SHAPE = {
     mentoring_photo_alt: 'string',
     photo: 'file',
     photo_alt: 'text',
-    quotes_heading: 'string',
-    quotes: [{ quote: 'string', name: 'string', role: 'string', company: 'string' }],
     group_photo: 'file',
     group_photo_alt: 'string',
   },
+  quotes: [{ at: 'string', name: 'string', role: 'string', company: 'string', text: 'list' }],
   logistics: {
     heading: 'string',
     cards: [{ value: 'string', label: 'string' }, 3],
