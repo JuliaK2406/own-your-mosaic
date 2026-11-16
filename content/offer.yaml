@@ -1,6 +1,6 @@
 # Own Your Mosaic of Life: all text of the page lives in this file.
 # Edit the text after the colons. Keep field names and indentation as they are.
-# Lines marked "draft" were written by us and wait for Julia's OK.
+# A line may carry the mark "draft" after a hash while a text waits for Julia's OK; none does at the moment (all marks lifted on 16 Nov).
 
 meta:
   published: false   # false = hidden from search engines, TODO and draft marks are visible. Set true on launch day
@@ -37,7 +37,7 @@ hero:
 
 who:
   heading: "Is this you?"
-  items:   # draft: the short titles come from Julia's slides
+  items:
     - title: "Stretched too thin"
       text: "You're doing well, maybe better than ever on paper, but you're stretched across too many directions to think straight about what's actually next."
     - title: "Ready for bigger"
@@ -48,7 +48,7 @@ who:
       text: "You can build a plan for anyone: your team, your clients, your family. Building one for yourself, without it costing you everything else, is the part you haven't cracked."
 
 shift:
-  heading: "The shift we work toward"   # draft
+  heading: "The shift we work toward"
   from_label: "From"
   to_label: "to"
   items:
@@ -65,7 +65,7 @@ promise:
   heading: "Your Next Chapter Roadmap"
   paragraphs:
     - "By the end of the program, you'll have a personalized roadmap for pursuing your next professional ambition, one that takes your career or business, priorities, energy, and personal life into account. You'll also have tools to help you put the plan into action."
-  diagram:   # draft: labels taken word for word from the paragraph above
+  diagram:
     inputs_label: "Takes into account"
     inputs: ["Career or business", "Priorities", "Energy", "Personal life"]
     result: "Your Next Chapter Roadmap"
@@ -97,7 +97,7 @@ process:
 
 package:
   heading: "What's included, in every tier"
-  stats:   # draft: from Julia's slides
+  stats:
     - { value: "8 × 90 min", label: "Live group sessions" }
     - { value: "30 min", label: "Private 1:1 with me" }
     - { value: "1", label: "Personal diagnostic" }
@@ -134,7 +134,7 @@ pricing:
 
 proof:
   heading: "Meet your mentor"
-  stats:   # draft: from Julia's slides
+  stats:
     - { value: "15", label: "The team I grew, from a production company I co-built from the ground up" }
     - { value: "51%", label: "Acquisition of the company by Sony" }
   paragraphs:
@@ -148,7 +148,7 @@ proof:
     own ventures), helping them do exactly what this program is built to do: take
     "too much, too fast, too unclear" and turn it into a concrete, workable action plan.
     The Mosaic of Life Method™ is the direct result of that experience, mine and theirs.
-  shift_visual:   # draft: a picture of the sentence above, words taken from it
+  shift_visual:
     from: ["too much", "too fast", "too unclear"]
     to: "a concrete, workable action plan"
   mentoring_photo: julia-krylova-session.jpg
@@ -194,11 +194,11 @@ quotes:   # five quotes from Julia's clients (16 Nov); "at" names the block each
 
 logistics:
   heading: "Practical details"
-  cards:   # draft: wording from Julia's slides
+  cards:
     - { value: "8 weeks", label: "One 90-minute online session per week" }
     - { value: "Weekday evenings", label: "Exact day and time to be confirmed" }
     - { value: "Max 8 women", label: "A small, focused group" }
-  timeline:   # draft: steps from Julia's slides, the enrollment line proposed by us
+  timeline:
     - { when: "Now", title: "Enrollment", text: "Program fit call, followed by a €200 + VAT deposit to secure your place" }
     - { when: "18 December 2026", title: "Final payment", text: "Remaining balance due" }
     - { when: "5 days before start", title: "Onboarding", text: "Welcome email, short questionnaire, and access to the community" }

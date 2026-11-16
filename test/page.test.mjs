@@ -100,18 +100,18 @@ test('registerUrl keeps the parameters an address already carries and adds the t
   assert.equal([...url.searchParams.keys()].length, 6);
 });
 
-test('draft tags: one per group, eight in all; none at the name, Meet your mentor, Practical details, the spots or the quotes', () => {
-  assert.equal(count(html, /tag--draft/g), 8);
-  assert.ok(html.includes(`${esc(content.who.heading)} <span class="tag tag--draft">draft</span></h2>`), 'who: at the block heading');
-  assert.ok(html.includes(`${esc(content.shift.heading)} <span class="tag tag--draft">draft</span></h2>`));
-  assert.ok(html.includes(`${esc(content.promise.diagram.inputs_label)} <span class="tag tag--draft">draft</span></p>`));
-  assert.ok(html.includes(`<p class="pricing__total caps">${esc(content.pricing.total_spots)}</p>`), 'the total spots line without a tag');
-  assert.ok(html.includes(`${esc(content.logistics.heading)} <span class="tag tag--draft">draft</span></h2>`), 'logistics: the cards tag at the heading');
-  assert.equal(count(html, /<p class="draft-line"><span class="tag tag--draft">draft<\/span><\/p>/g), 4, 'package stats, proof stats, the shift picture, the timeline');
-  assert.ok(!html.includes(`${esc(content.hero.name)} <span class="tag`), 'the name is approved');
-  assert.ok(html.includes(`<h2 id="proof-title">${esc(content.proof.heading)}</h2>`), 'Meet your mentor is approved');
-  const none = renderPage(content, { manifest, drafts: new Set() });
-  assert.ok(!none.includes('tag--draft') && !none.includes('draft-line'));
+test('draft tags: none on the page since 16 November; a marked group would still get its tag at the heading or as a line of its own', () => {
+  assert.equal(count(html, /tag--draft/g), 0);
+  assert.equal(count(html, /draft-line/g), 0);
+  assert.ok(html.includes(`<h2 id="shift-title">${esc(content.shift.heading)}</h2>`) && html.includes(`<h2 id="who-title">${esc(content.who.heading)}</h2>`));
+  assert.ok(html.includes(`<p class="pricing__total caps">${esc(content.pricing.total_spots)}</p>`) && html.includes(`<h2 id="proof-title">${esc(content.proof.heading)}</h2>`));
+  const marked = renderPage(content, { manifest, drafts: new Set(['shift.heading', 'package.stats', 'promise.diagram']) });
+  assert.equal(count(marked, /tag--draft/g), 3);
+  assert.ok(marked.includes(`${esc(content.shift.heading)} <span class="tag tag--draft">draft</span></h2>`), 'at the block heading');
+  assert.ok(marked.includes(`${esc(content.promise.diagram.inputs_label)} <span class="tag tag--draft">draft</span></p>`), 'at the label of the diagram');
+  assert.equal(count(marked, /<p class="draft-line"><span class="tag tag--draft">draft<\/span><\/p>/g), 1, 'the stats band gets a line of its own');
+  const published = render(withMeta({ published: true }), { drafts: new Set(['shift.heading']) });
+  assert.ok(!published.includes('tag--draft') && !published.includes('draft-line'), 'published: no tags whatever is marked');
 });
 
 test('head: lang, title, description, og tags; noindex while unpublished; canonical, og:url and og:image only with site_url', () => {
@@ -295,16 +295,19 @@ test('five quotes, each inside the block its "at" names, with every paragraph, t
   for (const q of content.quotes) {
     assert.ok(QUOTE_BLOCKS.includes(q.at));
     const block = section(q.at);
-    const figures = block.split('<figure class="quote">').slice(1).map((f) => f.split('</figure>')[0]);
+    const figures = block.split('<figure class="quote').slice(1).map((f) => f.split('</figure>')[0]);
     const figure = figures.find((f) => f.includes(`<strong class="quote__name">${esc(q.name)}</strong>`));
     assert.ok(figure, `${q.name} stands in ${q.at}`);
     for (const p of q.text) assert.ok(figure.includes(`<p>${esc(p)}</p>`), `${q.name}: every paragraph`);
     assert.ok(figure.includes(`<span class="quote__role">${esc(q.role)}, ${esc(q.company)}</span>`));
     assert.ok(figure.includes('<span class="quote__mark" aria-hidden="true">&ldquo;</span>'));
-    assert.ok(block.lastIndexOf('<figure class="quote">') > block.lastIndexOf('</ol>', block.indexOf('<figure class="quote">')) || q.at === 'package' || q.at === 'promise', `${q.at}: the quote comes after the list`);
+    assert.ok(block.lastIndexOf('<figure class="quote') > block.lastIndexOf('</ol>', block.indexOf('<figure class="quote')) || q.at === 'package' || q.at === 'promise', `${q.at}: the quote comes after the list`);
   }
-  assert.equal(count(html, /<figure class="quote">/g), 5);
-  assert.ok(section('promise').includes('</div>\n  <div class="container">\n    <figure class="quote">'), 'in Promise the quote gets a container of its own under the grid');
+  assert.equal(count(html, /<figure class="quote[" ]/g), 5);
+  const promise = section('promise');
+  assert.ok(promise.includes('</div>\n    <div class="promise__quote">\n    <figure class="quote quote--compact">'), 'in Promise the quote stands inside the grid, after the diagram, compact');
+  assert.ok(promise.indexOf('<div class="promise__quote">') < promise.lastIndexOf('</div>\n</section>'), 'inside the grid container');
+  assert.equal(count(html, /quote--compact/g), 1, 'only the Roadmap quote is compact');
   assert.throws(() => render({ ...content, quotes: [{ ...content.quotes[0], at: 'footer' }] }), /footer/);
 });
 

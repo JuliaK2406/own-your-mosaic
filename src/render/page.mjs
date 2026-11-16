@@ -68,10 +68,11 @@ export function depositButton(ctx, place) {
 
 // A client's quote (quotes[] in the yaml), printed by the block that quotes[].at names: the
 // mark, the paragraphs in Lora, the name and, under it, the role and the company. A block with
-// no quote prints nothing; container: true wraps the figures in a container of their own (for
-// a block whose own container is a grid).
-function quotesIn(ctx, at, { container = false } = {}) {
-  const figures = ctx.content.quotes.filter((q) => q.at === at).map((q) => `    <figure class="quote">
+// no quote prints nothing. The figure takes the full width of the block's content; compact:
+// true gives the smaller variant for a column, wrap names a div to hold the figures (one grid
+// item in a block whose container is a grid).
+function quotesIn(ctx, at, { wrap = '', compact = false } = {}) {
+  const figures = ctx.content.quotes.filter((q) => q.at === at).map((q) => `    <figure class="quote${compact ? ' quote--compact' : ''}">
       <span class="quote__mark" aria-hidden="true">&ldquo;</span>
       <blockquote class="quote__text">
 ${q.text.map((p) => `        <p>${esc(p)}</p>`).join('\n')}
@@ -80,7 +81,7 @@ ${q.text.map((p) => `        <p>${esc(p)}</p>`).join('\n')}
     </figure>`);
   if (!figures.length) return '';
   const body = figures.join('\n');
-  return container ? `\n  <div class="container">\n${body}\n  </div>` : `\n${body}`;
+  return wrap ? `\n    <div class="${wrap}">\n${body}\n    </div>` : `\n${body}`;
 }
 
 // The proportion of a served photo (width / height from the manifest), for a CSS aspect-ratio:
@@ -241,9 +242,10 @@ function problem(ctx) {
 </section>`;
 }
 
-// Promise: the heading and the paragraph as a lead; on the right the diagram card: four
-// inputs with tiles, a gold stem to the result behind the brand sign, then the four outcomes
-// with numbers in aubergine circles.
+// Promise: the heading and the paragraph as a lead, and under them, in the same column, the
+// quote that speaks about the roadmap (compact, the width of the column); on the right the
+// diagram card: four inputs with tiles, a gold stem to the result behind the brand sign, then
+// the four outcomes with numbers in aubergine circles. On the phone: text, card, quote.
 function promise(ctx) {
   const p = ctx.content.promise;
   const d = p.diagram;
@@ -267,8 +269,8 @@ ${inputs}
       <ol class="diagram__outcomes">
 ${outcomes}
       </ol>
-    </div>
-  </div>${quotesIn(ctx, 'promise', { container: true })}
+    </div>${quotesIn(ctx, 'promise', { wrap: 'promise__quote', compact: true })}
+  </div>
 </section>`;
 }
 

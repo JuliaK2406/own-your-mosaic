@@ -624,8 +624,10 @@ a:hover {
   color: var(--champagne);
 }
 
-/* Promise: the text and the diagram card. One column on the phone (the card after the text),
-   two columns from 900 px; the card stretches to the height of the text. */
+/* Promise: the text, the diagram card and the quote. One column on the phone (text, card,
+   quote); two columns from 900 px: the text and, under it, the compact quote on the left, the
+   card on the right over both rows. The card is the shorter column, so it sticks while the
+   left column scrolls by. */
 
 .promise__grid {
   display: grid;
@@ -785,11 +787,24 @@ a:hover {
 @media (min-width: 900px) {
   .promise__grid {
     grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    grid-template-rows: auto 1fr;
+    grid-template-areas:
+      "copy diagram"
+      "quote diagram";
     column-gap: clamp(2.5rem, 5vw, 5rem);
+    row-gap: var(--s-5);
     align-items: start;
   }
+  .promise__copy {
+    grid-area: copy;
+  }
+  .promise__quote {
+    grid-area: quote;
+  }
   .diagram {
-    justify-content: space-between;
+    grid-area: diagram;
+    position: sticky;
+    top: var(--s-5);
   }
 }
 
@@ -1195,9 +1210,16 @@ a:hover {
 
 .deposit__note {
   margin: var(--s-3) 0 0;
-  max-width: none;
+  max-width: var(--cta-width);   /* two lines, no wider than the button above it */
   font-size: var(--secondary-size);
   color: var(--text-muted);
+}
+
+.pricing__cta .btn,
+.deposit .btn {
+  display: flex;
+  width: 100%;
+  max-width: var(--cta-width);
 }
 
 @media (min-width: 900px) {
@@ -1445,14 +1467,14 @@ a:hover {
   }
 }
 
-/* A client's quote inside a block: a card with the mark, the paragraphs in Lora at lead size,
-   the name and, under it, the role and the company. Porcelain-deep on the light blocks,
-   porcelain on the deeper ones; at most 46 rem wide, at the left edge of the content. */
+/* A client's quote inside a block: a card with the mark, the paragraphs in Lora, the name
+   and, under it, the role and the company. Porcelain-deep on the light blocks, porcelain on
+   the deeper ones. The card takes the full width of the block's content, its edges on the
+   elements above it; the compact variant (quote--compact) fills the column it stands in. */
 
 .quote {
   position: relative;
   margin: var(--s-6) 0 0;
-  max-width: 46rem;
   padding: 3.25rem var(--s-5) var(--s-5);
   border-left: 2px solid var(--aubergine);
   border-radius: 0 var(--radius) var(--radius) 0;
@@ -1477,8 +1499,8 @@ a:hover {
   position: relative;
   margin: 0 0 var(--s-4);
   font-family: var(--font-heading);
-  font-size: var(--lead-size);
-  line-height: 1.5;
+  font-size: var(--quote-size);
+  line-height: 1.4;
 }
 
 .quote__text p {
@@ -1504,6 +1526,21 @@ a:hover {
   margin-top: 2px;
   font-size: var(--secondary-size);
   color: var(--text-muted);
+}
+
+.quote--compact {
+  margin: 0;
+  padding: 2.75rem var(--s-4) var(--s-4);
+}
+
+.quote--compact .quote__mark {
+  left: var(--s-4);
+  font-size: 3.5rem;
+}
+
+.quote--compact .quote__text {
+  font-size: 1.0625rem;
+  line-height: 1.5;
 }
 
 /* Practical details: three filled cards and a timeline of four steps */
@@ -1747,24 +1784,34 @@ a:hover {
 /* the two buttons side by side (stacked on a narrow phone), the deposit note under its button */
 
 .closing__actions {
-  display: flex;
-  flex-wrap: wrap;
+  display: grid;
+  grid-template-columns: minmax(0, var(--cta-width));
   justify-content: center;
-  align-items: flex-start;
+  align-items: start;
   gap: var(--s-4);
 }
 
+.closing__actions .btn {
+  width: 100%;
+}
+
 .closing__deposit {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
+  display: grid;
+  justify-items: center;
 }
 
 .closing .deposit__note {
   margin: var(--s-2) 0 0;
+  max-width: 100%;   /* the width of the button above it: two lines, centred under it */
   text-align: center;
   color: var(--on-aubergine);
   opacity: 0.85;
+}
+
+@media (min-width: 640px) {
+  .closing__actions {
+    grid-template-columns: repeat(2, var(--cta-width));
+  }
 }
 
 .closing .btn--outline {

@@ -9,7 +9,7 @@ const copy = () => structuredClone(content);
 const errorsOf = (c) => checkContent(c, { photos }).errors;
 const hasError = (errors, at) => errors.some((error) => error.startsWith(`${at}:`));
 
-const DRAFTS = ['who.items', 'shift.heading', 'promise.diagram', 'package.stats', 'proof.stats', 'proof.shift_visual', 'logistics.cards', 'logistics.timeline'];
+const DRAFTS = [];   // every draft mark was lifted on 16 November; the mechanism stays for later texts
 
 test('the real content file passes: no errors, no long dashes; the only TODO is the empty site_url', () => {
   const result = checkContent(content, { photos, raw });
@@ -19,16 +19,19 @@ test('the real content file passes: no errors, no long dashes; the only TODO is 
   assert.equal(report(content, result).ok, true);
 });
 
-test('drafts: the eight groups marked in the yaml, with their notes; the approved headings, the name, the spots lines and the quotes carry none', () => {
+test('drafts: no mark is left in the yaml since 16 November; a mark on a key or a list still resolves, with its note', () => {
   const { drafts, problems } = findDrafts(raw, content);
   assert.deepEqual(problems, []);
   assert.deepEqual(drafts.map((draft) => draft.path), DRAFTS);
-  assert.equal(drafts[0].value.length, 4, 'the whole who list is one draft');
-  assert.ok(drafts[0].note.startsWith('the short titles come from'));
-  assert.deepEqual(drafts[2].value.inputs, content.promise.diagram.inputs);
-  assert.deepEqual(drafts[5].value.from, content.proof.shift_visual.from);
-  assert.equal(drafts[7].value.length, 4);
-  for (const at of ['hero.name', 'proof.heading', 'logistics.heading', 'pricing.total_spots', 'pricing.tiers[1].spots', 'pricing.tiers[2].spots']) assert.ok(!drafts.some((draft) => draft.path === at), `${at} is approved`);
+  assert.ok(!raw.includes('# draft'));
+  const marked = raw
+    .replace('heading: "The shift we work toward"', 'heading: "The shift we work toward"   # draft: a heading of ours')
+    .replace('\n  stats:\n    - { value: "15"', '\n  stats:   # draft\n    - { value: "15"');
+  const again = findDrafts(marked, content);
+  assert.deepEqual(again.problems, []);
+  assert.deepEqual(again.drafts.map((draft) => draft.path), ['shift.heading', 'proof.stats']);
+  assert.equal(again.drafts[0].note, 'a heading of ours');
+  assert.equal(again.drafts[1].value.length, 2, 'the whole list is one draft');
   assert.ok(!('intro' in content.promise), 'the Promise intro left with the Problem repetition');
 });
 
@@ -133,7 +136,9 @@ test('published: true with a TODO or a draft left stops the build', () => {
   d.meta.published = true;
   d.meta.site_url = 'https://program.juliakrylova.com';
   assert.equal(report(d, checkContent(d, { photos })).ok, true, 'no TODO left and no draft markers known: ok');
-  const withDrafts = report(d, checkContent(d, { photos, raw }));
+  assert.equal(report(d, checkContent(d, { photos, raw })).ok, true, 'the real yaml carries no draft mark any more');
+  const marked = raw.replace('heading: "The shift we work toward"', 'heading: "The shift we work toward"   # draft');
+  const withDrafts = report(d, checkContent(d, { photos, raw: marked }));
   assert.equal(withDrafts.ok, false);
   assert.ok(withDrafts.lines.some((line) => line.includes('draft markers remain')));
 });

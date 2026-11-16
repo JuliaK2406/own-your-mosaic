@@ -55,6 +55,7 @@
   --radius: 10px;
   --radius-tile: 3px;
   --button-height: 52px;
+  --cta-width: 16rem;        /* the paired buttons of the closing band and the buttons under the tiers */
   --touch-min: 44px;
   --topbar-height: 64px;
 }
