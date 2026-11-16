@@ -22,9 +22,14 @@
 //   big (--set big, PROMPT 04e): the first screen at every width up to 1920, 360 and 1440 whole,
 //                                  1440 without tiles from a temporary build; the summary gives
 //                                  the photo size, the title-to-button height and the line lengths
-//   group (--set group, PROMPT 04c): What I bring with its photo at 390 and 1440, the band with
-//                                  the group photo (end of What I bring to the start of Practical
+//   group (--set group, PROMPT 04c): the approach cards with their photo at 390 and 1440, the band
+//                                  with the group photo (end of the cards to the start of Practical
 //                                  details) at 390, 1440 and 1920, 360 and 1440 whole
+//   cohort (--set cohort, 16 Nov, Julia's document): full pages at 360, 390 and 1440, the first
+//                                  screen and every changed block (Problem, Roadmap, Method,
+//                                  What's included, Pricing, Meet your mentor, the approach cards,
+//                                  Practical details, Good to know, the closing band) at 390 and
+//                                  1440, the top bar at 900; 834 and 1280 checked only
 // Checks on the way: no horizontal overflow (scrollWidth equals clientWidth), Lora and Inter
 // loaded from the site itself, not one request to another origin, every photo loaded
 // (naturalWidth above zero), on the phone the title and subtitle are on the first screen and
@@ -67,9 +72,10 @@ export const SETS = {
   hand: { 360: ['full'], 390: ['hero'], 834: [], 900: ['hero'], 1280: [], 1440: ['full', 'hero'] },
   big: { 360: ['full'], 390: ['hero'], 834: ['hero'], 900: ['hero'], 1280: ['hero'], 1440: ['full', 'hero'], 1920: ['hero'] },
   buttons: { 360: ['full'], 390: ['hero', 'shift', 'promise', 'method', 'package', 'pricing', 'logistics', 'closing'], 834: [], 900: ['topbar'], 1280: ['topbar'], 1440: ['full', 'hero', 'shift', 'promise', 'method', 'package', 'pricing', 'logistics', 'closing'] },
+  cohort: { 360: ['full'], 390: ['full', 'hero', 'problem', 'promise', 'method', 'package', 'pricing', 'mentor', 'approach', 'logistics', 'faq', 'closing'], 834: [], 900: ['topbar'], 1280: [], 1440: ['full', 'hero', 'problem', 'promise', 'method', 'package', 'pricing', 'mentor', 'approach', 'logistics', 'faq', 'closing'] },
   live: { 390: ['hero'], 1440: ['hero', 'group'] },
 };
-const BLOCKS = { topbar: '.topbar', who: '.who', shift: '.shift', problem: '.problem', promise: '.promise', method: '.process', process: '.process', package: '.package', pricing: '.pricing', mentor: '.proof', bring: '.bring', logistics: '.logistics', closing: '.closing' };
+const BLOCKS = { topbar: '.topbar', who: '.who', shift: '.shift', problem: '.problem', promise: '.promise', method: '.process', process: '.process', package: '.package', pricing: '.pricing', mentor: '.proof', bring: '.approach', approach: '.approach', logistics: '.logistics', faq: '.faq', closing: '.closing' };
 
 // Scrolls through the page so the lazy photos load, then back to the top. The page scrolls
 // smoothly for people, so the script scrolls instantly, or the lazy photo is never reached.
@@ -155,7 +161,7 @@ function facts(page) {
       })(),
       todoTags: document.querySelectorAll('.tag--todo').length,
       draftTags: document.querySelectorAll('.tag--draft').length,
-      fonts: { h1: size('h1'), h2: size('h2'), h3: size('h3'), heroParagraph: size('.hero__body p'), body: size('.package__list li'), statement: size('.problem__text'), caps: size('.hero__positioning'), price: size('.tier__amount'), quote: size('.quote__text') },
+      fonts: { h1: size('h1'), h2: size('h2'), h3: size('h3'), heroParagraph: size('.hero__body p'), body: size('.faq__a'), statement: size('.problem__text'), caps: size('.hero__positioning'), price: size('.tier__amount'), quote: size('.quote__text') },
       h1Lines: h1 ? Math.round(h1.getBoundingClientRect().height / parseFloat(getComputedStyle(h1).lineHeight)) : null,
       mentor: photos && lastParagraph && getComputedStyle(photos).display !== 'contents' ? { photosBottom: Math.round(photos.getBoundingClientRect().bottom + window.scrollY), textBottom: Math.round(lastParagraph.getBoundingClientRect().bottom + window.scrollY), sticky: getComputedStyle(photos).position } : null,
       heroFieldOverlapsText: field.some((f) => heroText.some((t) => intersects(f, t))),

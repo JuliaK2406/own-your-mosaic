@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { seeded, porcelainTile, bandTile, flyTile, cornerGroup, heroGroup, HERO_GROUP_SEED, bandVariant, bandSprite, bandUse, allMosaics, COLOURS, BAND_VARIANTS, BORDER_Y } from '../src/render/mosaic.mjs';
+import { seeded, porcelainTile, bandTile, flyTile, cornerGroup, heroGroup, HERO_GROUP_SEED, bandVariant, bandSprite, bandUse, allMosaics, COLOURS, BAND_VARIANTS, BORDER_Y, PATH, PATH_PATTERN, PATH_AFTER_SIZE, pathNowTiles, pathAfterTiles, pathNow, pathAfter } from '../src/render/mosaic.mjs';
 
 const rects = (svg) => [...svg.matchAll(/<rect x="(-?\d+)" y="(-?\d+)" width="(\d+)" height="(\d+)" rx="6" fill-opacity="([.\d]+)"\/>/g)].map((m) => ({ x: Number(m[1]), y: Number(m[2]), w: Number(m[3]), h: Number(m[4]), opacity: Number(m[5]) }));
 const fills = (svg) => [...svg.matchAll(/fill="(#[0-9A-Fa-f]{6})"/g)].map((m) => m[1]);
@@ -92,4 +92,42 @@ test('the band drawings: five widths; over the border only aubergine within the 
   assert.ok(sprite.startsWith('<svg class="mosaic-sprite" aria-hidden="true"'));
   for (const name of Object.keys(BAND_VARIANTS)) assert.ok(sprite.includes(`<symbol id="band-${name}" viewBox="0 0 ${BAND_VARIANTS[name].width} ${BAND_VARIANTS[name].height}">`));
   assert.ok(bandUse('wide', 'right').includes('<use href="#band-wide" transform="translate(292 0) scale(-1 1)"/>'));
+});
+
+test('the tiles picture of the Problem band: sixteen tiles scattered and turned, every corner inside the field, none closer than PATH.apart; the same sixteen as a whole 4 x 4 mosaic; brand colours only; the same every build', () => {
+  const now = pathNowTiles();
+  const after = pathAfterTiles();
+  assert.equal(now.length, 16);
+  assert.equal(after.length, 16);
+  assert.deepEqual(now.map((t) => t.fill), after.map((t) => t.fill), 'the same tiles, in the same order');
+  assert.deepEqual([...new Set(after.map((t) => t.fill))].sort(), [COLOURS.aubergine, COLOURS.champagne, COLOURS.warmGrey].sort());
+  assert.equal(PATH_PATTERN.length, 16);
+  const half = PATH.tile / 2;
+  now.forEach((t, i) => {
+    assert.ok(Math.abs(t.angle) <= PATH.turn && t.angle !== 0, `tile ${i} is turned (${t.angle})`);
+    const a = (t.angle * Math.PI) / 180;
+    for (const [dx, dy] of [[-half, -half], [half, -half], [half, half], [-half, half]]) {
+      const x = t.cx + dx * Math.cos(a) - dy * Math.sin(a);
+      const y = t.cy + dx * Math.sin(a) + dy * Math.cos(a);
+      assert.ok(x >= 0 && x <= PATH.field && y >= 0 && y <= PATH.field, `tile ${i}: a corner at ${x.toFixed(1)},${y.toFixed(1)} lies outside the ${PATH.field} px field`);
+    }
+    for (let j = 0; j < i; j += 1) {
+      assert.ok(Math.hypot(now[j].cx - t.cx, now[j].cy - t.cy) >= PATH.apart, `tiles ${j} and ${i} are closer than ${PATH.apart} px`);
+    }
+  });
+  after.forEach((t, i) => {
+    assert.equal(t.angle, 0);
+    assert.ok(t.cx - half >= 0 && t.cx + half <= PATH_AFTER_SIZE && t.cy - half >= 0 && t.cy + half <= PATH_AFTER_SIZE, `mosaic tile ${i} inside`);
+    assert.equal(t.cx - half, (i % 4) * (PATH.tile + PATH.gap));
+    assert.equal(t.cy - half, Math.floor(i / 4) * (PATH.tile + PATH.gap));
+  });
+  for (const svg of [pathNow(), pathAfter()]) {
+    assert.ok(svg.startsWith('<svg class="picture picture--') && svg.includes('aria-hidden="true"') && !svg.includes('slice'));
+    assert.equal((svg.match(/<rect /g) || []).length, 16);
+    for (const fill of fills(svg)) assert.ok([COLOURS.aubergine, COLOURS.champagne, COLOURS.warmGrey].includes(fill), fill);
+    assert.ok(!/<(image|script|text|foreignObject)\b/.test(svg));
+  }
+  assert.equal(pathNow(), pathNow(), 'the same picture every build');
+  assert.ok(pathNow().includes('transform="rotate(') && !pathAfter().includes('rotate('));
+  assert.equal(pathAfter().match(/viewBox="0 0 (\d+) (\d+)"/)[1], String(PATH_AFTER_SIZE));
 });

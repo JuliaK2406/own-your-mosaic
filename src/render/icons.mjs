@@ -15,21 +15,20 @@ export const ICONS = {
   'who-1': 'trending-up',      // Ready for bigger
   'who-2': 'eye-off',          // The best-kept secret: not seen
   'who-3': 'clipboard-check',  // A plan for everyone but you
-  // What's included
-  'package-0': 'users',           // eight weekly group sessions
-  'package-1': 'user',            // a private 1:1 session
-  'package-2': 'search',          // the diagnostic: a starting-point assessment
-  'package-3': 'lightbulb',       // teaching, tools, live Q&A and masterminds
-  'package-4': 'message-circle',  // your own questions and challenges
-  'package-5': 'book-open',       // a library of tools and resources
-  'package-6': 'messages-square', // a private community chat
-  'package-7': 'circle-play',     // session recordings
-  // What I bring
-  'strength-0': 'eye',           // Vision
-  'strength-1': 'chart-column',  // Strategy
-  'strength-2': 'lightbulb',     // Creative thinking
-  'strength-3': 'briefcase',     // Resourcefulness
-  'strength-4': 'target',        // Strategic focus
+  // Roadmap (slide 8)
+  'together': 'star',          // And you won't do it alone
+  // What's included (slide 7)
+  'package-0': 'users',           // 8 live sessions
+  'package-1': 'search',          // your personal diagnostic
+  'package-2': 'lightbulb',       // masterminds
+  'package-3': 'book-open',       // online tools library
+  'package-4': 'message-circle',  // active group chat
+  'package-5': 'circle-play',     // session recordings
+  'package-after': 'star',        // after week 8
+  // What makes my approach different
+  'approach-0': 'clapperboard',    // a producer's perspective
+  'approach-1': 'layers',          // one integrated method
+  'approach-2': 'heart-handshake', // practical mentoring with genuine care
   // Practical details
   'card-0': 'calendar-days',  // 8 weeks
   'card-1': 'clock',          // Weekday evenings

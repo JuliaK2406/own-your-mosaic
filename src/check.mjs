@@ -5,7 +5,7 @@
 //            Shown as a yellow tag on the page while meta.published is false.
 //   # draft  a text we wrote ourselves that Julia has not approved yet: an inline "# draft"
 //            comment on the line of the value. Shown as an aubergine "draft" tag on the page.
-//            On a key that opens a list (stats:   # draft) it marks the whole list.
+//            On a key that opens a list (items:   # draft) it marks the whole list.
 //
 // Both are only reminders while meta.published is false. With published: true any TODO or
 // draft stops the build, so unfinished text never reaches the published page.
@@ -53,51 +53,48 @@ const SHAPE = {
   hero: {
     title: 'string',
     subtitle: 'string',
-    tagline: 'string',
     name: 'string',
     positioning: 'string',
-    paragraphs: 'list',
+    opening: 'string',
+    supporting: 'string',
     facts: 'list:3',
     photo: 'file',
     photo_alt: 'text',
   },
   who: { heading: 'string', items: [{ title: 'string', text: 'string' }, 4] },
   shift: { heading: 'string', from_label: 'string', to_label: 'string', items: [{ from: 'string', to: 'string' }, 4] },
-  problem: { statement: 'string', statement_more: 'string' },
+  problem: { now_label: 'string', after_label: 'string', quote: 'string', author: 'string', source: 'string' },
   promise: {
+    label: 'string',
     heading: 'string',
-    paragraphs: 'list',
-    diagram: { inputs_label: 'string', inputs: 'list:4', result: 'string' },
-    outcomes_intro: 'string',
-    outcomes: 'list:4',
+    inputs_label: 'string',
+    inputs: 'list:4',
+    list_heading: 'string',
+    outcomes: [{ lead: 'string', text: 'string' }, 4],
+    together: { lead: 'string', text: 'string' },
   },
   process: {
     heading: 'string',
     intro: 'string',
-    levels_intro: 'string',
     start_label: 'string',
     start_weeks: 'string',
     finish_label: 'string',
     finish_weeks: 'string',
     levels: [{ name: 'string', weeks: 'string', text: 'string' }, 3],
   },
-  package: { heading: 'string', stats: [{ value: 'string', label: 'string' }, 4], items: 'list:8' },
+  package: { heading: 'string', items: [{ title: 'string', text: 'string' }, 6], after_label: 'string', after_text: 'string' },
   pricing: {
     heading: 'string',
     subheading: 'string',
     total_spots: 'string',
     vat_label: 'string',
-    tiers: [{ name: 'string', price: 'string', spots: 'text', text: 'string' }, 3],
-    note: 'string',
+    tiers: [{ name: 'string', was: 'string', price: 'string', spots: 'text', text: 'string' }, 3],
+    founding_note: 'string',
+    invoice_note: 'string',
   },
   proof: {
     heading: 'string',
-    stats: [{ value: 'string', label: 'string' }, 2],
     paragraphs: 'list',
-    strengths_intro: 'string',
-    strengths: 'list:5',
-    mentoring: 'string',
-    shift_visual: { from: 'list:3', to: 'string' },
     mentoring_photo: 'file',
     mentoring_photo_alt: 'string',
     photo: 'file',
@@ -105,20 +102,23 @@ const SHAPE = {
     group_photo: 'file',
     group_photo_alt: 'string',
   },
+  approach: { heading: 'string', items: [{ title: 'string', text: 'string' }, 3] },
   quotes: [{ at: 'string', name: 'string', role: 'string', company: 'string', text: 'list' }],
   logistics: {
     heading: 'string',
     cards: [{ value: 'string', label: 'string' }, 3],
-    timeline: [{ when: 'string', title: 'string', text: 'string' }, 4],
+    timeline: [{ when: 'text', title: 'string', text: 'string' }, 4],
   },
-  closing: { text: 'string' },
+  faq: { label: 'string', heading: 'string', items: [{ q: 'string', a: 'string' }, 6] },
+  closing: { heading: 'string', text: 'string', line: 'string' },
   footer: { legal_line: 'string', main_site_label: 'string' },
 };
 
 // The only values that may be empty: the final address until the subdomain is chosen, the photo
-// descriptions, and the spots line of a tier (Core has none).
+// descriptions, the spots line of a tier (Core has none) and the date of a timeline step (the
+// payment carries none, Julia's call of 16 Nov).
 const EMPTY_ALLOWED = new Set(['meta.site_url', 'hero.photo_alt', 'proof.photo_alt']);
-const EMPTY_ALLOWED_PATTERNS = [/^pricing\.tiers\[\d+\]\.spots$/];
+const EMPTY_ALLOWED_PATTERNS = [/^pricing\.tiers\[\d+\]\.spots$/, /^logistics\.timeline\[\d+\]\.when$/];
 const emptyAllowed = (at) => EMPTY_ALLOWED.has(at) || EMPTY_ALLOWED_PATTERNS.some((pattern) => pattern.test(at));
 // Fields that name a photo in content/photos.
 const PHOTO_FIELDS = ['hero.photo', 'proof.photo', 'proof.mentoring_photo', 'proof.group_photo'];

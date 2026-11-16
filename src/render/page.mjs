@@ -1,42 +1,42 @@
 // The HTML of the page, built from content/offer.yaml with plain template strings: no framework,
 // no script on the page. Every text goes through esc() (HTML escaping) or rich() (escaping plus
-// **bold**). No word on the page is written here: the texts come from the yaml, the photo
-// descriptions from its photo_alt fields. The only additions are the draft tags, shown while
-// meta.published is false, the decorative mosaics (src/render/mosaic.mjs) and the line icons
-// (src/render/icons.mjs, Lucide).
+// **bold** and *italic*). No word on the page is written here: the texts come from the yaml, the
+// photo descriptions from its photo_alt fields. The only additions are the draft tags, shown
+// while meta.published is false, the decorative mosaics and the tiles picture of the Problem
+// band (src/render/mosaic.mjs) and the line icons (src/render/icons.mjs, Lucide).
 
-import { heroGroup, bandSprite, bandSvgs } from './mosaic.mjs';
+import { heroGroup, bandSprite, bandSvgs, pathNow, pathAfter } from './mosaic.mjs';
 import { icon } from './icons.mjs';
 
 export const OG_IMAGE_FILE = 'og-image.png';
+export const OG_WIDTH = 1200;
+export const OG_HEIGHT = 627;
 // Tracking tags added to the Calendly address, so Julia sees where a booking came from
 // (Calendly: Calendar, Filter, Tracking IDs). utm_content names the place on the page.
+// utm_campaign keeps its first value: it is a filter key in Calendly, not a text of the page.
 export const UTM = { utm_source: 'own-your-mosaic', utm_medium: 'page', utm_campaign: 'pilot-2027' };
 export const BUTTON_PLACES = ['topbar', 'hero', 'pricing', 'closing'];
 // The places of the two deposit buttons (never the first screen or the top bar).
 export const DEPOSIT_PLACES = ['pricing', 'closing'];
-// The blocks that can take a client's quote (quotes[].at in the yaml).
-export const QUOTE_BLOCKS = ['shift', 'promise', 'process', 'package', 'pricing', 'logistics'];
+// The blocks that can take a client's quote (quotes[].at in the yaml). The Roadmap takes none
+// since 16 Nov: its layout follows Julia's slide 8.
+export const QUOTE_BLOCKS = ['shift', 'process', 'package', 'pricing', 'logistics'];
 // Tiles on the first screen: 'detached' = a small group in the top-right corner of the block,
 // away from the photo; 'none' = no tiles there. Julia asked for them away from the photo.
 export const HERO_TILES = 'detached';
 
-// The four small tiles of the Promise diagram, from light to deep, and the 3 x 3 brand sign
-// (the same shades as the favicon and the Snapshot icon) before its result line.
-export const DIAGRAM_ALPHAS = [0.3, 0.5, 0.75, 1];
-export const SIGN_ALPHAS = [1, 0.45, 0.8, 0.3, 0.9, 0.55, 0.7, 0.2, 1];
-
 export const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
-// **word** becomes <strong>word</strong>; this is the only markup allowed inside a text.
-export const rich = (s) => esc(s).replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+// **word** becomes <strong>word</strong>, *word* becomes <em>word</em> (a book title); this is
+// the only markup allowed inside a text.
+export const rich = (s) => esc(s).replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>').replace(/\*(.+?)\*/g, '<em>$1</em>');
 
 const paragraphs = (list, render = esc, className = '') => list.map((text) => `<p${className ? ` class="${className}"` : ''}>${render(text)}</p>`).join('\n');
-const tiles = (alphas, className) => `<span class="${className}" aria-hidden="true">${alphas.map((alpha) => `<span style="--alpha: ${alpha}"></span>`).join('')}</span>`;
 const draftTag = (ctx, at) => (!ctx.published && ctx.drafts.has(at) ? ' <span class="tag tag--draft">draft</span>' : '');
 // A draft tag on its own line, above a group that has no heading of its own (unpublished only).
 const draftLine = (ctx, at) => (draftTag(ctx, at) ? `<p class="draft-line">${draftTag(ctx, at).trim()}</p>` : '');
 const circle = (place, className) => `<span class="circle ${className}" aria-hidden="true">${icon(place)}</span>`;
-// A thin gold arrow (the sign of the shift): points right, CSS turns it down on the phone.
+// A thin gold arrow (the sign of the shift, and of the founding price): points right, CSS turns
+// it down on the phone where the shift rows stack.
 const ARROW = '<svg class="arrow" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M4 12h15"/><path d="m13 6 6 6-6 6"/></svg>';
 
 // The address of a tagged link (the Calendly booking, the Stripe deposit) with the tracking
@@ -69,8 +69,8 @@ export function depositButton(ctx, place) {
 // A client's quote (quotes[] in the yaml), printed by the block that quotes[].at names: the
 // mark, the paragraphs in Lora, the name and, under it, the role and the company. A block with
 // no quote prints nothing. The figure takes the full width of the block's content; compact:
-// true gives the smaller variant for a column, wrap names a div to hold the figures (one grid
-// item in a block whose container is a grid).
+// true gives the smaller variant for a column, wrap names a div to hold the figures (two
+// quotes side by side under What's included).
 function quotesIn(ctx, at, { wrap = '', compact = false } = {}) {
   const figures = ctx.content.quotes.filter((q) => q.at === at).map((q) => `    <figure class="quote${compact ? ' quote--compact' : ''}">
       <span class="quote__mark" aria-hidden="true">&ldquo;</span>
@@ -130,8 +130,8 @@ function head(ctx) {
       `<link rel="canonical" href="${esc(site)}/">`,
       `<meta property="og:url" content="${esc(site)}/">`,
       `<meta property="og:image" content="${esc(site)}/${OG_IMAGE_FILE}">`,
-      '<meta property="og:image:width" content="1200">',
-      '<meta property="og:image:height" content="627">',
+      `<meta property="og:image:width" content="${OG_WIDTH}">`,
+      `<meta property="og:image:height" content="${OG_HEIGHT}">`,
       `<meta property="og:image:alt" content="${esc(`${hero.title}: ${hero.subtitle}`)}">`,
       '<meta name="twitter:card" content="summary_large_image">',
     );
@@ -153,12 +153,13 @@ function topbar(ctx) {
 </header>`;
 }
 
-// The first screen: name and positioning in a row of their own; then the title, subtitle and
-// tagline with the photo beside them from 900 px (its top on the line of the title, its
-// proportion from its file, its right edge past the content toward the window edge); the
-// paragraphs, the button and the facts strip (navy, three cells in one row where the column
-// is wide enough; the wrapper is the size container the strip queries). The tiles, if
-// any, stand alone in the top-right corner of the block at the window edge.
+// The first screen: name and positioning in a row of their own; then the title and subtitle
+// with the photo beside them from 900 px (its top on the line of the title, its proportion
+// from its file, its right edge past the content toward the window edge); the opening (Julia's
+// document of 16 Nov, the first words of her deck) with the supporting copy under it, the
+// button and the facts strip (navy, three cells in one row where the column is wide enough;
+// the wrapper is the size container the strip queries). The tiles, if any, stand alone in the
+// top-right corner of the block at the window edge.
 function hero(ctx) {
   const h = ctx.content.hero;
   const group = ctx.heroTiles === 'none' ? '' : `  <span class="hero__tiles hero__tiles--wide" aria-hidden="true">${heroGroup()}</span>
@@ -173,13 +174,13 @@ ${group}  <div class="container hero__grid">
     <div class="hero__head">
       <h1 id="hero-title" class="hero__title">${esc(h.title)}</h1>
       <p class="hero__subtitle">${esc(h.subtitle)}</p>
-      <p class="hero__tagline lead">${esc(h.tagline)}</p>
     </div>
     <div class="hero__photo" style="--photo-ratio: ${photoRatio(ctx, h.photo)}">
       ${picture(ctx, h.photo, { alt: h.photo_alt, eager: true, sizes: '(min-width: 1440px) 512px, (min-width: 1280px) calc(50vw - 206px), (min-width: 1200px) calc(50vw - 150px), (min-width: 900px) calc(38.1vw - 16px), (min-width: 540px) 480px, calc(100vw - 48px)' })}
     </div>
     <div class="hero__body">
-      ${paragraphs(h.paragraphs, esc, 'lead')}
+      <p class="hero__opening lead">${esc(h.opening)}</p>
+      <p class="hero__supporting">${esc(h.supporting)}</p>
       <div class="hero__cta">${registerButton(ctx, 'hero')}</div>
       <div class="facts-box">
         <ul class="facts">
@@ -229,54 +230,67 @@ ${rows}
 </section>`;
 }
 
-// Problem: a navy band across the window, a gold rule, the statement in Lora, the rest in
-// Lora italic in champagne.
+// Problem: a navy band across the window with the right part of Julia's slide 2. The picture:
+// "now", the sixteen tiles scattered and turned, a dotted line, and "after 8 weeks", the same
+// tiles as one whole mosaic (both drawn by src/render/mosaic.mjs, no picture file). Beside it
+// the quote of Adam Grant in Lora italic in champagne, a gold rule above, the author and the
+// book under it.
 function problem(ctx) {
   const p = ctx.content.problem;
-  return `<section class="problem band band--navy">
+  return `<section class="problem band band--navy" aria-label="${esc(p.quote)}">
   <div class="container problem__inner">
-    <span class="rule" aria-hidden="true"></span>
-    <p class="problem__text">${esc(p.statement)}</p>
-    <p class="problem__more">${esc(p.statement_more)}</p>
+    <div class="problem__picture">
+      <div class="problem__now">
+        <p class="problem__label caps">${esc(p.now_label)}</p>
+        ${pathNow()}
+      </div>
+      <div class="problem__after">
+        <p class="problem__label caps">${esc(p.after_label)}</p>
+        ${pathAfter()}
+      </div>
+    </div>
+    <figure class="problem__quote">
+      <span class="rule" aria-hidden="true"></span>
+      <blockquote class="problem__text"><p>${esc(p.quote)}</p></blockquote>
+      <figcaption class="problem__by caps">${esc(p.author)}, <cite>${esc(p.source)}</cite></figcaption>
+    </figure>
   </div>
 </section>`;
 }
 
-// Promise: the heading and the paragraph as a lead, and under them, in the same column, the
-// quote that speaks about the roadmap (compact, the width of the column); on the right the
-// diagram card: four inputs with tiles, a gold stem to the result behind the brand sign, then
-// the four outcomes with numbers in aubergine circles. On the phone: text, card, quote.
+// Roadmap: an aubergine band after Julia's slide 8. On the left the label, the heading "What
+// you walk away with", the second label and the four inputs as filled tiles (champagne, navy,
+// a lighter aubergine, gold). On the right the title of the list in champagne, the four numbered
+// points, each with its lead in champagne, on a thin line, and under a rule the line about the
+// circle with a star. One column on the phone: the left part, then the right.
 function promise(ctx) {
   const p = ctx.content.promise;
-  const d = p.diagram;
-  const inputs = d.inputs.map((text, i) => `        <li class="diagram__input"><span class="diagram__tile" style="--alpha: ${DIAGRAM_ALPHAS[i] ?? 1}" aria-hidden="true"></span><span class="diagram__word">${esc(text)}</span></li>`).join('\n');
-  const outcomes = p.outcomes.map((text, i) => `        <li><span class="diagram__number" aria-hidden="true">${i + 1}</span><span>${esc(text)}</span></li>`).join('\n');
-  return `<section class="section promise" aria-labelledby="promise-title">
+  const inputs = p.inputs.map((text, i) => `        <li class="inputs__tile inputs__tile--${i + 1}">${esc(text)}</li>`).join('\n');
+  const outcomes = p.outcomes.map((item, i) => `        <li class="roadmap__item"><span class="roadmap__number" aria-hidden="true">${i + 1}</span><p><strong>${esc(item.lead)}</strong> ${esc(item.text)}</p></li>`).join('\n');
+  return `<section class="section promise band band--aubergine" aria-labelledby="promise-title">
   <div class="container promise__grid">
     <div class="promise__copy">
-      <h2 id="promise-title">${esc(p.heading)}</h2>
-      ${paragraphs(p.paragraphs, esc, 'lead')}
-    </div>
-    <div class="diagram">
-      <p class="diagram__label caps">${esc(d.inputs_label)}${draftTag(ctx, 'promise.diagram')}</p>
-      <ul class="diagram__inputs">
+      <p class="promise__label caps">${esc(p.label)}</p>
+      <h2 id="promise-title">${esc(p.heading)}${draftTag(ctx, 'promise.heading')}</h2>
+      <p class="promise__label promise__label--inputs caps">${esc(p.inputs_label)}</p>
+      <ul class="inputs">
 ${inputs}
       </ul>
-      <div class="diagram__join" aria-hidden="true"><span class="diagram__stem"></span><span class="diagram__dot"></span></div>
-      <p class="diagram__result">${tiles(SIGN_ALPHAS, 'diagram__sign')}<span class="diagram__title">${esc(d.result)}</span></p>
-      <span class="diagram__rule" aria-hidden="true"></span>
-      <p class="diagram__label diagram__label--outcomes">${esc(p.outcomes_intro)}</p>
-      <ol class="diagram__outcomes">
+    </div>
+    <div class="roadmap">
+      <h3 class="roadmap__title">${esc(p.list_heading)}</h3>
+      <ol class="roadmap__list">
 ${outcomes}
       </ol>
-    </div>${quotesIn(ctx, 'promise', { wrap: 'promise__quote', compact: true })}
+      <p class="roadmap__together">${circle('together', 'circle--outline')}<span><strong>${esc(p.together.lead)}</strong> ${esc(p.together.text)}</span></p>
+    </div>
   </div>
 </section>`;
 }
 
 // The path: start label, three level cards, finish label, joined by a thin line (vertical on
 // the phone, horizontal from 900 px), with the weeks above every point. The cards carry the
-// colours of Julia's pyramid: champagne, navy, aubergine.
+// colours of Julia's pyramid: champagne, navy, aubergine. Texts after her slide 4.
 function process(ctx) {
   const p = ctx.content.process;
   const levels = p.levels.map((level, i) => `        <li class="path__step">
@@ -291,7 +305,7 @@ function process(ctx) {
   <div class="container">
     <h2 id="process-title">${esc(p.heading)}</h2>
     <p class="lead">${esc(p.intro)}</p>
-    <p>${esc(p.levels_intro)}</p>
+    ${draftLine(ctx, 'process.levels')}
     <div class="path">
       <div class="path__end path__end--start"><span class="path__dot" aria-hidden="true"></span><span class="path__weeks caps">${esc(p.start_weeks)}</span><span class="path__end-label caps">${esc(p.start_label)}</span></div>
       <ol class="path__levels">
@@ -303,28 +317,40 @@ ${levels}
 </section>`;
 }
 
-// What's included: the stats band (navy, four cells) and the eight points with icons in
-// aubergine circles.
+// What's included, after Julia's slide 7: six tiles, each with an icon in an aubergine circle,
+// a title in Lora and a line under it; then the champagne strip "after week 8" with a star;
+// then, side by side from 900 px, the two quotes that stand between this block and the prices.
 function pack(ctx) {
   const p = ctx.content.package;
-  const stats = p.stats.map((stat) => `      <li><span class="stats__value">${esc(stat.value)}</span><span class="stats__label">${esc(stat.label)}</span></li>`).join('\n');
-  const items = p.items.map((text, i) => `      <li>${circle(`package-${i}`, 'circle--aubergine')}<span>${esc(text)}</span></li>`).join('\n');
+  const items = p.items.map((item, i) => `      <li class="included__item">
+        ${circle(`package-${i}`, 'circle--aubergine')}
+        <div>
+          <h3 class="included__title">${esc(item.title)}</h3>
+          <p class="included__text">${esc(item.text)}</p>
+        </div>
+      </li>`).join('\n');
   return `<section class="section package" aria-labelledby="package-title">
   <div class="container">
     <h2 id="package-title">${esc(p.heading)}</h2>
-    ${draftLine(ctx, 'package.stats')}
-    <ul class="stats">
-${stats}
-    </ul>
-    <ul class="package__list">
+    ${draftLine(ctx, 'package.items')}
+    <ul class="included">
 ${items}
-    </ul>${quotesIn(ctx, 'package')}
+    </ul>
+    <div class="after-week">
+      ${circle('package-after', 'circle--aubergine')}
+      <div>
+        <p class="after-week__label caps">${esc(p.after_label)}</p>
+        <p class="after-week__text">${esc(p.after_text)}</p>
+      </div>
+    </div>${quotesIn(ctx, 'package', { wrap: 'package__quotes' })}
   </div>
 </section>`;
 }
 
-// Pricing: three filled cards (champagne, navy, aubergine) with a gold line on top, the spots
-// under the price where a tier has them, the total above the cards. Under the cards the note
+// Pricing, after Julia's slide 9: the cohort line in capitals above the heading, three filled
+// cards (champagne, navy, aubergine) with a gold line on top, in each the first price struck
+// through, a gold arrow and the founding price, then "+ VAT" with the spots where a tier has
+// them, and the text with its bold words. Under the cards the founding note, the invoice line
 // and the call button; beside them, for those who have decided, the deposit: a lead line, the
 // outline button and its note.
 function pricing(ctx) {
@@ -333,20 +359,22 @@ function pricing(ctx) {
   const kinds = ['core', 'plus', 'premium'];
   const tiers = p.tiers.map((tier, i) => `      <li class="tier tier--${kinds[i] || 'core'}">
         <h3 class="tier__name">${esc(tier.name)}</h3>
-        <p class="tier__price"><span class="tier__amount">${esc(tier.price)}</span> <span class="tier__vat">${esc(p.vat_label)}</span></p>
-${String(tier.spots || '').trim() ? `        <p class="tier__spots">${esc(tier.spots)}</p>\n` : ''}        <p class="tier__text">${esc(tier.text)}</p>
+        <p class="tier__price"><s class="tier__was">${esc(tier.was)}</s> <span class="tier__now"><span class="tier__arrow" aria-hidden="true">${ARROW}</span><span class="tier__amount">${esc(tier.price)}</span></span></p>
+        <p class="tier__terms">${esc(p.vat_label)}${String(tier.spots || '').trim() ? ` · ${esc(tier.spots)}` : ''}</p>
+        <p class="tier__text">${rich(tier.text)}</p>
       </li>`).join('\n');
   return `<section class="section section--deep pricing" aria-labelledby="pricing-title">
   <div class="container">
+    <p class="pricing__label caps">${esc(p.subheading)} · ${esc(p.total_spots)}${draftTag(ctx, 'pricing.subheading')}</p>
     <h2 id="pricing-title">${esc(p.heading)}</h2>
-    <p class="pricing__sub">${esc(p.subheading)}</p>
-    <p class="pricing__total caps">${esc(p.total_spots)}${draftTag(ctx, 'pricing.total_spots')}</p>
+    ${draftLine(ctx, 'pricing.tiers')}
     <ul class="tiers">
 ${tiers}
     </ul>
     <div class="pricing__actions">
       <div class="pricing__call">
-        <p class="pricing__note">${esc(p.note)}</p>
+        <p class="pricing__note">${rich(p.founding_note)}</p>
+        <p class="pricing__invoice">${esc(p.invoice_note)}</p>
         <div class="pricing__cta">${registerButton(ctx, 'pricing')}</div>
       </div>
       <div class="deposit">
@@ -360,11 +388,10 @@ ${tiers}
 }
 
 // Meet your mentor: a navy band; the heading, then the sticky portrait on the left and, on the
-// right, two large figures in champagne and the two paragraphs. No tiles here: Julia asked for
-// the tiles away from the photos, and on navy they would only repeat that.
+// right, the paragraphs of Julia's document of 16 Nov (the book title in italic). No tiles
+// here: Julia asked for the tiles away from the photos, and on navy they would only repeat that.
 function proof(ctx) {
   const p = ctx.content.proof;
-  const stats = p.stats.map((stat) => `          <li><span class="proof__value">${esc(stat.value)}</span><span class="proof__label">${esc(stat.label)}</span></li>`).join('\n');
   return `<section class="section proof band band--navy" aria-labelledby="proof-title">
   <div class="container">
     <h2 id="proof-title">${esc(p.heading)}</h2>
@@ -375,10 +402,7 @@ function proof(ctx) {
         </div>
       </div>
       <div class="proof__copy">
-        ${draftLine(ctx, 'proof.stats')}
-        <ul class="proof__stats">
-${stats}
-        </ul>
+        ${draftLine(ctx, 'proof.paragraphs')}
         ${paragraphs(p.paragraphs, rich)}
       </div>
     </div>
@@ -386,42 +410,32 @@ ${stats}
 </section>`;
 }
 
-// What I bring: an aubergine panel with the five strengths and icons on the left; on the right
-// the mentoring paragraph and, under it, its picture: three struck-through pills, a gold arrow
-// and a navy plaque with the result. The picture repeats the words of the paragraph, so it is
-// hidden from screen readers. Under both columns, the photo of Julia leading a session.
-function bring(ctx) {
+// What makes my approach different (Julia's document of 16 Nov, in place of "What producing
+// gave me"): three cards in a row from 900 px, each with an icon in a champagne circle, a
+// title in Lora and the text. Under them, the photo of Julia leading a session.
+function approach(ctx) {
+  const a = ctx.content.approach;
   const p = ctx.content.proof;
-  const strengths = p.strengths.map((text, i) => `        <li>${circle(`strength-${i}`, 'circle--outline')}<span>${esc(text)}</span></li>`).join('\n');
-  const pills = p.shift_visual.from.map((text) => `<span class="struck"><s>${esc(text)}</s></span>`).join('\n          ');
-  return `<section class="section bring" aria-label="${esc(p.strengths_intro)}">
-  <div class="container bring__grid">
-    <div class="bring__panel">
-      <p class="bring__intro">${esc(p.strengths_intro)}</p>
-      <ul class="bring__list">
-${strengths}
-      </ul>
-    </div>
-    <div class="bring__copy">
-      <p>${esc(p.mentoring)}</p>
-      ${draftLine(ctx, 'proof.shift_visual')}
-      <div class="shift-visual" aria-hidden="true">
-        <div class="shift-visual__from">
-          ${pills}
-        </div>
-        <span class="shift-visual__arrow">${ARROW}</span>
-        <p class="shift-visual__to">${esc(p.shift_visual.to)}</p>
-      </div>
-    </div>
+  const cards = a.items.map((item, i) => `      <li class="card approach__card">
+        ${circle(`approach-${i}`, 'circle--champagne')}
+        <h3 class="approach__title">${esc(item.title)}</h3>
+        <p>${esc(item.text)}</p>
+      </li>`).join('\n');
+  return `<section class="section approach" aria-labelledby="approach-title">
+  <div class="container">
+    <h2 id="approach-title">${esc(a.heading)}${draftTag(ctx, 'approach.items')}</h2>
+    <ul class="cards cards--approach">
+${cards}
+    </ul>
   </div>
-  <div class="container bring__photo">
+  <div class="container approach__photo">
     ${picture(ctx, p.mentoring_photo, { alt: p.mentoring_photo_alt, sizes: '(min-width: 1200px) 1040px, (min-width: 900px) calc(100vw - 80px), calc(100vw - 48px)' })}
   </div>
 </section>`;
 }
 
-// The group photo: a band across the whole window between the quotes and Practical details,
-// no heading, no caption, no rounded corners.
+// The group photo: a band across the whole window between the approach cards and Practical
+// details, no heading, no caption, no rounded corners.
 function group(ctx) {
   const p = ctx.content.proof;
   return `<div class="group-photo">
@@ -430,7 +444,8 @@ function group(ctx) {
 }
 
 // Practical details: three filled cards with an icon, a value in Lora and a label, then the
-// timeline of four steps on a thin gold line (vertical on the phone).
+// timeline of four steps on a thin gold line (vertical on the phone). A step whose date is
+// empty in the yaml (the payment, since 16 Nov) shows no date line.
 function logistics(ctx) {
   const l = ctx.content.logistics;
   const kinds = ['champagne', 'navy', 'aubergine'];
@@ -440,8 +455,7 @@ function logistics(ctx) {
         <span class="detail__label">${esc(card.label)}</span>
       </li>`).join('\n');
   const steps = l.timeline.map((step) => `      <li class="step">
-        <span class="step__when caps">${esc(step.when)}</span>
-        <span class="step__dot" aria-hidden="true"></span>
+${String(step.when || '').trim() ? `        <span class="step__when caps">${esc(step.when)}</span>\n` : ''}        <span class="step__dot" aria-hidden="true"></span>
         <h3 class="step__title">${esc(step.title)}</h3>
         <p class="step__text">${esc(step.text)}</p>
       </li>`).join('\n');
@@ -459,17 +473,40 @@ ${steps}
 </section>`;
 }
 
-// The closing band: aubergine, modest since PROMPT 04 (a friendly reminder, not a statement):
-// the text at lead size up to 640 px wide, the call button and, next to it, the outline deposit
-// button with its note. Tiles only at the sides, outside the text, and over the upper border
-// onto Practical details; the drawings sit in a hidden sprite.
+// Good to know, after Julia's slide 10: the label, the heading and six questions with their
+// answers, each on a thin gold line at the left; two columns from 900 px, filled column by
+// column as on the slide.
+function faq(ctx) {
+  const f = ctx.content.faq;
+  const items = f.items.map((item) => `      <div class="faq__item">
+        <h3 class="faq__q">${esc(item.q)}</h3>
+        <p class="faq__a">${esc(item.a)}</p>
+      </div>`).join('\n');
+  return `<section class="section faq" aria-labelledby="faq-title">
+  <div class="container">
+    <p class="faq__label caps">${esc(f.label)}</p>
+    <h2 id="faq-title">${esc(f.heading)}${draftTag(ctx, 'faq.items')}</h2>
+    <div class="faq__grid">
+${items}
+    </div>
+  </div>
+</section>`;
+}
+
+// The closing band: aubergine, after the January slide of Julia's deck: the heading in Lora,
+// the line under it, the italic question in champagne, then the call button and, next to it,
+// the outline deposit button with its note. Tiles only at the sides, outside the text, and
+// over the upper border onto the block above; the drawings sit in a hidden sprite.
 function closing(ctx) {
+  const c = ctx.content.closing;
   const d = ctx.content.deposit;
-  return `<section class="closing">
+  return `<section class="closing" aria-labelledby="closing-title">
   ${bandSprite()}
   ${bandSvgs()}
   <div class="container closing__inner">
-    <p class="closing__text">${esc(ctx.content.closing.text)}</p>
+    <h2 id="closing-title" class="closing__title">${esc(c.heading)}${draftTag(ctx, 'closing.heading')}</h2>
+    <p class="closing__text">${esc(c.text)}</p>
+    <p class="closing__line">${esc(c.line)}</p>
     <div class="closing__actions">
       <div class="closing__cta">${registerButton(ctx, 'closing')}</div>
       <div class="closing__deposit">
@@ -515,9 +552,10 @@ ${process(ctx)}
 ${pack(ctx)}
 ${pricing(ctx)}
 ${proof(ctx)}
-${bring(ctx)}
+${approach(ctx)}
 ${group(ctx)}
 ${logistics(ctx)}
+${faq(ctx)}
 ${closing(ctx)}
 </main>
 ${footer(ctx)}

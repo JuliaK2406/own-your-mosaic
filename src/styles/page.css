@@ -2,8 +2,8 @@
    Since PROMPT 04 (Julia's feedback) the page carries weight: navy and aubergine bands across
    the window, champagne fills, large figures in Lora, line icons in circles, a timeline.
    Gold stays a line, a dot, an arrow and the button; never a fill. The blocks alternate
-   porcelain and porcelain-deep, with navy for Problem and Meet your mentor and aubergine for
-   the closing band. The decorative mosaics (first screen corner, closing band sides) come as
+   porcelain and porcelain-deep, with navy for Problem and Meet your mentor, aubergine for the
+   Roadmap and the closing band (since 16 Nov the blocks follow Julia's document and deck). The decorative mosaics (first screen corner, closing band sides) come as
    inline svg from the build. */
 
 *,
@@ -108,6 +108,23 @@ a:hover {
 }
 
 .band--navy :focus-visible {
+  outline-color: var(--champagne);
+}
+
+/* The aubergine band of the Roadmap: text porcelain, labels champagne */
+
+.band--aubergine {
+  background: var(--aubergine);
+  color: var(--on-aubergine);
+}
+
+.band--aubergine h2,
+.band--aubergine h3,
+.band--aubergine p {
+  color: var(--porcelain);
+}
+
+.band--aubergine :focus-visible {
   outline-color: var(--champagne);
 }
 
@@ -237,7 +254,8 @@ a:hover {
   border: 1px dashed var(--aubergine);
 }
 
-.band--navy .tag--draft {
+.band--navy .tag--draft,
+.band--aubergine .tag--draft {
   background: rgba(239, 220, 172, 0.16);
   color: var(--champagne);
   border-color: var(--champagne);
@@ -287,7 +305,8 @@ a:hover {
 
 /* First screen. The tiles stand alone in the top-right corner of the block at the window
    edge (the phone gets a small group beside the name and positioning lines). On the phone:
-   name and positioning, title, subtitle, tagline, photo, paragraphs, button, facts card.
+   name and positioning, title, subtitle, photo, the opening and its supporting copy, button,
+   facts strip.
    From 900 px: name and positioning in a row of their own, then the text left and the photo
    right, its top on the line of the title. The photo runs past the content edge toward the
    window edge (--hero-bleed), leaving 24 px, so it can be large while the paragraphs keep
@@ -340,13 +359,17 @@ a:hover {
 }
 
 .hero__subtitle {
-  margin: 0 0 var(--s-3);
+  margin: 0;
   font-family: var(--font-heading);
   font-size: var(--subtitle-size);
   line-height: 1.3;
 }
 
-.hero__tagline {
+.hero__opening {
+  margin: 0 0 var(--s-3);
+}
+
+.hero__supporting {
   margin: 0;
   color: var(--text-muted);
 }
@@ -585,226 +608,266 @@ a:hover {
   }
 }
 
-/* Problem: a navy band, a gold rule, the statement large in Lora, the rest in champagne italic */
+/* Problem: a navy band with the right part of Julia's slide 2. The picture: "now", the tiles
+   scattered over a 240 px field, a dotted line, and "after 8 weeks", the whole 160 px mosaic;
+   the two columns are three to two, so the tiles keep one size. Beside it, from 900 px, the
+   quote of Adam Grant: a gold rule, Lora italic in champagne, the author and the book in
+   capitals. One column on the phone: the picture, then the quote centred. */
 
 .problem {
-  padding-block: clamp(2.5rem, 5vw, 4.5rem);
+  padding-block: clamp(3rem, 5vw, 4.5rem);
 }
 
 .problem__inner {
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  row-gap: var(--s-6);
   align-items: center;
+}
+
+.problem__picture {
+  display: grid;
+  grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
+  column-gap: var(--s-5);
+  align-items: center;
+  width: min(100%, 520px);
+  margin-inline: auto;
+}
+
+.problem__now,
+.problem__after {
+  display: grid;
+  row-gap: var(--s-3);
+}
+
+.problem__after {
+  padding-left: var(--s-5);
+  border-left: 1px dashed rgba(239, 220, 172, 0.45);
+}
+
+.problem .problem__label {
+  margin: 0;
+  max-width: none;
+  color: var(--champagne);
+}
+
+.picture {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.problem__quote {
+  margin: 0;
   text-align: center;
 }
 
-.rule {
-  display: block;
-  width: 48px;
-  height: 1px;
-  margin-bottom: var(--s-5);
-  background: var(--gold);
+.problem__quote .rule {
+  margin-inline: auto;
 }
 
 .problem__text {
   margin: 0 0 var(--s-4);
-  max-width: 800px;
-  font-family: var(--font-heading);
-  font-size: var(--statement-size);
-  line-height: 1.25;
-}
-
-.problem__more {
-  margin: 0;
-  max-width: 760px;
   font-family: var(--font-heading);
   font-style: italic;
-  font-size: var(--subtitle-size);
-  line-height: 1.4;
+  font-size: var(--statement-size);
+  line-height: 1.3;
+}
+
+.problem__text p {
+  margin: 0 auto;
+  max-width: 18em;
   color: var(--champagne);
 }
 
-/* Promise: the text, the diagram card and the quote. One column on the phone (text, card,
-   quote); two columns from 900 px: the text and, under it, the compact quote on the left, the
-   card on the right over both rows. The card is the shorter column, so it sticks while the
-   left column scrolls by. */
+.problem .problem__by {
+  margin: 0;
+  max-width: none;
+  color: var(--porcelain-muted);
+}
+
+.problem__by cite {
+  font-style: italic;
+}
+
+@media (min-width: 900px) {
+  .problem__inner {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    column-gap: clamp(2.5rem, 5vw, 5rem);
+  }
+  .problem__picture {
+    margin-inline: 0;
+  }
+  .problem__quote {
+    text-align: left;
+  }
+  .problem__quote .rule {
+    margin-inline: 0;
+  }
+  .problem__text p {
+    margin-inline: 0;
+  }
+}
+
+/* Roadmap: an aubergine band after Julia's slide 8. Left: the label, the heading, the second
+   label and the four inputs as filled tiles in a 2 x 2 grid (champagne, navy, a lighter
+   aubergine, gold: the one place where gold is a fill, as on her slide). Right: the title of
+   the list in champagne, four numbered points on a thin champagne line, a rule and the line
+   about the circle with a star. One column on the phone, two from 900 px. */
 
 .promise__grid {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
-  row-gap: var(--s-5);
+  row-gap: var(--s-6);
 }
 
-.promise__copy p:last-child {
-  margin-bottom: 0;
+.promise .promise__label {
+  margin: 0 0 var(--s-3);
+  max-width: none;
+  color: var(--champagne);
 }
 
-.diagram {
+.promise h2 {
+  margin-bottom: var(--s-5);
+}
+
+.promise__label--inputs {
+  margin-top: var(--s-4);
+}
+
+.inputs {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--s-3);
+  max-width: 420px;
+}
+
+.inputs__tile {
   display: flex;
-  flex-direction: column;
-  padding: clamp(1.5rem, 1rem + 2vw, 2.5rem);
+  align-items: center;
+  min-height: 76px;
+  padding: var(--s-3) var(--s-4);
   border-radius: var(--radius);
-  background: var(--porcelain-deep);
-}
-
-.diagram__label {
-  margin: 0 0 var(--s-3);
-  max-width: none;
-}
-
-.diagram__label--outcomes {
-  font-weight: 600;
-}
-
-.diagram__inputs {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  column-gap: var(--s-5);
-  border-top: 1px solid var(--warm-grey);
-}
-
-@media (max-width: 479px) {
-  .diagram__inputs {
-    grid-template-columns: 1fr;
-  }
-}
-
-.diagram__input {
-  display: flex;
-  align-items: center;
-  gap: var(--s-3);
-  padding: var(--s-3) 0;
-  border-bottom: 1px solid var(--warm-grey);
   font-family: var(--font-heading);
-  font-size: clamp(1.25rem, 1.15rem + 0.4vw, 1.5rem);
+  font-size: clamp(1.125rem, 1.05rem + 0.3vw, 1.3125rem);
   font-weight: 500;
   line-height: 1.25;
+}
+
+.inputs__tile--1 {
+  background: var(--champagne);
   color: var(--navy);
 }
 
-.diagram__tile {
-  flex: none;
-  width: 12px;
-  height: 12px;
-  border-radius: 3px;
-  background: rgba(var(--aubergine-rgb), var(--alpha, 1));
+.inputs__tile--2 {
+  background: var(--navy);
+  color: var(--porcelain);
 }
 
-.diagram__join {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: var(--s-4) 0 var(--s-3);
+.inputs__tile--3 {
+  background: rgba(243, 233, 239, 0.16);
+  color: var(--porcelain);
 }
 
-.diagram__stem {
-  display: block;
-  width: 1px;
-  height: 28px;
+.inputs__tile--4 {
   background: var(--gold);
+  color: var(--navy);
 }
 
-.diagram__dot {
-  display: block;
-  width: 9px;
-  height: 9px;
-  margin-top: -1px;
-  border-radius: 50%;
-  background: var(--gold);
-}
-
-.diagram__result {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: var(--s-3);
-  margin: 0 0 var(--s-3);
-  max-width: none;
-  font-family: var(--font-heading);
+.roadmap__title {
+  margin: 0 0 var(--s-5);
+  font-family: var(--font-body);
   font-size: var(--h3-size);
-  font-weight: 500;
-  line-height: 1.25;
-  text-align: center;
-  color: var(--navy);
+  font-weight: 600;
+  color: var(--champagne);
 }
 
-.diagram__sign {
-  display: grid;
-  flex: none;
-  grid-template-columns: repeat(3, 6px);
-  grid-template-rows: repeat(3, 6px);
-  gap: 2px;
-}
-
-.diagram__sign span {
-  border-radius: 1px;
-  background: rgba(var(--aubergine-rgb), var(--alpha, 1));
-}
-
-.diagram__rule {
-  display: block;
-  width: 48px;
-  height: 1px;
-  margin: 0 auto var(--s-5);
-  background: var(--gold);
-}
-
-.diagram__outcomes {
+.roadmap__list {
+  position: relative;
   list-style: none;
   margin: 0;
   padding: 0;
   display: grid;
-  gap: var(--s-3);
+  gap: var(--s-4);
 }
 
-.diagram__outcomes li {
+.roadmap__list::before {
+  content: "";
+  position: absolute;
+  left: 15px;
+  top: 16px;
+  bottom: 16px;
+  width: 1px;
+  background: rgba(239, 220, 172, 0.4);
+}
+
+.roadmap__item {
+  position: relative;
   display: flex;
   align-items: flex-start;
-  gap: var(--s-3);
-  font-size: 1rem;
-  line-height: 1.5;
+  gap: var(--s-4);
 }
 
-.diagram__number {
+.roadmap__item p {
+  margin: 0;
+  padding-top: 3px;
+  max-width: none;
+  color: var(--on-aubergine);
+}
+
+.roadmap__item strong {
+  color: var(--champagne);
+}
+
+.roadmap__number {
   display: inline-flex;
   flex: none;
   align-items: center;
   justify-content: center;
-  width: 26px;
-  height: 26px;
-  margin-top: -1px;
+  width: 32px;
+  height: 32px;
+  border: 1.5px solid var(--champagne);
   border-radius: 50%;
   background: var(--aubergine);
-  color: var(--porcelain);
+  color: var(--champagne);
   font-family: var(--font-heading);
-  font-size: 0.9375rem;
+  font-size: 1rem;
   font-weight: 600;
+}
+
+.roadmap__together {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--s-4);
+  margin: var(--s-5) 0 0;
+  padding-top: var(--s-5);
+  max-width: none;
+  border-top: 1px solid rgba(239, 220, 172, 0.4);
+  color: var(--on-aubergine);
+}
+
+.roadmap__together .circle {
+  width: 40px;
+  height: 40px;
+}
+
+.roadmap__together .circle .icon {
+  width: 18px;
+  height: 18px;
+}
+
+.roadmap__together strong {
+  color: var(--porcelain);
 }
 
 @media (min-width: 900px) {
   .promise__grid {
-    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-    grid-template-rows: auto 1fr;
-    grid-template-areas:
-      "copy diagram"
-      "quote diagram";
+    grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
     column-gap: clamp(2.5rem, 5vw, 5rem);
-    row-gap: var(--s-5);
     align-items: start;
-  }
-  .promise__copy {
-    grid-area: copy;
-  }
-  .promise__quote {
-    grid-area: quote;
-  }
-  .diagram {
-    grid-area: diagram;
-    position: sticky;
-    top: var(--s-5);
   }
 }
 
@@ -975,115 +1038,101 @@ a:hover {
   }
 }
 
-/* What's included: the stats band (navy, four cells) and the eight points with icons */
+/* What's included: six tiles (porcelain-deep, an icon in an aubergine circle, a title in Lora
+   and a line under it), one column on the phone, two from 640 px, three from 900 px; then the
+   champagne strip "after week 8" with a star; then the two quotes, side by side from 900 px */
 
-.stats {
+.included {
   list-style: none;
-  margin: 0 0 var(--s-6);
+  margin: 0 0 var(--s-4);
   padding: 0;
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  border-radius: var(--radius);
-  background: var(--navy);
-  color: var(--porcelain);
+  gap: var(--s-4);
 }
 
-.stats li {
+.included__item {
   display: flex;
-  flex-direction: column;
-  gap: 2px;
+  align-items: center;
+  gap: var(--s-4);
   padding: var(--s-4) var(--s-5);
+  border-radius: var(--radius);
+  background: var(--porcelain-deep);
 }
 
-.stats li:nth-child(even) {
-  border-left: 1px solid rgba(250, 248, 245, 0.25);
-}
-
-.stats li:nth-child(n+3) {
-  border-top: 1px solid rgba(250, 248, 245, 0.25);
-}
-
-.stats__value {
-  font-family: var(--font-heading);
-  font-size: var(--statement-size);
+.included__title {
+  margin: 0 0 2px;
+  font-size: clamp(1.25rem, 1.15rem + 0.4vw, 1.5rem);
   font-weight: 500;
-  line-height: 1.1;
-  white-space: nowrap;
-  color: var(--champagne);
 }
 
-.stats__label {
-  font-size: var(--secondary-size);
-  color: var(--porcelain);
-}
-
-@media (min-width: 900px) {
-  .stats {
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-  }
-  .stats li {
-    padding: var(--s-5);
-  }
-  .stats li:nth-child(n+2) {
-    border-left: 1px solid rgba(250, 248, 245, 0.25);
-  }
-  .stats li:nth-child(n+3) {
-    border-top: 0;
-  }
-}
-
-.package__list {
-  list-style: none;
+.included__text {
   margin: 0;
-  padding: 0;
-  display: grid;
-  gap: var(--s-4);
-}
-
-.package__list li {
-  display: flex;
-  align-items: flex-start;
-  gap: var(--s-4);
-  max-width: var(--measure);
-}
-
-.package__list .circle {
-  width: 40px;
-  height: 40px;
-}
-
-.package__list .circle .icon {
-  width: 18px;
-  height: 18px;
-}
-
-.package__list li span:last-child {
-  padding-top: 7px;
-}
-
-@media (min-width: 900px) {
-  .package__list {
-    grid-template-columns: 1fr 1fr;
-    column-gap: var(--s-6);
-  }
-}
-
-/* Pricing: three filled cards with a gold line on top */
-
-.pricing h2 {
-  margin-bottom: var(--s-2);
-}
-
-.pricing__sub {
-  margin: 0 0 var(--s-3);
-  font-family: var(--font-heading);
-  font-size: var(--subtitle-size);
-  line-height: 1.3;
+  max-width: none;
+  font-size: var(--secondary-size);
   color: var(--text-muted);
 }
 
-.pricing__total {
-  margin: 0 0 var(--head-gap);
+.after-week {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--s-4);
+  padding: var(--s-5);
+  border-radius: var(--radius);
+  background: var(--champagne);
+  color: var(--navy);
+}
+
+.after-week .circle {
+  color: var(--champagne);
+}
+
+.after-week__label {
+  margin: 0 0 var(--s-2);
+  max-width: none;
+  color: var(--aubergine);
+}
+
+.after-week__text {
+  margin: 0;
+  max-width: none;
+  font-family: var(--font-heading);
+  font-size: var(--lead-size);
+  line-height: 1.45;
+}
+
+.package__quotes {
+  display: grid;
+  gap: var(--s-5);
+  margin-top: var(--s-6);
+}
+
+.package__quotes .quote {
+  margin: 0;
+}
+
+@media (min-width: 640px) {
+  .included {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 900px) {
+  .included {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: var(--s-5);
+    margin-bottom: var(--s-5);
+  }
+  .package__quotes {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+/* Pricing: the cohort line in capitals above the heading, three filled cards with a gold line
+   on top; in each the first price struck through, then the gold arrow and the founding price,
+   then the VAT line with the spots where a tier has them. */
+
+.pricing__label {
+  margin: 0 0 var(--s-3);
   max-width: none;
   color: var(--aubergine);
 }
@@ -1139,12 +1188,29 @@ a:hover {
 }
 
 .tier__price {
-  display: flex;
-  align-items: baseline;
-  gap: var(--s-2);
   margin: 0 0 var(--s-2);
   max-width: none;
   color: inherit;
+}
+
+.tier__was {
+  display: block;
+  margin-bottom: var(--s-1);
+  font-family: var(--font-heading);
+  font-size: clamp(1.375rem, 1.2rem + 0.7vw, 1.875rem);
+  line-height: 1.2;
+  opacity: 0.6;
+}
+
+.tier__now {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--s-2);
+}
+
+.tier__arrow .arrow {
+  width: 28px;
+  height: 28px;
 }
 
 .tier__amount {
@@ -1154,15 +1220,11 @@ a:hover {
   line-height: 1;
 }
 
-.tier__vat,
-.tier__spots {
+.tier__terms {
+  margin: 0;
+  max-width: none;
   font-size: var(--secondary-size);
   opacity: 0.85;
-}
-
-.tier__spots {
-  margin: 0 0 var(--s-2);
-  max-width: none;
   color: inherit;
 }
 
@@ -1191,7 +1253,13 @@ a:hover {
 }
 
 .pricing__note {
+  margin: 0 0 var(--s-2);
+}
+
+.pricing__invoice {
   margin: 0 0 var(--s-4);
+  font-size: var(--secondary-size);
+  color: var(--text-muted);
 }
 
 .deposit {
@@ -1241,7 +1309,7 @@ a:hover {
 }
 
 /* Meet your mentor: a navy band; the heading, then the sticky portrait on the left and the
-   figures and paragraphs on the right. One column on the phone. */
+   paragraphs on the right. One column on the phone. */
 
 .proof__grid {
   display: grid;
@@ -1260,45 +1328,8 @@ a:hover {
   border-radius: var(--radius);
 }
 
-.proof__stats {
-  list-style: none;
-  margin: 0 0 var(--s-5);
-  padding: 0;
-  display: grid;
-  gap: var(--s-4);
-}
-
-.proof__stats li {
-  display: flex;
-  flex-direction: column;
-  gap: var(--s-1);
-  padding-top: var(--s-3);
-  border-top: 1px solid var(--gold);
-}
-
-.proof__value {
-  font-family: var(--font-heading);
-  font-size: clamp(2.75rem, 2.2rem + 2vw, 4rem);
-  font-weight: 500;
-  line-height: 1;
-  color: var(--champagne);
-}
-
-.proof__label {
-  max-width: 24em;
-  font-size: var(--secondary-size);
-  color: var(--porcelain-muted);
-}
-
 .proof__copy p:last-child {
   margin-bottom: 0;
-}
-
-@media (min-width: 540px) {
-  .proof__stats {
-    grid-template-columns: 1fr 1fr;
-    column-gap: var(--s-5);
-  }
 }
 
 @media (min-width: 900px) {
@@ -1316,115 +1347,38 @@ a:hover {
   }
 }
 
-/* What I bring: an aubergine panel on the left, the paragraph and its picture on the right */
+/* What makes my approach different: three cards (porcelain-deep, an icon in a champagne circle,
+   a title in Lora, the text), one column on the phone, three from 900 px; under them the
+   session photo: taller (about 4:3) on the phone, centred on Julia; the proportion of the
+   served file from 640 px */
 
-.bring__grid {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr);
-  gap: var(--s-5);
-}
-
-.bring__panel {
-  padding: clamp(1.5rem, 1rem + 2vw, 2.5rem);
-  border-radius: var(--radius);
-  background: var(--aubergine);
-  color: var(--on-aubergine);
-}
-
-.bring__intro {
-  margin: 0 0 var(--s-5);
-  max-width: none;
-  font-family: var(--font-heading);
-  font-size: var(--subtitle-size);
-  line-height: 1.3;
-  color: var(--porcelain);
-}
-
-.bring__list {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  display: grid;
-  gap: var(--s-3);
-}
-
-.bring__list li {
-  display: flex;
-  align-items: center;
+.cards--approach {
   gap: var(--s-4);
-  font-family: var(--font-heading);
-  font-size: var(--h3-size);
-  font-weight: 500;
-  color: var(--porcelain);
 }
 
-.bring__list .circle {
-  width: 44px;
-  height: 44px;
-}
-
-.bring__list .circle .icon {
-  width: 20px;
-  height: 20px;
-}
-
-.bring__copy > p {
-  margin-bottom: var(--s-5);
-}
-
-.shift-visual {
-  display: grid;
-  gap: var(--s-3);
-  justify-items: start;
-}
-
-.shift-visual__from {
+.approach__card {
   display: flex;
-  flex-wrap: wrap;
-  gap: var(--s-2);
+  flex-direction: column;
+  gap: var(--s-3);
+  border: 0;
+  background: var(--porcelain-deep);
 }
 
-.struck {
-  display: inline-flex;
-  align-items: center;
-  min-height: 40px;
-  padding: 0 18px;
-  border-radius: 999px;
-  background: var(--warm-grey);
-  color: var(--text-muted);
-  font-family: var(--font-heading);
-  font-style: italic;
-  font-size: 1.0625rem;
+.approach__title {
+  margin: 0;
+  font-weight: 500;
 }
 
-.shift-visual__arrow .arrow {
-  width: 28px;
-  height: 28px;
-  margin-left: 6px;
-  transform: rotate(90deg);
-}
-
-.shift-visual__to {
+.approach__card p {
   margin: 0;
   max-width: none;
-  padding: var(--s-4) var(--s-5);
-  border-radius: var(--radius);
-  background: var(--navy);
-  color: var(--porcelain);
-  font-family: var(--font-heading);
-  font-size: var(--h3-size);
-  font-weight: 500;
-  line-height: 1.3;
 }
 
-/* the session photo under both columns: taller (about 4:3) on the phone, centred on Julia;
-   the proportion of the served file from 640 px */
-
-.bring__photo {
+.approach__photo {
   margin-top: var(--s-6);
 }
 
-.bring__photo img {
+.approach__photo img {
   width: 100%;
   aspect-ratio: 4 / 3;
   object-fit: cover;
@@ -1433,16 +1387,15 @@ a:hover {
 }
 
 @media (min-width: 640px) {
-  .bring__photo img {
+  .approach__photo img {
     aspect-ratio: auto;
   }
 }
 
 @media (min-width: 900px) {
-  .bring__grid {
-    grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr);
-    column-gap: clamp(2.5rem, 5vw, 5rem);
-    align-items: start;
+  .cards--approach {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: var(--s-5);
   }
 }
 
@@ -1708,9 +1661,53 @@ a:hover {
   }
 }
 
-/* Closing band: the only aubergine band across the window, modest: the text at lead size up
-   to 640 px, the button. The tile drawings stand at the left and right edges, 200 px above the
-   band's top (over Practical details) down into the band; one drawing per width. */
+/* Good to know: the label, the heading and six questions, each with its answer on a thin gold
+   line at the left; two columns from 900 px, filled column by column as on Julia's slide 10 */
+
+.faq__label {
+  margin: 0 0 var(--s-3);
+  max-width: none;
+  color: var(--aubergine);
+}
+
+.faq__grid {
+  display: grid;
+  gap: var(--s-5);
+}
+
+.faq__item {
+  padding-left: var(--s-5);
+  border-left: 2px solid var(--gold);
+}
+
+.faq__q {
+  margin: 0 0 var(--s-2);
+  font-family: var(--font-body);
+  font-size: 1.125rem;
+  font-weight: 600;
+  line-height: 1.35;
+  color: var(--aubergine);
+}
+
+.faq__a {
+  margin: 0;
+  max-width: none;
+}
+
+@media (min-width: 900px) {
+  .faq__grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-rows: repeat(3, auto);
+    grid-auto-flow: column;
+    column-gap: clamp(2.5rem, 5vw, 5rem);
+    row-gap: var(--s-6);
+  }
+}
+
+/* Closing band: aubergine across the window, after the January slide of Julia's deck: the
+   heading, the line under it, the italic question in champagne, the two buttons. The tile
+   drawings stand at the left and right edges, 200 px above the band's top (over Good to know)
+   down into the band; one drawing per width. */
 
 .closing {
   position: relative;
@@ -1772,13 +1769,29 @@ a:hover {
   text-align: center;
 }
 
+.closing__title {
+  margin: 0 auto var(--s-4);
+  max-width: 760px;
+  color: var(--porcelain);
+}
+
 .closing__text {
-  margin: 0 auto var(--s-5);
+  margin: 0 auto var(--s-3);
   max-width: 640px;
   font-family: var(--font-heading);
   font-size: var(--lead-size);
   line-height: 1.5;
   color: var(--on-aubergine);
+}
+
+.closing__line {
+  margin: 0 auto var(--s-6);
+  max-width: 640px;
+  font-family: var(--font-heading);
+  font-style: italic;
+  font-size: var(--subtitle-size);
+  line-height: 1.4;
+  color: var(--champagne);
 }
 
 /* the two buttons side by side (stacked on a narrow phone), the deposit note under its button */
