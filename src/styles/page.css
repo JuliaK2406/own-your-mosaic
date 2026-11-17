@@ -305,7 +305,7 @@ a:hover {
 
 /* First screen. The tiles stand alone in the top-right corner of the block at the window
    edge (the phone gets a small group beside the name and positioning lines). On the phone:
-   name and positioning, title, subtitle, photo, the opening and its supporting copy, button,
+   name and positioning, title, the three lines under it, photo, the supporting copy, button,
    facts strip.
    From 900 px: name and positioning in a row of their own, then the text left and the photo
    right, its top on the line of the title. The photo runs past the content edge toward the
@@ -358,15 +358,13 @@ a:hover {
   font-size: var(--h1-size);
 }
 
-.hero__subtitle {
+/* the three lines under the title (Julia, 17 Nov), each on a line of its own, in Lora */
+.hero__lines {
   margin: 0;
+  max-width: none;
   font-family: var(--font-heading);
-  font-size: var(--subtitle-size);
-  line-height: 1.3;
-}
-
-.hero__opening {
-  margin: 0 0 var(--s-3);
+  font-size: clamp(1.25rem, 1.164rem + 0.381vw, 1.5rem);   /* 20 to 24 px */
+  line-height: 1.35;
 }
 
 .hero__supporting {
@@ -456,13 +454,14 @@ a:hover {
   }
   .hero__grid {
     grid-template-columns: minmax(0, var(--hero-text)) minmax(0, 1fr);
+    grid-template-rows: auto auto 1fr;   /* the last row takes the height the photo adds, so the text keeps together under the title */
     grid-template-areas:
       "intro ."
       "head photo"
       "body photo";
     column-gap: clamp(2rem, 3.5vw, 3rem);
     align-items: start;
-    padding-block: clamp(3.5rem, 6vh, 5rem) calc(var(--section-gap) / 2);
+    padding-block: clamp(4.25rem, 6vh, 5.5rem) calc(var(--section-gap) / 2);   /* 12 px more since 17 Nov: the shorter positioning line lifted the photo toward the corner tiles */
   }
   .hero__name,
   .hero__positioning {
@@ -546,8 +545,21 @@ a:hover {
   }
 }
 
-/* The shift: "From ..." on the left (muted), a gold arrow, "to ..." on the right (Lora, navy);
-   stacked on the phone with the arrow turned down */
+/* The shift: the heading and four compact rows ("From ..." muted, a gold arrow, "to ..." in
+   Lora) on the left, the tiles picture on the right from 900 px: "now", sixteen tiles
+   scattered over a 240 px field, a dotted line, "after 8 weeks", the whole 160 px mosaic; the
+   two columns are three to two, so the tiles keep one size. On the phone the rows stack with
+   the arrow turned down and the picture follows them. */
+
+.shift__grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  row-gap: var(--s-5);
+}
+
+.shift h2 {
+  margin-bottom: var(--s-4);
+}
 
 .shift__list {
   list-style: none;
@@ -559,8 +571,8 @@ a:hover {
 .shift__row {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
-  gap: var(--s-2);
-  padding: var(--s-5) 0;
+  gap: var(--s-1);
+  padding: var(--s-3) 0;
   border-bottom: 1px solid var(--warm-grey);
 }
 
@@ -571,7 +583,7 @@ a:hover {
 
 .shift__label {
   display: block;
-  margin-bottom: 2px;
+  margin-bottom: 1px;
 }
 
 .shift__from .shift__text {
@@ -580,7 +592,7 @@ a:hover {
 
 .shift__to .shift__text {
   font-family: var(--font-heading);
-  font-size: var(--h3-size);
+  font-size: clamp(1.125rem, 1.07rem + 0.25vw, 1.3125rem);
   font-weight: 500;
   line-height: 1.3;
 }
@@ -592,63 +604,37 @@ a:hover {
 }
 
 .shift__arrow .arrow {
-  width: 28px;
-  height: 28px;
+  width: 22px;
+  height: 22px;
   transform: rotate(90deg);
 }
 
-@media (min-width: 900px) {
-  .shift__row {
-    grid-template-columns: minmax(0, 1fr) 72px minmax(0, 1.15fr);
-    align-items: center;
-    column-gap: var(--s-4);
-  }
-  .shift__arrow .arrow {
-    transform: none;
-  }
-}
+/* the tiles picture: labels in aubergine, the mosaic beside the scattered tiles */
 
-/* Problem: a navy band with the right part of Julia's slide 2. The picture: "now", the tiles
-   scattered over a 240 px field, a dotted line, and "after 8 weeks", the whole 160 px mosaic;
-   the two columns are three to two, so the tiles keep one size. Beside it, from 900 px, the
-   quote of Adam Grant: a gold rule, Lora italic in champagne, the author and the book in
-   capitals. One column on the phone: the picture, then the quote centred. */
-
-.problem {
-  padding-block: clamp(3rem, 5vw, 4.5rem);
-}
-
-.problem__inner {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr);
-  row-gap: var(--s-6);
-  align-items: center;
-}
-
-.problem__picture {
+.tiles-pair {
   display: grid;
   grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
   column-gap: var(--s-5);
   align-items: center;
-  width: min(100%, 520px);
+  width: min(100%, 480px);
   margin-inline: auto;
 }
 
-.problem__now,
-.problem__after {
+.tiles-pair__now,
+.tiles-pair__after {
   display: grid;
   row-gap: var(--s-3);
 }
 
-.problem__after {
+.tiles-pair__after {
   padding-left: var(--s-5);
-  border-left: 1px dashed rgba(239, 220, 172, 0.45);
+  border-left: 1px dashed rgba(30, 42, 71, 0.3);
 }
 
-.problem .problem__label {
+.tiles-pair__label {
   margin: 0;
   max-width: none;
-  color: var(--champagne);
+  color: var(--aubergine);
 }
 
 .picture {
@@ -657,56 +643,30 @@ a:hover {
   height: auto;
 }
 
-.problem__quote {
-  margin: 0;
-  text-align: center;
-}
-
-.problem__quote .rule {
-  margin-inline: auto;
-}
-
-.problem__text {
-  margin: 0 0 var(--s-4);
-  font-family: var(--font-heading);
-  font-style: italic;
-  font-size: var(--statement-size);
-  line-height: 1.3;
-}
-
-.problem__text p {
-  margin: 0 auto;
-  max-width: 18em;
-  color: var(--champagne);
-}
-
-.problem .problem__by {
-  margin: 0;
-  max-width: none;
-  color: var(--porcelain-muted);
-}
-
-.problem__by cite {
-  font-style: italic;
-}
-
 @media (min-width: 900px) {
-  .problem__inner {
-    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  .shift__grid {
+    grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
     column-gap: clamp(2.5rem, 5vw, 5rem);
+    align-items: center;
   }
-  .problem__picture {
+  .shift__row {
+    grid-template-columns: minmax(0, 1fr) 40px minmax(0, 1.15fr);
+    align-items: center;
+    column-gap: var(--s-3);
+  }
+  .shift__arrow .arrow {
+    transform: none;
+  }
+  .tiles-pair {
+    width: 100%;
     margin-inline: 0;
   }
-  .problem__quote {
-    text-align: left;
-  }
-  .problem__quote .rule {
-    margin-inline: 0;
-  }
-  .problem__text p {
-    margin-inline: 0;
-  }
+}
+
+/* The bridge: the band between The shift and the Roadmap, nothing but a client's quote */
+
+.bridge .quote {
+  margin-top: 0;
 }
 
 /* Roadmap: an aubergine band after Julia's slide 8. Left: the label, the heading, the second
@@ -1127,14 +1087,43 @@ a:hover {
   }
 }
 
-/* Pricing: the cohort line in capitals above the heading, three filled cards with a gold line
-   on top; in each the first price struck through, then the gold arrow and the founding price,
-   then the VAT line with the spots where a tier has them. */
+/* Pricing: the cohort line in capitals, the heading, the line about the invoices in a box with
+   a gold border and a check mark, three filled cards with a gold line on top; in each the first
+   price struck through, the gold arrow and the founding price on one line, then the VAT line
+   with the spots where a tier has them, the intro line and the list (Core) or the line (Plus,
+   Premium) of what is in. */
 
 .pricing__label {
   margin: 0 0 var(--s-3);
   max-width: none;
   color: var(--aubergine);
+}
+
+.pricing h2 {
+  margin-bottom: var(--s-5);
+}
+
+.pricing__invoice {
+  display: flex;
+  align-items: center;
+  gap: var(--s-4);
+  margin: 0 0 var(--s-5);
+  padding: var(--s-3) var(--s-4);
+  max-width: none;
+  border: 1px solid var(--gold);
+  border-radius: var(--radius);
+  background: var(--porcelain);
+  font-weight: 600;
+}
+
+.pricing__invoice .circle {
+  width: 36px;
+  height: 36px;
+}
+
+.pricing__invoice .circle .icon {
+  width: 18px;
+  height: 18px;
 }
 
 .tiers {
@@ -1188,29 +1177,25 @@ a:hover {
 }
 
 .tier__price {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--s-2);
   margin: 0 0 var(--s-2);
   max-width: none;
   color: inherit;
 }
 
 .tier__was {
-  display: block;
-  margin-bottom: var(--s-1);
   font-family: var(--font-heading);
-  font-size: clamp(1.375rem, 1.2rem + 0.7vw, 1.875rem);
+  font-size: clamp(1.25rem, 1.111rem + 0.571vw, 1.625rem);   /* 20 to 26 px */
   line-height: 1.2;
   opacity: 0.6;
 }
 
-.tier__now {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--s-2);
-}
-
 .tier__arrow .arrow {
-  width: 28px;
-  height: 28px;
+  width: 26px;
+  height: 26px;
 }
 
 .tier__amount {
@@ -1228,7 +1213,7 @@ a:hover {
   color: inherit;
 }
 
-.tier__text {
+.tier__intro {
   margin: var(--s-3) 0 0;
   padding-top: var(--s-3);
   max-width: none;
@@ -1236,30 +1221,36 @@ a:hover {
   color: inherit;
 }
 
-.tier--plus .tier__text,
-.tier--premium .tier__text {
+.tier--plus .tier__intro,
+.tier--premium .tier__intro {
   border-top-color: rgba(250, 248, 245, 0.25);
 }
 
-/* Under the tiers: the note and the call button; beside them, for those who have decided,
-   the deposit (a lead line in Lora, the outline button, its note). One column on the phone
-   with the deposit under a thin line; two columns from 900 px, the deposit behind a thin
-   vertical line. */
+.tier__list {
+  margin: var(--s-2) 0 0;
+  padding-left: 1.25em;
+  list-style: disc;
+  color: inherit;
+}
+
+.tier__list li + li {
+  margin-top: 2px;
+}
+
+.tier__line {
+  margin: var(--s-2) 0 0;
+  max-width: none;
+  color: inherit;
+}
+
+/* Under the tiers: the call button; beside it, for those who have decided, the deposit (a
+   lead line in Lora, the outline button, its note). One column on the phone with the deposit
+   under a thin line; two columns from 900 px, the deposit behind a thin vertical line. */
 
 .pricing__actions {
   display: grid;
   gap: var(--s-5);
   margin-top: var(--s-5);
-}
-
-.pricing__note {
-  margin: 0 0 var(--s-2);
-}
-
-.pricing__invoice {
-  margin: 0 0 var(--s-4);
-  font-size: var(--secondary-size);
-  color: var(--text-muted);
 }
 
 .deposit {
@@ -1420,8 +1411,9 @@ a:hover {
   }
 }
 
-/* A client's quote inside a block: a card with the mark, the paragraphs in Lora, the name
-   and, under it, the role and the company. Porcelain-deep on the light blocks, porcelain on
+/* A client's quote inside a block: a card with the mark, the paragraphs in Lora italic a little
+   under the body size with the key phrase in bold (Julia, 17 Nov), the name and, under it, the
+   role and the company. Porcelain-deep on the light blocks, porcelain on
    the deeper ones. The card takes the full width of the block's content, its edges on the
    elements above it; the compact variant (quote--compact) fills the column it stands in. */
 
@@ -1452,8 +1444,13 @@ a:hover {
   position: relative;
   margin: 0 0 var(--s-4);
   font-family: var(--font-heading);
+  font-style: italic;
   font-size: var(--quote-size);
-  line-height: 1.4;
+  line-height: 1.5;
+}
+
+.quote__text strong {
+  font-weight: 600;
 }
 
 .quote__text p {
@@ -1771,7 +1768,8 @@ a:hover {
 
 .closing__title {
   margin: 0 auto var(--s-4);
-  max-width: 760px;
+  max-width: 840px;   /* clear of the tile drawings at the sides (292 px each from 1440) */
+  font-size: clamp(2rem, 1.814rem + 0.762vw, 2.5rem);   /* 32 to 40 px: the first line stays one line on a desktop, as on Julia's screenshot */
   color: var(--porcelain);
 }
 

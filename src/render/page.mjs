@@ -19,8 +19,9 @@ export const BUTTON_PLACES = ['topbar', 'hero', 'pricing', 'closing'];
 // The places of the two deposit buttons (never the first screen or the top bar).
 export const DEPOSIT_PLACES = ['pricing', 'closing'];
 // The blocks that can take a client's quote (quotes[].at in the yaml). The Roadmap takes none
-// since 16 Nov: its layout follows Julia's slide 8.
-export const QUOTE_BLOCKS = ['shift', 'process', 'package', 'pricing', 'logistics'];
+// since 16 Nov: its layout follows Julia's slide 8. "bridge" is the band between The shift and
+// the Roadmap, which since 17 Nov holds nothing but a quote (Anna's).
+export const QUOTE_BLOCKS = ['shift', 'bridge', 'process', 'package', 'pricing', 'logistics'];
 // Tiles on the first screen: 'detached' = a small group in the top-right corner of the block,
 // away from the photo; 'none' = no tiles there. Julia asked for them away from the photo.
 export const HERO_TILES = 'detached';
@@ -67,15 +68,16 @@ export function depositButton(ctx, place) {
 }
 
 // A client's quote (quotes[] in the yaml), printed by the block that quotes[].at names: the
-// mark, the paragraphs in Lora, the name and, under it, the role and the company. A block with
-// no quote prints nothing. The figure takes the full width of the block's content; compact:
+// mark, the paragraphs in Lora italic with the key phrase in bold (**...** in the yaml, Julia's
+// choice of 17 Nov), the name and, under it, the role and the company. A block with no quote
+// prints nothing. The figure takes the full width of the block's content; compact:
 // true gives the smaller variant for a column, wrap names a div to hold the figures (two
 // quotes side by side under What's included).
 function quotesIn(ctx, at, { wrap = '', compact = false } = {}) {
   const figures = ctx.content.quotes.filter((q) => q.at === at).map((q) => `    <figure class="quote${compact ? ' quote--compact' : ''}">
       <span class="quote__mark" aria-hidden="true">&ldquo;</span>
       <blockquote class="quote__text">
-${q.text.map((p) => `        <p>${esc(p)}</p>`).join('\n')}
+${q.text.map((p) => `        <p>${rich(p)}</p>`).join('\n')}
       </blockquote>
       <figcaption class="quote__by"><strong class="quote__name">${esc(q.name)}</strong><span class="quote__role">${esc(q.role)}, ${esc(q.company)}</span></figcaption>
     </figure>`);
@@ -132,7 +134,7 @@ function head(ctx) {
       `<meta property="og:image" content="${esc(site)}/${OG_IMAGE_FILE}">`,
       `<meta property="og:image:width" content="${OG_WIDTH}">`,
       `<meta property="og:image:height" content="${OG_HEIGHT}">`,
-      `<meta property="og:image:alt" content="${esc(`${hero.title}: ${hero.subtitle}`)}">`,
+      `<meta property="og:image:alt" content="${esc(`${hero.title}: ${hero.lines.join(' ')}`)}">`,
       '<meta name="twitter:card" content="summary_large_image">',
     );
   }
@@ -153,13 +155,13 @@ function topbar(ctx) {
 </header>`;
 }
 
-// The first screen: name and positioning in a row of their own; then the title and subtitle
-// with the photo beside them from 900 px (its top on the line of the title, its proportion
-// from its file, its right edge past the content toward the window edge); the opening (Julia's
-// document of 16 Nov, the first words of her deck) with the supporting copy under it, the
-// button and the facts strip (navy, three cells in one row where the column is wide enough;
-// the wrapper is the size container the strip queries). The tiles, if any, stand alone in the
-// top-right corner of the block at the window edge.
+// The first screen: name and positioning in a row of their own; then the title and, under it,
+// the three lines of Julia's note of 17 Nov (each on a line of its own, Lora), with the photo
+// beside them from 900 px (its top on the line of the title, its proportion from its file, its
+// right edge past the content toward the window edge); the supporting copy, the button and the
+// facts strip (navy, three cells in one row where the column is wide enough; the wrapper is
+// the size container the strip queries). The tiles, if any, stand alone in the top-right
+// corner of the block at the window edge.
 function hero(ctx) {
   const h = ctx.content.hero;
   const group = ctx.heroTiles === 'none' ? '' : `  <span class="hero__tiles hero__tiles--wide" aria-hidden="true">${heroGroup()}</span>
@@ -173,13 +175,12 @@ ${group}  <div class="container hero__grid">
     </div>
     <div class="hero__head">
       <h1 id="hero-title" class="hero__title">${esc(h.title)}</h1>
-      <p class="hero__subtitle">${esc(h.subtitle)}</p>
+      <p class="hero__lines">${h.lines.map((line) => esc(line)).join('<br>\n        ')}</p>
     </div>
     <div class="hero__photo" style="--photo-ratio: ${photoRatio(ctx, h.photo)}">
       ${picture(ctx, h.photo, { alt: h.photo_alt, eager: true, sizes: '(min-width: 1440px) 512px, (min-width: 1280px) calc(50vw - 206px), (min-width: 1200px) calc(50vw - 150px), (min-width: 900px) calc(38.1vw - 16px), (min-width: 540px) 480px, calc(100vw - 48px)' })}
     </div>
     <div class="hero__body">
-      <p class="hero__opening lead">${esc(h.opening)}</p>
       <p class="hero__supporting">${esc(h.supporting)}</p>
       <div class="hero__cta">${registerButton(ctx, 'hero')}</div>
       <div class="facts-box">
@@ -212,48 +213,48 @@ ${cards}
 </section>`;
 }
 
-// The shift: four rows "From ... to ...", a gold arrow between, a full stop at the end.
+// The shift: the heading and four compact rows "From ... to ..." with a gold arrow between
+// and a full stop at the end; beside them, from 900 px, the tiles picture (since 17 Nov, from
+// the old Problem band): "now", the sixteen tiles scattered and turned, a dotted line, and
+// "after 8 weeks", the same tiles as one whole mosaic (src/render/mosaic.mjs, no picture file).
+// On the phone the picture follows the rows.
 function shift(ctx) {
   const s = ctx.content.shift;
-  const rows = s.items.map((item) => `      <li class="shift__row">
-        <p class="shift__from"><span class="shift__label caps">${esc(s.from_label)}</span> <span class="shift__text">${esc(item.from)}</span></p>
-        <span class="shift__arrow">${ARROW}</span>
-        <p class="shift__to"><span class="shift__label caps">${esc(s.to_label)}</span> <span class="shift__text">${esc(item.to)}.</span></p>
-      </li>`).join('\n');
+  const rows = s.items.map((item) => `        <li class="shift__row">
+          <p class="shift__from"><span class="shift__label caps">${esc(s.from_label)}</span> <span class="shift__text">${esc(item.from)}</span></p>
+          <span class="shift__arrow">${ARROW}</span>
+          <p class="shift__to"><span class="shift__label caps">${esc(s.to_label)}</span> <span class="shift__text">${esc(item.to)}.</span></p>
+        </li>`).join('\n');
   return `<section class="section shift" aria-labelledby="shift-title">
-  <div class="container">
-    <h2 id="shift-title">${esc(s.heading)}${draftTag(ctx, 'shift.heading')}</h2>
-    <ol class="shift__list">
+  <div class="container shift__grid">
+    <div class="shift__copy">
+      <h2 id="shift-title">${esc(s.heading)}${draftTag(ctx, 'shift.heading')}</h2>
+      <ol class="shift__list">
 ${rows}
-    </ol>${quotesIn(ctx, 'shift')}
+      </ol>
+    </div>
+    <div class="tiles-pair">
+      <div class="tiles-pair__now">
+        <p class="tiles-pair__label caps">${esc(s.now_label)}</p>
+        ${pathNow()}
+      </div>
+      <div class="tiles-pair__after">
+        <p class="tiles-pair__label caps">${esc(s.after_label)}</p>
+        ${pathAfter()}
+      </div>
+    </div>${quotesIn(ctx, 'shift')}
   </div>
 </section>`;
 }
 
-// Problem: a navy band across the window with the right part of Julia's slide 2. The picture:
-// "now", the sixteen tiles scattered and turned, a dotted line, and "after 8 weeks", the same
-// tiles as one whole mosaic (both drawn by src/render/mosaic.mjs, no picture file). Beside it
-// the quote of Adam Grant in Lora italic in champagne, a gold rule above, the author and the
-// book under it.
-function problem(ctx) {
-  const p = ctx.content.problem;
-  return `<section class="problem band band--navy" aria-label="${esc(p.quote)}">
-  <div class="container problem__inner">
-    <div class="problem__picture">
-      <div class="problem__now">
-        <p class="problem__label caps">${esc(p.now_label)}</p>
-        ${pathNow()}
-      </div>
-      <div class="problem__after">
-        <p class="problem__label caps">${esc(p.after_label)}</p>
-        ${pathAfter()}
-      </div>
-    </div>
-    <figure class="problem__quote">
-      <span class="rule" aria-hidden="true"></span>
-      <blockquote class="problem__text"><p>${esc(p.quote)}</p></blockquote>
-      <figcaption class="problem__by caps">${esc(p.author)}, <cite>${esc(p.source)}</cite></figcaption>
-    </figure>
+// The bridge: the light band between The shift and the Roadmap, which since 17 Nov holds only
+// a client's quote (quotes[].at = bridge), the full width of the content. Without a quote the
+// band is not printed at all.
+function bridge(ctx) {
+  const quotes = quotesIn(ctx, 'bridge');
+  if (!quotes) return '';
+  return `<section class="section section--deep bridge" aria-label="${esc(ctx.content.quotes.find((q) => q.at === 'bridge').name)}">
+  <div class="container">${quotes}
   </div>
 </section>`;
 }
@@ -318,7 +319,8 @@ ${levels}
 }
 
 // What's included, after Julia's slide 7: six tiles, each with an icon in an aubergine circle,
-// a title in Lora and a line under it; then the champagne strip "after week 8" with a star;
+// a title in Lora and a line under it; then the champagne strip "after week 8" with a star and
+// two phrases in bold (**...** in the yaml, Julia's choice of 17 Nov);
 // then, side by side from 900 px, the two quotes that stand between this block and the prices.
 function pack(ctx) {
   const p = ctx.content.package;
@@ -340,18 +342,20 @@ ${items}
       ${circle('package-after', 'circle--aubergine')}
       <div>
         <p class="after-week__label caps">${esc(p.after_label)}</p>
-        <p class="after-week__text">${esc(p.after_text)}</p>
+        <p class="after-week__text">${rich(p.after_text)}</p>
       </div>
     </div>${quotesIn(ctx, 'package', { wrap: 'package__quotes' })}
   </div>
 </section>`;
 }
 
-// Pricing, after Julia's slide 9: the cohort line in capitals above the heading, three filled
-// cards (champagne, navy, aubergine) with a gold line on top, in each the first price struck
-// through, a gold arrow and the founding price, then "+ VAT" with the spots where a tier has
-// them, and the text with its bold words. Under the cards the founding note, the invoice line
-// and the call button; beside them, for those who have decided, the deposit: a lead line, the
+// Pricing, after Julia's new slide 09 of 17 Nov: the cohort line in capitals, the heading,
+// then the line about the invoices with a check mark in an aubergine circle (above the cards,
+// where the phone shows it before the column of cards), three filled cards (champagne, navy,
+// aubergine) with a gold line on top, in each the first price struck through, a gold arrow and
+// the founding price on one line, "+ VAT" with the spots where a tier has them, the intro line
+// and the list of what is in (Core: five points; Plus and Premium: one line). Under the cards
+// the call button; beside it, for those who have decided, the deposit: a lead line, the
 // outline button and its note.
 function pricing(ctx) {
   const p = ctx.content.pricing;
@@ -359,22 +363,22 @@ function pricing(ctx) {
   const kinds = ['core', 'plus', 'premium'];
   const tiers = p.tiers.map((tier, i) => `      <li class="tier tier--${kinds[i] || 'core'}">
         <h3 class="tier__name">${esc(tier.name)}</h3>
-        <p class="tier__price"><s class="tier__was">${esc(tier.was)}</s> <span class="tier__now"><span class="tier__arrow" aria-hidden="true">${ARROW}</span><span class="tier__amount">${esc(tier.price)}</span></span></p>
+        <p class="tier__price"><s class="tier__was">${esc(tier.was)}</s><span class="tier__arrow" aria-hidden="true">${ARROW}</span><span class="tier__amount">${esc(tier.price)}</span></p>
         <p class="tier__terms">${esc(p.vat_label)}${String(tier.spots || '').trim() ? ` · ${esc(tier.spots)}` : ''}</p>
-        <p class="tier__text">${rich(tier.text)}</p>
+        <p class="tier__intro">${esc(tier.intro)}</p>
+${tier.items.length > 1 ? `        <ul class="tier__list">\n${tier.items.map((item) => `          <li>${esc(item)}</li>`).join('\n')}\n        </ul>` : `        <p class="tier__line">${esc(tier.items[0])}</p>`}
       </li>`).join('\n');
   return `<section class="section section--deep pricing" aria-labelledby="pricing-title">
   <div class="container">
     <p class="pricing__label caps">${esc(p.subheading)} · ${esc(p.total_spots)}${draftTag(ctx, 'pricing.subheading')}</p>
     <h2 id="pricing-title">${esc(p.heading)}</h2>
+    <p class="pricing__invoice">${circle('invoice', 'circle--aubergine')}<span>${esc(p.invoice_note)}</span></p>
     ${draftLine(ctx, 'pricing.tiers')}
     <ul class="tiers">
 ${tiers}
     </ul>
     <div class="pricing__actions">
       <div class="pricing__call">
-        <p class="pricing__note">${rich(p.founding_note)}</p>
-        <p class="pricing__invoice">${esc(p.invoice_note)}</p>
         <div class="pricing__cta">${registerButton(ctx, 'pricing')}</div>
       </div>
       <div class="deposit">
@@ -493,10 +497,11 @@ ${items}
 </section>`;
 }
 
-// The closing band: aubergine, after the January slide of Julia's deck: the heading in Lora,
-// the line under it, the italic question in champagne, then the call button and, next to it,
-// the outline deposit button with its note. Tiles only at the sides, outside the text, and
-// over the upper border onto the block above; the drawings sit in a hidden sprite.
+// The closing band: aubergine, as on Julia's screenshot of 17 Nov: the two large lines of the
+// heading (each on a line of its own), the smaller line under them, the gold italic line, then
+// the call button and, next to it, the outline deposit button with its note. Tiles only at the
+// sides, outside the text, and over the upper border onto the block above; the drawings sit in
+// a hidden sprite.
 function closing(ctx) {
   const c = ctx.content.closing;
   const d = ctx.content.deposit;
@@ -504,7 +509,7 @@ function closing(ctx) {
   ${bandSprite()}
   ${bandSvgs()}
   <div class="container closing__inner">
-    <h2 id="closing-title" class="closing__title">${esc(c.heading)}${draftTag(ctx, 'closing.heading')}</h2>
+    <h2 id="closing-title" class="closing__title">${esc(c.heading)}<br>${esc(c.heading_more)}${draftTag(ctx, 'closing.heading')}</h2>
     <p class="closing__text">${esc(c.text)}</p>
     <p class="closing__line">${esc(c.line)}</p>
     <div class="closing__actions">
@@ -546,7 +551,7 @@ ${topbar(ctx)}
 ${hero(ctx)}
 ${who(ctx)}
 ${shift(ctx)}
-${problem(ctx)}
+${bridge(ctx)}
 ${promise(ctx)}
 ${process(ctx)}
 ${pack(ctx)}

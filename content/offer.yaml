@@ -1,7 +1,8 @@
 # Own Your Mosaic of Life: all text of the page lives in this file.
 # Edit the text after the colons. Keep field names and indentation as they are.
 # A line may carry the mark "draft" after a hash while a text waits for Julia's OK; none does at the moment (all marks lifted on 16 Nov).
-# Texts since 16 Nov follow Julia's document "Adapting the group offer page" and the deck "Own Your Mosaic of Life 4.0 · Webinar".
+# Texts since 16 Nov follow Julia's document "Adapting the group offer page" and the deck "Own Your Mosaic of Life 4.0 · Webinar";
+# her corrections of 17 Nov (the hero lines, the prices after her new slide 09, the last screen) are in.
 
 meta:
   published: false   # false = hidden from search engines, TODO and draft marks are visible. Set true on launch day
@@ -13,7 +14,7 @@ links:
   main_site: https://www.juliakrylova.com
 
 register:
-  label: "Book a 20-minute call"   # the call lasts 20 minutes (Stas, 16 Nov); the link stays Julia's 30-minute meeting
+  label: "Book a program fit call"   # Julia's wording of 17 Nov; the link stays her 30-minute Calendly meeting
   url: https://calendly.com/juliakrylova/30min
 
 deposit:
@@ -24,22 +25,24 @@ deposit:
 
 hero:
   title: "Own Your Mosaic of Life"
-  subtitle: "Build a Roadmap for Your Next Ambition"
   name: "Julia Krylova"
-  positioning: "Strategic Mentor for Ambitious Women Leaders at Their Next Big Chapter"
-  opening: "You've built a career or business and achieved a lot. Now you're ready for bigger. What's missing is the path to get there."
+  positioning: "Strategic Mentor for High-Achieving Women Leaders"
+  lines:   # the three lines under the title (Julia, 17 Nov), each on a line of its own
+    - "You've built a career or business and achieved a lot."
+    - "You're ready for bigger."
+    - "What's missing is a clear roadmap of how to get there."
   supporting: "An eight-week online mentoring program to help you make clear choices, build a practical system around your next ambition, and start taking action, without sacrificing the life you've already built."
   facts: ["January 2027 Founding Cohort", "Online", "Maximum 8 participants"]
   photo: julia-krylova-on-stage.jpg
   photo_alt: "Julia Krylova speaking into a microphone with one arm raised, in a white jacket"
 
 who:
-  heading: "Is this you?"
+  heading: "A lot of high-achieving women leaders can relate to this"
   items:
-    - title: "Stretched too thin"
-      text: "You're doing well, maybe better than ever on paper, but you're stretched across too many directions to think straight about what's actually next."
     - title: "Ready for bigger"
       text: "You're ready for a bigger role, a bigger bet, a bigger version of what you're already doing. You just haven't built the bridge to get there yet."
+    - title: "Stretched too thin"
+      text: "You're doing well, maybe better than ever on paper, but you're stretched across too many directions to think straight about what's actually next."
     - title: "The best-kept secret"
       text: "People respect what you do, but somehow your real value still isn't fully recognized, and you're tired of being the best-kept secret in the room."
     - title: "A plan for everyone but you"
@@ -49,18 +52,13 @@ shift:
   heading: "The shift we work toward"
   from_label: "From"
   to_label: "to"
+  now_label: "Now"               # the picture beside the rows (17 Nov): the tiles scattered now ...
+  after_label: "After 8 weeks"   # ... and the same tiles as one mosaic after eight weeks
   items:
     - { from: "feeling pulled in too many directions", to: "knowing what deserves your focus" }
     - { from: "wondering what your next step should be", to: "having a strategy that fits your circumstances" }
     - { from: "being valued for what you deliver", to: "communicating the wider value you bring" }
     - { from: "holding an ambition alongside an overloaded life", to: "having a practical roadmap that takes both into account" }
-
-problem:   # the right part of slide 2 on the navy band: the tiles now and after eight weeks, then the quote of Adam Grant
-  now_label: "Now"
-  after_label: "After 8 weeks"
-  quote: "When people can't see a path, they stop dreaming of the destination."
-  author: "Adam Grant"
-  source: "Hidden Potential"
 
 promise:   # slide 8
   label: "The outcome"
@@ -105,31 +103,40 @@ package:   # slide 7
     - { title: "Active group chat", text: "During the program" }
     - { title: "Session recordings", text: "Plus one month after" }
   after_label: "After week 8"
-  after_text: "A group calibration session one month after the program, to check progress and adjust your roadmap. And you're invited to the Mosaic of Life alumni club: an active community of women on the same path."
+  after_text: "**A group calibration session** one month after the program, to check progress and adjust your roadmap. And you're invited to the **Mosaic of Life alumni club**: an active community of women on the same path."
 
-pricing:   # slide 9
-  heading: "Founding Members"
+pricing:   # Julia's new slide 09 of 17 Nov
+  heading: "Choose Your Experience"
   subheading: "Founding cohort, January 2027"
   total_spots: "8 spots in total"
+  invoice_note: "Invoices available for employer or L&D budgets, plus a short letter for your manager."
   vat_label: "+ VAT"
   tiers:
     - name: "Core"
       was: "€995"
       price: "€795"
       spots: ""
-      text: "Your complete eight-week Mosaic of Life group program, including the diagnostic, weekly sessions, practical tools, interactive masterminds and community support."
+      intro: "Complete group program, including:"
+      items:
+        - "The diagnostic"
+        - "Weekly sessions"
+        - "Tools library"
+        - "Community"
+        - 'Post course "check-in" group session'
     - name: "Plus"
       was: "€1,295"
       price: "€1,095"
       spots: "up to 5 spots"
-      text: "Everything in Core, plus **one 90-minute private mentoring session** to explore your personal challenges and decisions in greater depth."
+      intro: "Complete group program (Core), plus:"
+      items:
+        - "one 90-minute 1:1 mentoring session"
     - name: "Premium"
       was: "€2,095"
       price: "€1,895"
       spots: "only 2 spots"
-      text: "Everything in Core, plus **four private mentoring sessions**: two during the program and two during the following two months, helping you implement your roadmap and adjust your strategy."
-  founding_note: "As a founding member, you get **a better price than future cohorts** and **a real say in shaping the program**."
-  invoice_note: "Invoices available for employer or L&D budgets."
+      intro: "Complete group program (Core), plus:"
+      items:
+        - "four 90-minute 1:1 mentoring sessions"
 
 proof:   # the text of Julia's document (16 Nov)
   heading: "Meet Your Mentor"
@@ -157,31 +164,31 @@ approach:   # the text of Julia's document (16 Nov), in place of "What producing
     - title: "Practical Mentoring With Genuine Care"
       text: "I don't just ask questions. I share real-world experience, offer ideas and recommendations, challenge assumptions, and help clients find solutions they can use. I genuinely care about their progress."
 
-quotes:   # five quotes from Julia's clients (16 Nov); "at" names the block each one stands in (shift, process, package, pricing or logistics)
-  - at: shift
+quotes:   # five quotes from Julia's clients (16 Nov); "at" names the block each one stands in (shift, bridge, process, package, pricing or logistics); **bold** marks the key phrase (17 Nov)
+  - at: process
     name: "Kateryna Gryn"
     role: "IT Specialist"
     company: "EPAM"
     text:
-      - "In just a few weeks, I secured a new job, clarified my role in a startup, initiated my divorce, and defined my path in relationships. I reclaimed my morning rituals, bought a piano for lessons with my son, and finally reached for my paints again. I gained clarity on where I was settling for less and where I could finally start choosing for myself."
-  - at: process
+      - "**In just a few weeks, I secured a new job**, clarified my role in a startup, initiated my divorce, and defined my path in relationships. I reclaimed my morning rituals, bought a piano for lessons with my son, and finally reached for my paints again. I gained clarity on where I was settling for less and where I could finally start choosing for myself."
+  - at: bridge
     name: "Anna Buevich"
     role: "Independent Professional"
     company: "Entertainment Industry"
     text:
-      - "Julia helped me build a system for both career realization and life resilience. I moved from reactive networking to strategic engagement and already see real opportunities opening up. I am perceived as a significantly stronger and more authoritative professional, and I have begun to internally permit myself to operate on a larger scale."
+      - "Julia helped me build a system for both career realization and life resilience. **I moved from reactive networking to strategic engagement** and already see real opportunities opening up. I am perceived as a significantly stronger and more authoritative professional, and I have begun to internally permit myself to operate on a larger scale."
   - at: package
     name: "Ellen Farnan"
     role: "Strategic Project Manager"
     company: "Oracle"
     text:
-      - "Julia's workshops were not only extremely engaging but her empathy and encouragement created a warm and supportive environment during each session. The attendees were put at ease with her kind and calm demeanor, and it was wonderful to see everyone opening up about their own experiences."
+      - "Julia's workshops were not only extremely engaging but her empathy and encouragement created **a warm and supportive environment** during each session. The attendees were put at ease with her kind and calm demeanor, and it was wonderful to see everyone opening up about their own experiences."
   - at: package
     name: "Ally Alombro"
     role: "Software Engineer"
     company: "Van Lanschot Kempen"
     text:
-      - "Julia helped me turn my goals into a clear, measurable plan and encouraged me to anchor my goals in how I want to feel, not just what I want to achieve. She challenged me to celebrate progress, set non-negotiable time for myself, and build habits that create real balance instead of constant urgency."
+      - "Julia helped me **turn my goals into a clear, measurable plan** and encouraged me to anchor my goals in how I want to feel, not just what I want to achieve. She challenged me to celebrate progress, set non-negotiable time for myself, and build habits that create real balance instead of constant urgency."
       - "This mentorship has reshaped how I show up: more grounded, intentional, and able to trust my own voice."
   - at: logistics
     name: "Angela Weigend"
@@ -189,7 +196,7 @@ quotes:   # five quotes from Julia's clients (16 Nov); "at" names the block each
     company: "Heineken"
     text:
       - "Working with Julia helped me become more intentional in how I show up, without changing who I am as a leader."
-      - "The small adjustments we worked on had a much bigger impact than I expected, not only in how I came across, but also in how grounded and confident I felt internally."
+      - "The small adjustments we worked on had **a much bigger impact than I expected**, not only in how I came across, but also in how grounded and confident I felt internally."
 
 logistics:
   heading: "Practical details"
@@ -199,7 +206,7 @@ logistics:
     - { value: "Max 8 women", label: "A small, focused group" }
   timeline:   # four steps after Julia's document (16 Nov): the payment step carries no date
     - { when: "Now", title: "Program fit call", text: "Followed by a €200 deposit to secure your place" }
-    - { when: "", title: "Payment", text: "Remaining balance due" }
+    - { when: "", title: "Payment", text: "Remaining balance due by December 18th." }
     - { when: "5 days before start", title: "Onboarding", text: "Welcome email, short questionnaire, and access to the community" }
     - { when: "Mid-January 2027", title: "We begin", text: "Your first live session" }
 
@@ -220,10 +227,11 @@ faq:   # slide 10, in the order of its two columns (left column first)
     - q: "What happens after week 8?"
       a: "You leave with your Next Chapter Roadmap. One month later, we meet again as a group to check progress. And you're invited to the Mosaic of Life alumni club."
 
-closing:   # the January slide of the deck
-  heading: "In January, everyone thinks about goals. We act on them."
+closing:   # the last screen as on Julia's screenshot of 17 Nov: two large lines, a smaller one, the gold italic line
+  heading: "In January, everyone thinks about goals."
+  heading_more: "We act on them."
   text: "This time, you won't be alone."
-  line: "One year from now: what if it worked?"
+  line: "Join the founding cohort"
 
 footer:
   legal_line: "Mastermind Global B.V. · KVK 88166473 · Amsterdam"

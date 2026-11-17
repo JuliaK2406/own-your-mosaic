@@ -1,6 +1,6 @@
 // The link card (og:image) for LinkedIn and the like: a 1200 x 627 PNG made only from what the
-// page already shows: hero.title and hero.subtitle in Lora on porcelain, and a mosaic of tiles
-// in the brand aubergine. No other text. Writes assets/og-image.png, which the build copies
+// page already shows: hero.title and the three lines under it (hero.lines, since 17 Nov) in
+// Lora on porcelain, and a mosaic of tiles in the brand aubergine. No other text. Writes assets/og-image.png, which the build copies
 // into dist/. Fonts and colours come from the repository itself. Run: npm run og
 
 import { readFile } from 'node:fs/promises';
@@ -36,7 +36,7 @@ html, body { margin: 0; background: ${porcelain}; }
 .tile { border-radius: 14px; }
 </style></head>
 <body><div class="card">
-  <div><h1 class="title">${esc(content.hero.title)}</h1><p class="subtitle">${esc(content.hero.subtitle)}</p></div>
+  <div><h1 class="title">${esc(content.hero.title)}</h1><p class="subtitle">${content.hero.lines.map((line) => esc(line)).join('<br>')}</p></div>
   <div class="mosaic">${columns}</div>
 </div></body></html>
 `;

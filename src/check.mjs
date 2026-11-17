@@ -52,18 +52,16 @@ const SHAPE = {
   deposit: { lead: 'string', label: 'string', note: 'string', url: 'https' },
   hero: {
     title: 'string',
-    subtitle: 'string',
     name: 'string',
     positioning: 'string',
-    opening: 'string',
+    lines: 'list:3',
     supporting: 'string',
     facts: 'list:3',
     photo: 'file',
     photo_alt: 'text',
   },
   who: { heading: 'string', items: [{ title: 'string', text: 'string' }, 4] },
-  shift: { heading: 'string', from_label: 'string', to_label: 'string', items: [{ from: 'string', to: 'string' }, 4] },
-  problem: { now_label: 'string', after_label: 'string', quote: 'string', author: 'string', source: 'string' },
+  shift: { heading: 'string', from_label: 'string', to_label: 'string', items: [{ from: 'string', to: 'string' }, 4], now_label: 'string', after_label: 'string' },
   promise: {
     label: 'string',
     heading: 'string',
@@ -87,10 +85,9 @@ const SHAPE = {
     heading: 'string',
     subheading: 'string',
     total_spots: 'string',
-    vat_label: 'string',
-    tiers: [{ name: 'string', was: 'string', price: 'string', spots: 'text', text: 'string' }, 3],
-    founding_note: 'string',
     invoice_note: 'string',
+    vat_label: 'string',
+    tiers: [{ name: 'string', was: 'string', price: 'string', spots: 'text', intro: 'string', items: 'list' }, 3],
   },
   proof: {
     heading: 'string',
@@ -110,7 +107,7 @@ const SHAPE = {
     timeline: [{ when: 'text', title: 'string', text: 'string' }, 4],
   },
   faq: { label: 'string', heading: 'string', items: [{ q: 'string', a: 'string' }, 6] },
-  closing: { heading: 'string', text: 'string', line: 'string' },
+  closing: { heading: 'string', heading_more: 'string', text: 'string', line: 'string' },
   footer: { legal_line: 'string', main_site_label: 'string' },
 };
 

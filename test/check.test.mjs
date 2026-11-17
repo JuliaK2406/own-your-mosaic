@@ -32,7 +32,8 @@ test('drafts: no mark is left in the yaml since 16 November; a mark on a key or 
   assert.deepEqual(again.drafts.map((draft) => draft.path), ['shift.heading', 'package.items']);
   assert.equal(again.drafts[0].note, 'a heading of ours');
   assert.equal(again.drafts[1].value.length, 6, 'the whole list is one draft');
-  assert.ok(!('tagline' in content.hero) && !('paragraphs' in content.hero), 'the first screen carries the opening and the supporting copy of 16 Nov, no tagline');
+  assert.ok(!('tagline' in content.hero) && !('subtitle' in content.hero) && !('opening' in content.hero), 'the first screen carries the three lines of 17 Nov and the supporting copy, no tagline, no subtitle');
+  assert.ok(!('problem' in content), 'the Problem band left on 17 Nov');
 });
 
 test('a draft marker that does not resolve to a value is a problem, not silently dropped', () => {
@@ -42,8 +43,10 @@ test('a draft marker that does not resolve to a value is a problem, not silently
   assert.ok(problems[0].includes('hero.nothing'));
 });
 
-test('exact counts: 4 who, 4 shift, 4 inputs, 4 outcomes, 3 levels, 6 package items, 3 tiers, 3 approach items, 3 cards, 4 steps, 6 questions, 3 facts', () => {
+test('exact counts: 3 hero lines, 4 who, 4 shift, 4 inputs, 4 outcomes, 3 levels, 6 package items, 3 tiers with at least one item, 3 approach items, 3 cards, 4 steps, 6 questions, 3 facts', () => {
   const cases = [
+    ['hero.lines', (c) => c.hero.lines.pop()],
+    ['pricing.tiers[1].items', (c) => { c.pricing.tiers[1].items = []; }],
     ['who.items', (c) => c.who.items.pop()],
     ['shift.items', (c) => c.shift.items.pop()],
     ['promise.inputs', (c) => c.promise.inputs.push('Extra')],
@@ -92,8 +95,11 @@ test('an empty text is reported with its path; site_url, photo_alt, a tier\'s sp
   delete h.process.levels[1].weeks;
   assert.ok(hasError(errorsOf(h), 'process.levels[1].weeks'));
   const i = copy();
-  i.hero.opening = '';
-  assert.ok(hasError(errorsOf(i), 'hero.opening'));
+  i.hero.lines[1] = '';
+  assert.ok(hasError(errorsOf(i), 'hero.lines[1]'));
+  const l = copy();
+  l.pricing.invoice_note = '';
+  assert.ok(hasError(errorsOf(l), 'pricing.invoice_note'));
   const j = copy();
   j.faq.items[5].a = '';
   assert.ok(hasError(errorsOf(j), 'faq.items[5].a'));
@@ -126,11 +132,11 @@ test('photos named in the yaml must exist in content/photos; the two group photo
 
 test('a long dash is a warning with the path of the field, not an error', () => {
   const c = copy();
-  c.problem.quote = 'When people cannot see a path \u2014 they stop.';
+  c.shift.after_label = 'After 8 weeks \u2014 whole';
   c.who.items[0].text = 'On paper \u2013 and in life.';
   const result = checkContent(c, { photos });
   assert.deepEqual(result.errors, []);
-  assert.deepEqual(result.warnings, ['who.items[0].text: contains a long dash', 'problem.quote: contains a long dash']);
+  assert.deepEqual(result.warnings, ['who.items[0].text: contains a long dash', 'shift.after_label: contains a long dash']);
 });
 
 test('published: true with a TODO or a draft left stops the build', () => {
@@ -194,6 +200,7 @@ test('deposit and quotes: the deposit needs a lead, a label, a note and an https
   assert.ok(hasError(errorsOf(f), 'quotes[1].at'));
   assert.equal(content.quotes.length, 5);
   assert.deepEqual(content.quotes.map((q) => q.text.length), [1, 1, 1, 2, 2], 'two of the quotes keep their two paragraphs');
-  assert.deepEqual(content.quotes.map((q) => q.at), ['shift', 'process', 'package', 'package', 'logistics'], 'since 16 Nov two quotes stand under What\'s included, none in the Roadmap');
+  assert.deepEqual(content.quotes.map((q) => q.at), ['process', 'bridge', 'package', 'package', 'logistics'], 'since 17 Nov Kateryna stands in the Method, Anna in the bridge, two under What\'s included, none in the Roadmap');
+  assert.ok(content.quotes.every((q) => q.text.join(' ').includes('**')), 'every quote carries its bold phrase');
   assert.deepEqual(checkContent(copy(), { photos }).todos, ['meta.site_url (empty)']);
 });

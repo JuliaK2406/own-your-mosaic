@@ -11,8 +11,8 @@ export const ICONS_DIR = path.resolve(path.dirname(fileURLToPath(import.meta.url
 // place -> Lucide file name
 export const ICONS = {
   // Is this you?
-  'who-0': 'expand',           // Stretched too thin: pulled in every direction
-  'who-1': 'trending-up',      // Ready for bigger
+  'who-0': 'trending-up',      // Ready for bigger
+  'who-1': 'expand',           // Stretched too thin: pulled in every direction
   'who-2': 'eye-off',          // The best-kept secret: not seen
   'who-3': 'clipboard-check',  // A plan for everyone but you
   // Roadmap (slide 8)
@@ -29,6 +29,8 @@ export const ICONS = {
   'approach-0': 'clapperboard',    // a producer's perspective
   'approach-1': 'layers',          // one integrated method
   'approach-2': 'heart-handshake', // practical mentoring with genuine care
+  // Prices
+  'invoice': 'check',          // invoices available for employer or L&D budgets
   // Practical details
   'card-0': 'calendar-days',  // 8 weeks
   'card-1': 'clock',          // Weekday evenings

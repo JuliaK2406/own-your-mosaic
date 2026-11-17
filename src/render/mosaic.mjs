@@ -16,6 +16,7 @@ export const COLOURS = {
   warmGrey: '#E4E2DD',
   gold: '#B89B5E',
   onAubergine: '#F3E9EF',
+  navy: '#1E2A47',
 };
 export const TILE = 28;
 export const GAP = 6;
@@ -237,11 +238,12 @@ export function allMosaics() {
   };
 }
 
-// The picture of the Problem band, after the right part of Julia's slide 2: the same sixteen
-// tiles twice. On the left, now: the tiles scattered over a square field, each pushed off its
-// point and turned. On the right, after eight weeks: the same tiles as one whole 4 x 4 mosaic.
-// Champagne, aubergine and warm grey (at half strength, a slate grey on the navy band); the
-// colours of the mosaic follow the slide row by row, the scattered tiles carry the same ones.
+// The tiles picture of The shift (since 17 Nov; before that the Problem band), after the right
+// part of Julia's slide 2: the same sixteen tiles twice. On the left, now: the tiles scattered
+// over a square field, each pushed off its point and turned. On the right, after eight weeks:
+// the same tiles as one whole 4 x 4 mosaic. Champagne, aubergine and navy at 0.38 (a slate
+// grey on the light block); the colours of the mosaic follow the slide row by row, the
+// scattered tiles carry the same ones.
 // Both are drawn at their own size, with the same tile, and no tile is ever cut: the mosaic
 // fills its field exactly, and every turned tile keeps all four corners inside the field
 // (a test turns them and checks). These two svgs are a picture of the page (class picture),
@@ -252,7 +254,7 @@ export const PATH_SEED = 19;
 const PATH_FILLS = {
   c: { fill: COLOURS.champagne, opacity: 1 },
   a: { fill: COLOURS.aubergine, opacity: 1 },
-  g: { fill: COLOURS.warmGrey, opacity: 0.5 },
+  g: { fill: COLOURS.navy, opacity: 0.38 },
 };
 
 function pictureSvg(className, width, height, body) {

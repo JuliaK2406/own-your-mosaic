@@ -27,8 +27,8 @@
   --lead-size: clamp(1.1875rem, 1.118rem + 0.286vw, 1.375rem);    /* 19 to 22 px */
   --body-size: clamp(1.0625rem, 1.016rem + 0.19vw, 1.1875rem);    /* 17 to 19 px */
   --statement-size: clamp(1.625rem, 1.3rem + 1.333vw, 2.5rem);    /* 26 to 40 px, Lora */
-  --price-size: clamp(2.25rem, 1.971rem + 1.143vw, 3rem);         /* 36 to 48 px, Lora */
-  --quote-size: clamp(1.25rem, 1.064rem + 0.762vw, 1.75rem);      /* 20 to 28 px, Lora */
+  --price-size: clamp(2rem, 1.814rem + 0.762vw, 2.5rem);          /* 32 to 40 px, Lora: the founding price on one line with the first one (17 Nov) */
+  --quote-size: clamp(1rem, 0.953rem + 0.19vw, 1.125rem);         /* 16 to 18 px, Lora italic, a little under the body text (Julia, 17 Nov) */
   --secondary-size: 0.9375rem;                                    /* 15 px */
   --caps-size: 0.8125rem;                                         /* 13 px, labels in capitals */
   --leading-body: 1.6;

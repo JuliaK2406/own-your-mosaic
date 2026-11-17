@@ -94,13 +94,13 @@ test('the band drawings: five widths; over the border only aubergine within the 
   assert.ok(bandUse('wide', 'right').includes('<use href="#band-wide" transform="translate(292 0) scale(-1 1)"/>'));
 });
 
-test('the tiles picture of the Problem band: sixteen tiles scattered and turned, every corner inside the field, none closer than PATH.apart; the same sixteen as a whole 4 x 4 mosaic; brand colours only; the same every build', () => {
+test('the tiles picture of The shift: sixteen tiles scattered and turned, every corner inside the field, none closer than PATH.apart; the same sixteen as a whole 4 x 4 mosaic; brand colours only; the same every build', () => {
   const now = pathNowTiles();
   const after = pathAfterTiles();
   assert.equal(now.length, 16);
   assert.equal(after.length, 16);
   assert.deepEqual(now.map((t) => t.fill), after.map((t) => t.fill), 'the same tiles, in the same order');
-  assert.deepEqual([...new Set(after.map((t) => t.fill))].sort(), [COLOURS.aubergine, COLOURS.champagne, COLOURS.warmGrey].sort());
+  assert.deepEqual([...new Set(after.map((t) => t.fill))].sort(), [COLOURS.aubergine, COLOURS.champagne, COLOURS.navy].sort());
   assert.equal(PATH_PATTERN.length, 16);
   const half = PATH.tile / 2;
   now.forEach((t, i) => {
@@ -124,7 +124,7 @@ test('the tiles picture of the Problem band: sixteen tiles scattered and turned,
   for (const svg of [pathNow(), pathAfter()]) {
     assert.ok(svg.startsWith('<svg class="picture picture--') && svg.includes('aria-hidden="true"') && !svg.includes('slice'));
     assert.equal((svg.match(/<rect /g) || []).length, 16);
-    for (const fill of fills(svg)) assert.ok([COLOURS.aubergine, COLOURS.champagne, COLOURS.warmGrey].includes(fill), fill);
+    for (const fill of fills(svg)) assert.ok([COLOURS.aubergine, COLOURS.champagne, COLOURS.navy].includes(fill), fill);
     assert.ok(!/<(image|script|text|foreignObject)\b/.test(svg));
   }
   assert.equal(pathNow(), pathNow(), 'the same picture every build');
