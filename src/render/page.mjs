@@ -213,34 +213,34 @@ ${cards}
 </section>`;
 }
 
-// The shift: the heading and four compact rows "From ... to ..." with a gold arrow between
-// and a full stop at the end; beside them, from 900 px, the tiles picture (since 17 Nov, from
-// the old Problem band): "now", the sixteen tiles scattered and turned, a dotted line, and
-// "after 8 weeks", the same tiles as one whole mosaic (src/render/mosaic.mjs, no picture file).
-// On the phone the picture follows the rows.
+// The shift: the heading, four compact rows "From ... to ..." with a gold arrow between and a
+// full stop at the end, and the tiles picture (Julia's note of 17 Nov): two squares of one
+// size, "now" with the sixteen tiles pushed off their points and turned, "after 8 weeks" with
+// the same tiles as one even mosaic, a label over each square at its left edge, a gold arrow
+// from the first square to the second (src/render/mosaic.mjs draws the squares, no picture
+// file). From 900 px the squares stand one under the other beside the rows, as tall together
+// as the rows; on the phone side by side under the rows.
 function shift(ctx) {
   const s = ctx.content.shift;
-  const rows = s.items.map((item) => `        <li class="shift__row">
-          <p class="shift__from"><span class="shift__label caps">${esc(s.from_label)}</span> <span class="shift__text">${esc(item.from)}</span></p>
-          <span class="shift__arrow">${ARROW}</span>
-          <p class="shift__to"><span class="shift__label caps">${esc(s.to_label)}</span> <span class="shift__text">${esc(item.to)}.</span></p>
-        </li>`).join('\n');
+  const rows = s.items.map((item) => `      <li class="shift__row">
+        <p class="shift__from"><span class="shift__label caps">${esc(s.from_label)}</span> <span class="shift__text">${esc(item.from)}</span></p>
+        <span class="shift__arrow">${ARROW}</span>
+        <p class="shift__to"><span class="shift__label caps">${esc(s.to_label)}</span> <span class="shift__text">${esc(item.to)}.</span></p>
+      </li>`).join('\n');
   return `<section class="section shift" aria-labelledby="shift-title">
   <div class="container shift__grid">
-    <div class="shift__copy">
-      <h2 id="shift-title">${esc(s.heading)}${draftTag(ctx, 'shift.heading')}</h2>
-      <ol class="shift__list">
+    <h2 id="shift-title" class="shift__heading">${esc(s.heading)}${draftTag(ctx, 'shift.heading')}</h2>
+    <ol class="shift__list">
 ${rows}
-      </ol>
-    </div>
+    </ol>
     <div class="tiles-pair">
-      <div class="tiles-pair__now">
+      <div class="tiles-pair__cell tiles-pair__cell--now">
         <p class="tiles-pair__label caps">${esc(s.now_label)}</p>
-        ${pathNow()}
+        <div class="tiles-pair__square">${pathNow()}<span class="tiles-pair__arrow" aria-hidden="true">${ARROW}</span></div>
       </div>
-      <div class="tiles-pair__after">
+      <div class="tiles-pair__cell tiles-pair__cell--after">
         <p class="tiles-pair__label caps">${esc(s.after_label)}</p>
-        ${pathAfter()}
+        <div class="tiles-pair__square">${pathAfter()}</div>
       </div>
     </div>${quotesIn(ctx, 'shift')}
   </div>
@@ -349,7 +349,8 @@ ${items}
 </section>`;
 }
 
-// Pricing, after Julia's new slide 09 of 17 Nov: the cohort line in capitals, the heading,
+// Pricing, after Julia's new slide 09 of 17 Nov: the cohort line in capitals (the spots after
+// the dot held together by no-break spaces, so the phone breaks the line before the dot), the heading,
 // then the line about the invoices with a check mark in an aubergine circle (above the cards,
 // where the phone shows it before the column of cards), three filled cards (champagne, navy,
 // aubergine) with a gold line on top, in each the first price struck through, a gold arrow and
@@ -370,7 +371,7 @@ ${tier.items.length > 1 ? `        <ul class="tier__list">\n${tier.items.map((it
       </li>`).join('\n');
   return `<section class="section section--deep pricing" aria-labelledby="pricing-title">
   <div class="container">
-    <p class="pricing__label caps">${esc(p.subheading)} · ${esc(p.total_spots)}${draftTag(ctx, 'pricing.subheading')}</p>
+    <p class="pricing__label caps">${esc(p.subheading)} · ${esc(p.total_spots).replace(/ /g, '&nbsp;')}${draftTag(ctx, 'pricing.subheading')}</p>
     <h2 id="pricing-title">${esc(p.heading)}</h2>
     <p class="pricing__invoice">${circle('invoice', 'circle--aubergine')}<span>${esc(p.invoice_note)}</span></p>
     ${draftLine(ctx, 'pricing.tiers')}

@@ -545,11 +545,13 @@ a:hover {
   }
 }
 
-/* The shift: the heading and four compact rows ("From ..." muted, a gold arrow, "to ..." in
-   Lora) on the left, the tiles picture on the right from 900 px: "now", sixteen tiles
-   scattered over a 240 px field, a dotted line, "after 8 weeks", the whole 160 px mosaic; the
-   two columns are three to two, so the tiles keep one size. On the phone the rows stack with
-   the arrow turned down and the picture follows them. */
+/* The shift: the heading, four compact rows ("From ..." muted, a gold arrow, "to ..." in
+   Lora) and the tiles picture: two squares of one size, "now" and "after 8 weeks", each with
+   its label over its left edge and a gold arrow from the first to the second. On the phone
+   the rows stack with the arrow turned down and the squares stand side by side under them,
+   the arrow between them pointing right. From 900 px the rows take the left column and the
+   squares stand one under the other on the right, the arrow pointing down between them, the
+   column exactly as tall as the rows: the squares take the height the rows give them. */
 
 .shift__grid {
   display: grid;
@@ -557,8 +559,8 @@ a:hover {
   row-gap: var(--s-5);
 }
 
-.shift h2 {
-  margin-bottom: var(--s-4);
+.shift__heading {
+  margin: 0;
 }
 
 .shift__list {
@@ -609,45 +611,71 @@ a:hover {
   transform: rotate(90deg);
 }
 
-/* the tiles picture: labels in aubergine, the mosaic beside the scattered tiles */
+/* the tiles picture: the svg fills its square box, so the box alone sets the size */
 
 .tiles-pair {
-  display: grid;
-  grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
-  column-gap: var(--s-5);
-  align-items: center;
-  width: min(100%, 480px);
-  margin-inline: auto;
+  display: flex;
+  align-items: flex-start;
 }
 
-.tiles-pair__now,
-.tiles-pair__after {
-  display: grid;
-  row-gap: var(--s-3);
+.tiles-pair__cell {
+  flex: 1 1 0;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
 }
 
-.tiles-pair__after {
-  padding-left: var(--s-5);
-  border-left: 1px dashed rgba(30, 42, 71, 0.3);
+.tiles-pair__cell--now {
+  margin-right: 44px;   /* room for the arrow between the squares */
 }
 
 .tiles-pair__label {
-  margin: 0;
+  margin: 0 0 var(--s-2);
   max-width: none;
+  white-space: nowrap;
   color: var(--aubergine);
 }
 
-.picture {
+.tiles-pair__square {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1 / 1;
+}
+
+.tiles-pair__square .picture {
+  position: absolute;
+  inset: 0;
   display: block;
   width: 100%;
-  height: auto;
+  height: 100%;
+}
+
+.tiles-pair__arrow {
+  position: absolute;
+  top: 50%;
+  left: 100%;
+  transform: translate(10px, -50%);
+}
+
+.tiles-pair__arrow .arrow {
+  width: 24px;
+  height: 24px;
 }
 
 @media (min-width: 900px) {
   .shift__grid {
     grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
+    grid-template-areas:
+      "head ."
+      "list picture";
     column-gap: clamp(2.5rem, 5vw, 5rem);
-    align-items: center;
+    row-gap: var(--s-4);
+  }
+  .shift__heading {
+    grid-area: head;
+  }
+  .shift__list {
+    grid-area: list;
   }
   .shift__row {
     grid-template-columns: minmax(0, 1fr) 40px minmax(0, 1.15fr);
@@ -658,8 +686,30 @@ a:hover {
     transform: none;
   }
   .tiles-pair {
-    width: 100%;
-    margin-inline: 0;
+    grid-area: picture;
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .tiles-pair__cell {
+    min-height: 0;
+    align-items: flex-start;
+  }
+  .tiles-pair__cell--now {
+    margin: 0 0 48px;   /* room for the arrow under the first square */
+  }
+  .tiles-pair__label {
+    flex: none;
+  }
+  .tiles-pair__square {
+    flex: 1 1 0;
+    min-height: 0;
+    width: auto;
+    aspect-ratio: 1 / 1;
+  }
+  .tiles-pair__arrow {
+    top: 100%;
+    left: 50%;
+    transform: translate(-50%, 12px) rotate(90deg);
   }
 }
 

@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { loadContent, loadRaw, findDrafts, walkStrings } from '../src/check.mjs';
 import { renderPage, registerUrl, rich, esc, UTM, BUTTON_PLACES, DEPOSIT_PLACES, QUOTE_BLOCKS, HERO_TILES, OG_WIDTH, OG_HEIGHT } from '../src/render/page.mjs';
-import { COLOURS, BAND_VARIANTS, PATH, PATH_AFTER_SIZE } from '../src/render/mosaic.mjs';
+import { COLOURS, BAND_VARIANTS, PATH_SIZE } from '../src/render/mosaic.mjs';
 import { ICONS } from '../src/render/icons.mjs';
 
 const content = await loadContent();
@@ -30,7 +30,7 @@ test('every text from the yaml is on the page word for word (Julia\'s document a
   walkStrings(content, '', (at, text) => {
     if (SKIP.test(at) || text.trim() === '') return;
     checked += 1;
-    if (!html.includes(rich(text))) missing.push(at);
+    if (!html.replace(/&nbsp;/g, ' ').includes(rich(text))) missing.push(at);
   });
   assert.deepEqual(missing, []);
   assert.ok(checked > 120, `${checked} texts checked`);
@@ -108,7 +108,7 @@ test('registerUrl keeps the parameters an address already carries and adds the t
 test('draft tags: none on the page since 16 November; a marked group would still get its tag at the heading or as a line of its own', () => {
   assert.equal(count(html, /tag--draft/g), 0);
   assert.equal(count(html, /draft-line/g), 0);
-  assert.ok(html.includes(`<h2 id="shift-title">${esc(content.shift.heading)}</h2>`) && html.includes(`<h2 id="who-title">${esc(content.who.heading)}</h2>`));
+  assert.ok(html.includes(`<h2 id="shift-title" class="shift__heading">${esc(content.shift.heading)}</h2>`) && html.includes(`<h2 id="who-title">${esc(content.who.heading)}</h2>`));
   assert.ok(html.includes(`<h2 id="faq-title">${esc(content.faq.heading)}</h2>`) && html.includes(`<h2 id="proof-title">${esc(content.proof.heading)}</h2>`));
   const marked = renderPage(content, { manifest, drafts: new Set(['shift.heading', 'package.items', 'faq.items']) });
   assert.equal(count(marked, /tag--draft/g), 3);
@@ -209,10 +209,10 @@ test('Is this you: the heading of 17 Nov, Ready for bigger first, then Stretched
   assert.ok(!who.includes('class="tile"'));
 });
 
-test('the shift: the heading and four compact rows with the From and to labels, a gold arrow between and a full stop at the end; beside them the tiles picture (now scattered, after 8 weeks whole, sixteen tiles each, brand colours, no cut); no quote here since 17 Nov', () => {
+test('the shift: the heading, four compact rows with the From and to labels, a gold arrow between and a full stop at the end, and the tiles picture: two squares of one size (now pushed and turned, after 8 weeks even), a label over each, an arrow from the first to the second; no quote here since 17 Nov', () => {
   const shift = section('shift');
   const s = content.shift;
-  assert.ok(shift.includes('<div class="container shift__grid">\n    <div class="shift__copy">\n      <h2 id="shift-title">'));
+  assert.ok(shift.includes('<div class="container shift__grid">\n    <h2 id="shift-title" class="shift__heading">'));
   const rows = shift.match(/<li class="shift__row">[^]*?<\/li>/g) || [];
   assert.equal(rows.length, 4);
   rows.forEach((row, i) => {
@@ -222,8 +222,10 @@ test('the shift: the heading and four compact rows with the From and to labels, 
     assert.ok(row.includes('<span class="shift__arrow"><svg class="arrow"'));
   });
   assert.equal(s.heading, 'The shift we work toward');
-  assert.ok(shift.includes(`<div class="tiles-pair__now">\n        <p class="tiles-pair__label caps">${esc(s.now_label)}</p>\n        <svg class="picture picture--now" viewBox="0 0 ${PATH.field} ${PATH.field}"`));
-  assert.ok(shift.includes(`<div class="tiles-pair__after">\n        <p class="tiles-pair__label caps">${esc(s.after_label)}</p>\n        <svg class="picture picture--after" viewBox="0 0 ${PATH_AFTER_SIZE} ${PATH_AFTER_SIZE}"`));
+  assert.ok(shift.includes(`<div class="tiles-pair__cell tiles-pair__cell--now">\n        <p class="tiles-pair__label caps">${esc(s.now_label)}</p>\n        <div class="tiles-pair__square"><svg class="picture picture--now" viewBox="0 0 ${PATH_SIZE} ${PATH_SIZE}"`));
+  assert.ok(shift.includes(`<div class="tiles-pair__cell tiles-pair__cell--after">\n        <p class="tiles-pair__label caps">${esc(s.after_label)}</p>\n        <div class="tiles-pair__square"><svg class="picture picture--after" viewBox="0 0 ${PATH_SIZE} ${PATH_SIZE}"`));
+  assert.ok(shift.includes('</svg><span class="tiles-pair__arrow" aria-hidden="true"><svg class="arrow"'), 'the arrow sits in the first square, between the two');
+  assert.equal(count(shift, /tiles-pair__arrow/g), 1);
   const pictures = shift.match(/<svg class="picture[^]*?<\/svg>/g) || [];
   assert.equal(pictures.length, 2);
   for (const svg of pictures) {
@@ -303,8 +305,9 @@ test('What\'s included (slide 7): six tiles with an icon in an aubergine circle,
 test('Pricing (Julia\'s new slide 09 of 17 Nov): the cohort line, the heading Choose Your Experience, the invoices line with a check above the cards, three coloured cards with the first price struck through, the arrow and the founding price on one line, the VAT line with the spots, the intro and the list or the line; under the cards only the buttons', () => {
   const pricing = section('pricing');
   const p = content.pricing;
-  assert.ok(pricing.includes(`<p class="pricing__label caps">${esc(p.subheading)} · ${esc(p.total_spots)}</p>\n    <h2 id="pricing-title">${esc(p.heading)}</h2>\n    <p class="pricing__invoice"><span class="circle circle--aubergine" aria-hidden="true"><svg class="icon"`));
+  assert.ok(pricing.includes(`<p class="pricing__label caps">${esc(p.subheading)} · ${esc(p.total_spots).replace(/ /g, '&nbsp;')}</p>\n    <h2 id="pricing-title">${esc(p.heading)}</h2>\n    <p class="pricing__invoice"><span class="circle circle--aubergine" aria-hidden="true"><svg class="icon"`));
   assert.equal(p.heading, 'Choose Your Experience');
+  assert.ok(pricing.includes('2027 · 8&nbsp;spots&nbsp;in&nbsp;total</p>'), 'the spots hold together, the line may break before the dot');
   assert.ok(pricing.includes(`<span>${esc(p.invoice_note)}</span></p>`) && p.invoice_note.endsWith('plus a short letter for your manager.'));
   assert.ok(pricing.indexOf('pricing__invoice') < pricing.indexOf('<ul class="tiers">'), 'the invoices line stands above the cards');
   assert.equal(ICONS.invoice, 'check');
@@ -444,7 +447,7 @@ test('the closing band (Julia\'s screenshot of 17 Nov): the two large lines of t
   assert.ok(!/One year from now/.test(html));
 });
 
-test('icons: nineteen places, every icon an inline svg with one stroke, aria-hidden, without text; seven arrows; the footer and the legal line', () => {
+test('icons: nineteen places, every icon an inline svg with one stroke, aria-hidden, without text; eight arrows; the footer and the legal line', () => {
   assert.equal(Object.keys(ICONS).length, 19);
   const icons = html.match(/<svg class="icon"[^]*?<\/svg>/g) || [];
   assert.equal(icons.length, 19);
@@ -452,7 +455,7 @@ test('icons: nineteen places, every icon an inline svg with one stroke, aria-hid
     assert.ok(svg.includes('stroke="currentColor" stroke-width="1.5"') && svg.includes('aria-hidden="true"') && svg.includes('focusable="false"'));
     assert.ok(!/<(text|image|script)\b/.test(svg));
   }
-  assert.equal(count(html, /<svg class="arrow"/g), 7, 'four shift rows and the three founding prices');
+  assert.equal(count(html, /<svg class="arrow"/g), 8, 'four shift rows, the tiles picture and the three founding prices');
   assert.ok(html.includes(`<p>${esc(content.footer.legal_line)}</p>`));
   assert.ok(html.includes(`<a href="${content.links.main_site}">${esc(content.footer.main_site_label)}</a>`));
 });

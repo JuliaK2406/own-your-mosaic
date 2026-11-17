@@ -199,7 +199,7 @@ test('deposit and quotes: the deposit needs a lead, a label, a note and an https
   delete f.quotes[1].at;
   assert.ok(hasError(errorsOf(f), 'quotes[1].at'));
   assert.equal(content.quotes.length, 5);
-  assert.deepEqual(content.quotes.map((q) => q.text.length), [1, 1, 1, 2, 2], 'two of the quotes keep their two paragraphs');
+  assert.deepEqual(content.quotes.map((q) => q.text.length), [1, 1, 1, 1, 2], 'Angela keeps her two paragraphs; Ally lost her last sentence on 17 Nov');
   assert.deepEqual(content.quotes.map((q) => q.at), ['process', 'bridge', 'package', 'package', 'logistics'], 'since 17 Nov Kateryna stands in the Method, Anna in the bridge, two under What\'s included, none in the Roadmap');
   assert.ok(content.quotes.every((q) => q.text.join(' ').includes('**')), 'every quote carries its bold phrase');
   assert.deepEqual(checkContent(copy(), { photos }).todos, ['meta.site_url (empty)']);

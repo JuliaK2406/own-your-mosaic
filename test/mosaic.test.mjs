@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { seeded, porcelainTile, bandTile, flyTile, cornerGroup, heroGroup, HERO_GROUP_SEED, bandVariant, bandSprite, bandUse, allMosaics, COLOURS, BAND_VARIANTS, BORDER_Y, PATH, PATH_PATTERN, PATH_AFTER_SIZE, pathNowTiles, pathAfterTiles, pathNow, pathAfter } from '../src/render/mosaic.mjs';
+import { seeded, porcelainTile, bandTile, flyTile, cornerGroup, heroGroup, HERO_GROUP_SEED, bandVariant, bandSprite, bandUse, allMosaics, COLOURS, BAND_VARIANTS, BORDER_Y, PATH, PATH_PATTERN, PATH_SIZE, pathNowTiles, pathAfterTiles, pathNow, pathAfter } from '../src/render/mosaic.mjs';
 
 const rects = (svg) => [...svg.matchAll(/<rect x="(-?\d+)" y="(-?\d+)" width="(\d+)" height="(\d+)" rx="6" fill-opacity="([.\d]+)"\/>/g)].map((m) => ({ x: Number(m[1]), y: Number(m[2]), w: Number(m[3]), h: Number(m[4]), opacity: Number(m[5]) }));
 const fills = (svg) => [...svg.matchAll(/fill="(#[0-9A-Fa-f]{6})"/g)].map((m) => m[1]);
@@ -94,40 +94,41 @@ test('the band drawings: five widths; over the border only aubergine within the 
   assert.ok(bandUse('wide', 'right').includes('<use href="#band-wide" transform="translate(292 0) scale(-1 1)"/>'));
 });
 
-test('the tiles picture of The shift: sixteen tiles scattered and turned, every corner inside the field, none closer than PATH.apart; the same sixteen as a whole 4 x 4 mosaic; brand colours only; the same every build', () => {
+test('the tiles picture of The shift: two squares of one size; after 8 weeks an even 4 x 4 mosaic inside the square; now the same sixteen tiles pushed off their points and turned, every corner inside the square, none closer than PATH.apart; brand colours only; the same every build', () => {
   const now = pathNowTiles();
   const after = pathAfterTiles();
   assert.equal(now.length, 16);
   assert.equal(after.length, 16);
+  assert.equal(PATH_SIZE, 170);
   assert.deepEqual(now.map((t) => t.fill), after.map((t) => t.fill), 'the same tiles, in the same order');
   assert.deepEqual([...new Set(after.map((t) => t.fill))].sort(), [COLOURS.aubergine, COLOURS.champagne, COLOURS.navy].sort());
   assert.equal(PATH_PATTERN.length, 16);
   const half = PATH.tile / 2;
+  after.forEach((t, i) => {
+    assert.equal(t.angle, 0);
+    assert.equal(t.cx - half, PATH.margin + (i % 4) * (PATH.tile + PATH.gap));
+    assert.equal(t.cy - half, PATH.margin + Math.floor(i / 4) * (PATH.tile + PATH.gap));
+    assert.ok(t.cx - half >= PATH.margin && t.cx + half <= PATH_SIZE - PATH.margin && t.cy + half <= PATH_SIZE - PATH.margin, `mosaic tile ${i} inside the square, with the margin`);
+  });
   now.forEach((t, i) => {
     assert.ok(Math.abs(t.angle) <= PATH.turn && t.angle !== 0, `tile ${i} is turned (${t.angle})`);
+    assert.ok(Math.abs(t.cx - after[i].cx) <= PATH.jitter + 1e-9 && Math.abs(t.cy - after[i].cy) <= PATH.jitter + 1e-9, `tile ${i} stays near its point of the mosaic`);
     const a = (t.angle * Math.PI) / 180;
     for (const [dx, dy] of [[-half, -half], [half, -half], [half, half], [-half, half]]) {
       const x = t.cx + dx * Math.cos(a) - dy * Math.sin(a);
       const y = t.cy + dx * Math.sin(a) + dy * Math.cos(a);
-      assert.ok(x >= 0 && x <= PATH.field && y >= 0 && y <= PATH.field, `tile ${i}: a corner at ${x.toFixed(1)},${y.toFixed(1)} lies outside the ${PATH.field} px field`);
+      assert.ok(x >= 0 && x <= PATH_SIZE && y >= 0 && y <= PATH_SIZE, `tile ${i}: a corner at ${x.toFixed(1)},${y.toFixed(1)} lies outside the ${PATH_SIZE} px square`);
     }
     for (let j = 0; j < i; j += 1) {
       assert.ok(Math.hypot(now[j].cx - t.cx, now[j].cy - t.cy) >= PATH.apart, `tiles ${j} and ${i} are closer than ${PATH.apart} px`);
     }
   });
-  after.forEach((t, i) => {
-    assert.equal(t.angle, 0);
-    assert.ok(t.cx - half >= 0 && t.cx + half <= PATH_AFTER_SIZE && t.cy - half >= 0 && t.cy + half <= PATH_AFTER_SIZE, `mosaic tile ${i} inside`);
-    assert.equal(t.cx - half, (i % 4) * (PATH.tile + PATH.gap));
-    assert.equal(t.cy - half, Math.floor(i / 4) * (PATH.tile + PATH.gap));
-  });
   for (const svg of [pathNow(), pathAfter()]) {
-    assert.ok(svg.startsWith('<svg class="picture picture--') && svg.includes('aria-hidden="true"') && !svg.includes('slice'));
+    assert.ok(svg.startsWith('<svg class="picture picture--') && svg.includes(`viewBox="0 0 ${PATH_SIZE} ${PATH_SIZE}"`) && svg.includes('aria-hidden="true"') && !svg.includes('slice'));
     assert.equal((svg.match(/<rect /g) || []).length, 16);
     for (const fill of fills(svg)) assert.ok([COLOURS.aubergine, COLOURS.champagne, COLOURS.navy].includes(fill), fill);
     assert.ok(!/<(image|script|text|foreignObject)\b/.test(svg));
   }
   assert.equal(pathNow(), pathNow(), 'the same picture every build');
   assert.ok(pathNow().includes('transform="rotate(') && !pathAfter().includes('rotate('));
-  assert.equal(pathAfter().match(/viewBox="0 0 (\d+) (\d+)"/)[1], String(PATH_AFTER_SIZE));
 });

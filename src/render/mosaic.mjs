@@ -238,27 +238,26 @@ export function allMosaics() {
   };
 }
 
-// The tiles picture of The shift (since 17 Nov; before that the Problem band), after the right
-// part of Julia's slide 2: the same sixteen tiles twice. On the left, now: the tiles scattered
-// over a square field, each pushed off its point and turned. On the right, after eight weeks:
-// the same tiles as one whole 4 x 4 mosaic. Champagne, aubergine and navy at 0.38 (a slate
-// grey on the light block); the colours of the mosaic follow the slide row by row, the
-// scattered tiles carry the same ones.
-// Both are drawn at their own size, with the same tile, and no tile is ever cut: the mosaic
-// fills its field exactly, and every turned tile keeps all four corners inside the field
-// (a test turns them and checks). These two svgs are a picture of the page (class picture),
-// not a decoration, so they stand beside the labels "now" and "after 8 weeks" of the yaml.
-export const PATH = { tile: 34, gap: 8, corner: 4, field: 240, margin: 26, jitter: 12, apart: 42, turn: 45 };
+// The tiles picture of The shift, after the right part of Julia's slide 2 and her note of
+// 17 Nov: the same sixteen tiles twice, in two squares of one size. "After 8 weeks": the
+// tiles as one even 4 x 4 mosaic inside the square. "Now": the same tiles, each pushed off its
+// point of that mosaic and turned a little, never over the edge of the square. Champagne,
+// aubergine and navy at 0.38 (a slate grey on the light block); the colours follow the slide
+// row by row. Both are drawn at their own size; no tile is ever cut: every turned tile keeps
+// all four corners inside the square (a test turns them and checks). These two svgs are a
+// picture of the page (class picture), not a decoration; CSS lays them out beside the rows.
+export const PATH = { tile: 30, gap: 10, corner: 4, margin: 10, jitter: 6, apart: 35, turn: 14 };
 export const PATH_PATTERN = 'cagcacgacacgacac'.split('');   // c champagne, a aubergine, g grey; four rows of four, as on the slide
 export const PATH_SEED = 19;
+export const PATH_SIZE = 2 * PATH.margin + 4 * PATH.tile + 3 * PATH.gap;   // the square: 170
 const PATH_FILLS = {
   c: { fill: COLOURS.champagne, opacity: 1 },
   a: { fill: COLOURS.aubergine, opacity: 1 },
   g: { fill: COLOURS.navy, opacity: 0.38 },
 };
 
-function pictureSvg(className, width, height, body) {
-  return `<svg class="picture ${className}" viewBox="0 0 ${width} ${height}" width="${width}" height="${height}" preserveAspectRatio="xMidYMid meet" aria-hidden="true" focusable="false">${body}</svg>`;
+function pictureSvg(className, size, body) {
+  return `<svg class="picture ${className}" viewBox="0 0 ${size} ${size}" width="${size}" height="${size}" preserveAspectRatio="xMidYMid meet" aria-hidden="true" focusable="false">${body}</svg>`;
 }
 
 const pictureRects = (tiles) => {
@@ -271,16 +270,23 @@ const pictureRects = (tiles) => {
   return [...groups].map(([fill, rects]) => `<g fill="${fill}">${rects.join('')}</g>`).join('');
 };
 
-// The tiles of now: each tile of the pattern starts on a point of a 4 x 4 lattice inside the
-// field, is pushed off it by up to PATH.jitter (never closer than PATH.apart to a tile already
-// placed, thirty tries, then the point itself) and turned by up to PATH.turn degrees.
+// The centre of a tile of the even mosaic: PATH.margin in from the square, then tile and gap.
+const point = (i) => ({ x: PATH.margin + PATH.tile / 2 + (i % 4) * (PATH.tile + PATH.gap), y: PATH.margin + PATH.tile / 2 + Math.floor(i / 4) * (PATH.tile + PATH.gap) });
+
+// The tiles after eight weeks: the pattern as an even 4 x 4 mosaic inside the square.
+export function pathAfterTiles() {
+  return PATH_PATTERN.map((kind, i) => ({ cx: point(i).x, cy: point(i).y, angle: 0, ...PATH_FILLS[kind] }));
+}
+
+// The tiles of now: each tile starts on its point of the mosaic, is pushed off it by up to
+// PATH.jitter (never closer than PATH.apart to a tile already placed, thirty tries, then the
+// point itself) and turned by up to PATH.turn degrees.
 export function pathNowTiles(seed = PATH_SEED) {
   const rnd = seeded(seed);
-  const { field, margin, jitter, apart, turn } = PATH;
-  const pitch = (field - 2 * margin) / 4;
+  const { jitter, apart, turn } = PATH;
   const placed = [];
   PATH_PATTERN.forEach((kind, i) => {
-    const base = { x: margin + pitch * ((i % 4) + 0.5), y: margin + pitch * (Math.floor(i / 4) + 0.5) };
+    const base = point(i);
     let pick = base;
     for (let attempt = 0; attempt < 30; attempt += 1) {
       const candidate = { x: base.x + between(rnd, -jitter, jitter), y: base.y + between(rnd, -jitter, jitter) };
@@ -294,18 +300,10 @@ export function pathNowTiles(seed = PATH_SEED) {
   return placed;
 }
 
-// The tiles after eight weeks: the pattern as a 4 x 4 mosaic, PATH.gap between the tiles.
-export function pathAfterTiles() {
-  const step = PATH.tile + PATH.gap;
-  return PATH_PATTERN.map((kind, i) => ({ cx: (i % 4) * step + PATH.tile / 2, cy: Math.floor(i / 4) * step + PATH.tile / 2, angle: 0, ...PATH_FILLS[kind] }));
-}
-
-export const PATH_AFTER_SIZE = 4 * PATH.tile + 3 * PATH.gap;
-
 export function pathNow(seed = PATH_SEED) {
-  return pictureSvg('picture--now', PATH.field, PATH.field, pictureRects(pathNowTiles(seed)));
+  return pictureSvg('picture--now', PATH_SIZE, pictureRects(pathNowTiles(seed)));
 }
 
 export function pathAfter() {
-  return pictureSvg('picture--after', PATH_AFTER_SIZE, PATH_AFTER_SIZE, pictureRects(pathAfterTiles()));
+  return pictureSvg('picture--after', PATH_SIZE, pictureRects(pathAfterTiles()));
 }
