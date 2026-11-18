@@ -105,12 +105,12 @@ test('registerUrl keeps the parameters an address already carries and adds the t
   assert.equal([...url.searchParams.keys()].length, 6);
 });
 
-test('draft tags: none on the page since 16 November; a marked group would still get its tag at the heading or as a line of its own', () => {
+test('draft tags: none on the page since 16 November; on a closed copy a marked group would still get its tag at the heading or as a line of its own', () => {
   assert.equal(count(html, /tag--draft/g), 0);
   assert.equal(count(html, /draft-line/g), 0);
   assert.ok(html.includes(`<h2 id="shift-title" class="shift__heading">${esc(content.shift.heading)}</h2>`) && html.includes(`<h2 id="who-title">${esc(content.who.heading)}</h2>`));
   assert.ok(html.includes(`<h2 id="faq-title">${esc(content.faq.heading)}</h2>`) && html.includes(`<h2 id="proof-title">${esc(content.proof.heading)}</h2>`));
-  const marked = renderPage(content, { manifest, drafts: new Set(['shift.heading', 'package.items', 'faq.items']) });
+  const marked = renderPage(withMeta({ published: false }), { manifest, drafts: new Set(['shift.heading', 'package.items', 'faq.items']) });
   assert.equal(count(marked, /tag--draft/g), 3);
   assert.ok(marked.includes(`${esc(content.shift.heading)} <span class="tag tag--draft">draft</span></h2>`), 'at the block heading');
   assert.ok(marked.includes(`${esc(content.faq.heading)} <span class="tag tag--draft">draft</span></h2>`), 'at the heading of Good to know');
@@ -119,28 +119,31 @@ test('draft tags: none on the page since 16 November; a marked group would still
   assert.ok(!published.includes('tag--draft') && !published.includes('draft-line'), 'published: no tags whatever is marked');
 });
 
-test('head: lang, title, description, og tags; noindex while unpublished; canonical, og:url and og:image only with site_url', () => {
+test('head: lang, title, description, og tags; published since 18 Nov: no noindex, canonical, og:url and og:image with the site address; a closed copy gets noindex and none of them', () => {
   assert.ok(html.startsWith('<!doctype html>\n<html lang="en">'));
   assert.ok(html.includes(`<title>${esc(content.meta.title)}</title>`));
   assert.ok(content.meta.title.includes('January 2027 Founding Cohort') && content.meta.description.includes('January 2027 Founding Cohort'));
   assert.ok(html.includes(`<meta name="description" content="${esc(content.meta.description)}">`));
-  assert.ok(html.includes('<meta name="robots" content="noindex, nofollow">'));
-  for (const tag of ['rel="canonical"', 'og:url', 'og:image', 'twitter:card']) assert.ok(!html.includes(tag), `${tag} needs an absolute address`);
   const site = 'https://program.juliakrylova.com';
-  const live = render(withMeta({ published: true, site_url: `${site}/` }));
-  assert.ok(!live.includes('name="robots"'));
-  assert.ok(live.includes(`<link rel="canonical" href="${site}/">`));
-  assert.ok(live.includes(`<meta property="og:image" content="${site}/og-image.png">`));
-  assert.ok(live.includes(`<meta property="og:image:width" content="${OG_WIDTH}">`) && OG_WIDTH === 1200 && OG_HEIGHT === 627);
-  assert.ok(live.includes(`<meta property="og:image:alt" content="${esc(content.hero.title)}: ${esc(content.hero.lines.join(' '))}">`));
-  assert.ok(live.includes('<meta name="twitter:card" content="summary_large_image">'));
+  assert.equal(content.meta.published, true);
+  assert.equal(content.meta.site_url, site);
+  assert.ok(!html.includes('name="robots"'), 'published: no noindex');
+  assert.ok(html.includes(`<link rel="canonical" href="${site}/">`));
+  assert.ok(html.includes(`<meta property="og:url" content="${site}/">`));
+  assert.ok(html.includes(`<meta property="og:image" content="${site}/og-image.png">`));
+  assert.ok(html.includes(`<meta property="og:image:width" content="${OG_WIDTH}">`) && OG_WIDTH === 1200 && OG_HEIGHT === 627);
+  assert.ok(html.includes(`<meta property="og:image:alt" content="${esc(content.hero.title)}: ${esc(content.hero.lines.join(' '))}">`));
+  assert.ok(html.includes('<meta name="twitter:card" content="summary_large_image">'));
+  const closed = render(withMeta({ published: false, site_url: '' }));
+  assert.ok(closed.includes('<meta name="robots" content="noindex, nofollow">'));
+  for (const tag of ['rel="canonical"', 'og:url', 'og:image', 'twitter:card']) assert.ok(!closed.includes(tag), `${tag} needs an absolute address`);
 });
 
 test('no Google fonts, no script at all, no absolute paths: everything comes from the site itself', () => {
   assert.ok(!/fonts\.googleapis\.com|fonts\.gstatic\.com/.test(html));
   assert.ok(!/<script/.test(html), 'not one script on the page');
   assert.ok(!/(href|src|srcset)="\/[^/]/.test(html), 'no root-absolute paths');
-  assert.ok(!/(href|src)="https?:\/\/(?!www\.juliakrylova\.com|calendly\.com\/juliakrylova\/30min|buy\.stripe\.com\/)/.test(html), 'the only outside links are the main site, the Calendly booking and the Stripe deposit');
+  assert.ok(!/(href|src)="https?:\/\/(?!www\.juliakrylova\.com|program\.juliakrylova\.com\/|calendly\.com\/juliakrylova\/30min|buy\.stripe\.com\/)/.test(html), 'the only outside links are the main site, the canonical address of this site, the Calendly booking and the Stripe deposit');
   assert.ok(html.includes('href="styles.css"') && html.includes('href="favicon.svg"'));
 });
 

@@ -11,11 +11,14 @@ const hasError = (errors, at) => errors.some((error) => error.startsWith(`${at}:
 
 const DRAFTS = [];   // every draft mark was lifted on 16 November; the mechanism stays for later texts
 
-test('the real content file passes: no errors, no long dashes; the only TODO is the empty site_url', () => {
+test('the real content file passes: no errors, no long dashes, no TODO, no draft; published with the site address since 18 Nov', () => {
   const result = checkContent(content, { photos, raw });
   assert.deepEqual(result.errors, []);
   assert.deepEqual(result.warnings, []);
-  assert.deepEqual(result.todos, ['meta.site_url (empty)']);
+  assert.deepEqual(result.todos, []);
+  assert.deepEqual(result.drafts, []);
+  assert.equal(content.meta.published, true);
+  assert.equal(content.meta.site_url, 'https://program.juliakrylova.com');
   assert.equal(report(content, result).ok, true);
 });
 
@@ -146,13 +149,11 @@ test('a long dash is a warning with the path of the field, not an error', () => 
 
 test('published: true with a TODO or a draft left stops the build', () => {
   const c = copy();
-  c.meta.published = true;
-  const withTodo = report(c, checkContent(c, { photos }));   // site_url is still empty
+  c.meta.site_url = '';   // an empty address is a TODO
+  const withTodo = report(c, checkContent(c, { photos }));
   assert.equal(withTodo.ok, false);
   assert.ok(withTodo.lines.some((line) => line.includes('TODO markers remain')));
   const d = copy();
-  d.meta.published = true;
-  d.meta.site_url = 'https://program.juliakrylova.com';
   assert.equal(report(d, checkContent(d, { photos })).ok, true, 'no TODO left and no draft markers known: ok');
   assert.equal(report(d, checkContent(d, { photos, raw })).ok, true, 'the real yaml carries no draft mark any more');
   const marked = raw.replace('heading: "The shift we work toward"', 'heading: "The shift we work toward"   # draft');
@@ -187,7 +188,7 @@ test('register: the label is required, the address must be a full https:// one',
   const d = copy();
   d.register.label = '  ';
   assert.ok(hasError(errorsOf(d), 'register.label'));
-  assert.deepEqual(checkContent(copy(), { photos }).todos, ['meta.site_url (empty)'], 'nothing about the button is a TODO');
+  assert.deepEqual(checkContent(copy(), { photos }).todos, [], 'nothing about the button is a TODO');
 });
 
 test('deposit and quotes: the deposit needs a lead, a label, a note and an https address; every quote names its block in "at" and carries paragraphs, a name, a role and a company', () => {
@@ -207,5 +208,5 @@ test('deposit and quotes: the deposit needs a lead, a label, a note and an https
   assert.deepEqual(content.quotes.map((q) => q.text.length), [1, 1, 1, 1, 2], 'Angela keeps her two paragraphs; Ally lost her last sentence on 17 Nov');
   assert.deepEqual(content.quotes.map((q) => q.at), ['process', 'bridge', 'package', 'package', 'logistics'], 'since 17 Nov Kateryna stands in the Method, Anna in the bridge, two under What\'s included, none in the Roadmap');
   assert.ok(content.quotes.every((q) => q.text.join(' ').includes('**')), 'every quote carries its bold phrase');
-  assert.deepEqual(checkContent(copy(), { photos }).todos, ['meta.site_url (empty)']);
+  assert.deepEqual(checkContent(copy(), { photos }).todos, []);
 });

@@ -5,8 +5,8 @@
 # her corrections of 17 Nov (the hero lines, the prices after her new slide 09, the last screen) are in.
 
 meta:
-  published: false   # false = hidden from search engines, TODO and draft marks are visible. Set true on launch day
-  site_url: ""       # the final address, e.g. https://program.juliakrylova.com. Empty until the subdomain is chosen
+  published: true    # true since the launch (18 Nov 2026): indexable, no TODO or draft marks allowed; false hides the page from search engines and shows the marks
+  site_url: "https://program.juliakrylova.com"   # the site's address: canonical, og:url and the link card in <head>
   title: "Own Your Mosaic of Life: January 2027 Founding Cohort | Julia Krylova"
   description: "An eight-week online mentoring program to help you make clear choices, build a practical system around your next ambition, and start taking action, without sacrificing the life you've already built. January 2027 Founding Cohort, online, maximum 8 participants."
 

@@ -1,6 +1,7 @@
 // Build: content/offer.yaml -> check -> photo versions -> dist/ with index.html, styles.css
 // (with the @font-face rules), the fonts and their licences, favicon.svg, the link card
-// og-image.png and, while unpublished, robots.txt. Run with npm run build.
+// og-image.png, the CNAME file with the site's domain and, while unpublished, robots.txt.
+// Run with npm run build.
 
 import { readFile, writeFile, mkdir, rm, stat, copyFile } from 'node:fs/promises';
 import path from 'node:path';
@@ -25,6 +26,10 @@ export const FONTS = [
 export const FONT_LICENCES = ['OFL-Inter.txt', 'OFL-Lora.txt'];
 const LATIN_RANGE = 'U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD';
 export const ROBOTS_TXT = 'User-agent: *\nDisallow: /\n';
+// The site's domain (GitHub Pages custom domain, a CNAME record in the DNS of juliakrylova.com
+// pointing at juliak2406.github.io). Written to dist/CNAME on every build, so the domain
+// survives a rebuild whatever way the site is published.
+export const CUSTOM_DOMAIN = 'program.juliakrylova.com';
 
 // One @font-face per weight, as Google Fonts declares them, all pointing at the same file.
 export function fontFaceCss() {
@@ -77,11 +82,12 @@ export async function build(options = {}) {
     'index.html': renderPage(content, { manifest, drafts, themeColor: readToken(tokens, '--porcelain'), ...(options.heroTiles ? { heroTiles: options.heroTiles } : {}) }),
     'styles.css': `${fontFaceCss()}/* ---- tokens.css ---- */\n${tokens}\n/* ---- page.css ---- */\n${page}`,
   };
+  files['CNAME'] = `${CUSTOM_DOMAIN}\n`;
   if (!published) files['robots.txt'] = ROBOTS_TXT;
 
   // Only the build's own files are replaced; dist/img keeps the photo versions between builds.
   // register.js was the form script until PROMPT 03b and is removed if a build left it behind.
-  for (const name of [...Object.keys(files), 'robots.txt', 'register.js', 'CNAME']) await rm(path.join(distDir, name), { force: true });
+  for (const name of [...Object.keys(files), 'robots.txt', 'register.js']) await rm(path.join(distDir, name), { force: true });
   for (const [name, body] of Object.entries(files)) await writeFile(path.join(distDir, name), body, 'utf8');
   const copies = [
     ...FONTS.map((font) => [path.join(ASSETS, 'fonts', font.file), path.join('fonts', font.file)]),
