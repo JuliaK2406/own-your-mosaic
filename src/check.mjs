@@ -60,7 +60,7 @@ const SHAPE = {
     photo: 'file',
     photo_alt: 'text',
   },
-  who: { heading: 'string', items: [{ title: 'string', text: 'string' }, 4] },
+  who: { label: 'string', heading: 'string', items: [{ title: 'string', text: 'string' }, 4] },
   shift: { heading: 'string', from_label: 'string', to_label: 'string', items: [{ from: 'string', to: 'string' }, 4], now_label: 'string', after_label: 'string' },
   promise: {
     label: 'string',
@@ -87,7 +87,7 @@ const SHAPE = {
     total_spots: 'string',
     invoice_note: 'string',
     vat_label: 'string',
-    tiers: [{ name: 'string', was: 'string', price: 'string', spots: 'text', intro: 'string', items: 'list' }, 3],
+    tiers: [{ name: 'string', price: 'string', spots: 'text', badge: 'text', intro: 'string', items: 'list' }, 3],
   },
   proof: {
     heading: 'string',
@@ -112,10 +112,11 @@ const SHAPE = {
 };
 
 // The only values that may be empty: the final address until the subdomain is chosen, the photo
-// descriptions, the spots line of a tier (Core has none) and the date of a timeline step (the
-// payment carries none, Julia's call of 16 Nov).
+// descriptions, the spots line and the badge of a tier (since 18 Nov no tier has spots and only
+// Plus carries "Most recommended") and the date of a timeline step (the payment carries none,
+// Julia's call of 16 Nov).
 const EMPTY_ALLOWED = new Set(['meta.site_url', 'hero.photo_alt', 'proof.photo_alt']);
-const EMPTY_ALLOWED_PATTERNS = [/^pricing\.tiers\[\d+\]\.spots$/, /^logistics\.timeline\[\d+\]\.when$/];
+const EMPTY_ALLOWED_PATTERNS = [/^pricing\.tiers\[\d+\]\.(spots|badge)$/, /^logistics\.timeline\[\d+\]\.when$/];
 const emptyAllowed = (at) => EMPTY_ALLOWED.has(at) || EMPTY_ALLOWED_PATTERNS.some((pattern) => pattern.test(at));
 // Fields that name a photo in content/photos.
 const PHOTO_FIELDS = ['hero.photo', 'proof.photo', 'proof.mentoring_photo', 'proof.group_photo'];

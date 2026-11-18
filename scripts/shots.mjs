@@ -31,6 +31,7 @@
 //                                  390 and 1440, the top bar at 900; 834 and 1280 checked only
 //   fixes17 (--set fixes17, 17 Nov, the three fixes): The shift, What's included and the prices at
 //                                  390 and 1440, The shift at 900 and 1280 as well
+//   prices18 (--set prices18, 18 Nov): Who it is for and the prices at 390 and 1440, the prices at 900
 //   cohort (--set cohort, 16 Nov, Julia's document): full pages at 360, 390 and 1440, the first
 //                                  screen and every changed block (Problem, Roadmap, Method,
 //                                  What's included, Pricing, Meet your mentor, the approach cards,
@@ -81,6 +82,7 @@ export const SETS = {
   cohort: { 360: ['full'], 390: ['full', 'hero', 'problem', 'promise', 'method', 'package', 'pricing', 'mentor', 'approach', 'logistics', 'faq', 'closing'], 834: [], 900: ['topbar'], 1280: [], 1440: ['full', 'hero', 'problem', 'promise', 'method', 'package', 'pricing', 'mentor', 'approach', 'logistics', 'faq', 'closing'] },
   review17: { 360: ['full'], 390: ['full', 'hero', 'who', 'shift', 'bridge', 'method', 'package', 'pricing', 'logistics', 'closing'], 834: [], 900: ['topbar'], 1280: [], 1440: ['full', 'hero', 'who', 'shift', 'bridge', 'method', 'package', 'pricing', 'logistics', 'closing'] },
   fixes17: { 360: [], 390: ['shift', 'package', 'pricing'], 834: [], 900: ['shift'], 1280: ['shift'], 1440: ['shift', 'package', 'pricing'] },
+  prices18: { 360: [], 390: ['who', 'pricing'], 834: [], 900: ['pricing'], 1280: [], 1440: ['who', 'pricing'] },
   live: { 390: ['hero'], 1440: ['hero', 'group'] },
 };
 const BLOCKS = { topbar: '.topbar', who: '.who', shift: '.shift', problem: '.bridge', bridge: '.bridge', promise: '.promise', method: '.process', process: '.process', package: '.package', pricing: '.pricing', mentor: '.proof', bring: '.approach', approach: '.approach', logistics: '.logistics', faq: '.faq', closing: '.closing' };

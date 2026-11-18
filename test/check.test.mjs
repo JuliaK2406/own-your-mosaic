@@ -80,9 +80,14 @@ test('an empty text is reported with its path; site_url, photo_alt, a tier\'s sp
   e.hero.photo_alt = '';
   e.proof.photo_alt = '';
   e.pricing.tiers[1].spots = '';
+  e.pricing.tiers[1].badge = '';
   e.logistics.timeline[2].when = '';
   assert.deepEqual(errorsOf(e), []);
-  assert.equal(content.pricing.tiers[0].spots, '', 'Core has no spots line');
+  assert.deepEqual(content.pricing.tiers.map((t) => t.spots), ['', '', ''], 'no tier has a spots line since 18 Nov');
+  assert.deepEqual(content.pricing.tiers.map((t) => t.badge), ['', 'Most recommended', ''], 'the badge on Plus only');
+  const m = copy();
+  delete m.who.label;
+  assert.ok(hasError(errorsOf(m), 'who.label'));
   assert.equal(content.logistics.timeline[1].when, '', 'the payment step carries no date (Julia, 16 Nov)');
   assert.equal(content.logistics.timeline[1].title, 'Payment');
   const f = copy();

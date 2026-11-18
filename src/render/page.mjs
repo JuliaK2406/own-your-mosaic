@@ -36,8 +36,8 @@ const draftTag = (ctx, at) => (!ctx.published && ctx.drafts.has(at) ? ' <span cl
 // A draft tag on its own line, above a group that has no heading of its own (unpublished only).
 const draftLine = (ctx, at) => (draftTag(ctx, at) ? `<p class="draft-line">${draftTag(ctx, at).trim()}</p>` : '');
 const circle = (place, className) => `<span class="circle ${className}" aria-hidden="true">${icon(place)}</span>`;
-// A thin gold arrow (the sign of the shift, and of the founding price): points right, CSS turns
-// it down on the phone where the shift rows stack.
+// A thin gold arrow (the sign of the shift): points right, CSS turns it down on the phone where
+// the shift rows stack and between the two squares of the tiles picture from 900 px.
 const ARROW = '<svg class="arrow" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M4 12h15"/><path d="m13 6 6 6-6 6"/></svg>';
 
 // The address of a tagged link (the Calendly booking, the Stripe deposit) with the tracking
@@ -193,7 +193,8 @@ ${h.facts.map((fact) => `          <li>${esc(fact)}</li>`).join('\n')}
 </section>`;
 }
 
-// Is this you?: four cards with an icon in a champagne circle, a title in Lora italic and the text.
+// Who it is for: the small line above the heading (Julia, 18 Nov), the heading and four cards
+// with an icon in a champagne circle, a title in Lora italic and the text.
 function who(ctx) {
   const w = ctx.content.who;
   const cards = w.items.map((item, i) => `      <li class="card who__card">
@@ -205,6 +206,7 @@ function who(ctx) {
       </li>`).join('\n');
   return `<section class="section section--deep who" aria-labelledby="who-title">
   <div class="container">
+    <p class="who__label caps">${esc(w.label)}</p>
     <h2 id="who-title">${esc(w.heading)}${draftTag(ctx, 'who.items')}</h2>
     <ul class="cards cards--who">
 ${cards}
@@ -349,26 +351,25 @@ ${items}
 </section>`;
 }
 
-// Pricing, after Julia's new slide 09 of 17 Nov: the cohort line in capitals (the spots after
-// the dot held together by no-break spaces, so the phone breaks the line before the dot), the heading,
-// then the line about the invoices with a check mark in an aubergine circle (above the cards,
-// where the phone shows it before the column of cards), three filled cards (champagne, navy,
-// aubergine) with a gold line on top, in each the first price struck through, a gold arrow and
-// the founding price on one line, "+ VAT" with the spots where a tier has them, the intro line
-// and the list of what is in (Core: five points; Plus and Premium: one line). Under the cards
-// the call button; beside it, for those who have decided, the deposit: a lead line, the
-// outline button and its note.
+// Pricing, after Julia's price slide of 18 Nov: the cohort line in capitals (the spots after
+// the dot held together by no-break spaces, so the phone breaks the line before the dot), the
+// heading, then the line about the invoices with a check mark in an aubergine circle (above
+// the cards, where the phone shows it before the column of cards), three filled cards
+// (champagne, navy, aubergine) with a gold line on top, in each the price with "(excl. VAT)"
+// beside it, the spots where a tier has them (none since 18 Nov), the intro line and the list
+// of what is in (Core: five points; Plus and Premium: one line), and at the foot of a card its
+// badge where it has one ("Most recommended" on Plus). Under the cards the call button; beside
+// it, for those who have decided, the deposit: a lead line, the outline button and its note.
 function pricing(ctx) {
   const p = ctx.content.pricing;
   const d = ctx.content.deposit;
   const kinds = ['core', 'plus', 'premium'];
   const tiers = p.tiers.map((tier, i) => `      <li class="tier tier--${kinds[i] || 'core'}">
         <h3 class="tier__name">${esc(tier.name)}</h3>
-        <p class="tier__price"><s class="tier__was">${esc(tier.was)}</s><span class="tier__arrow" aria-hidden="true">${ARROW}</span><span class="tier__amount">${esc(tier.price)}</span></p>
-        <p class="tier__terms">${esc(p.vat_label)}${String(tier.spots || '').trim() ? ` · ${esc(tier.spots)}` : ''}</p>
-        <p class="tier__intro">${esc(tier.intro)}</p>
+        <p class="tier__price"><span class="tier__amount">${esc(tier.price)}</span> <span class="tier__vat">${esc(p.vat_label)}</span></p>
+${String(tier.spots || '').trim() ? `        <p class="tier__terms">${esc(tier.spots)}</p>\n` : ''}        <p class="tier__intro">${esc(tier.intro)}</p>
 ${tier.items.length > 1 ? `        <ul class="tier__list">\n${tier.items.map((item) => `          <li>${esc(item)}</li>`).join('\n')}\n        </ul>` : `        <p class="tier__line">${esc(tier.items[0])}</p>`}
-      </li>`).join('\n');
+${String(tier.badge || '').trim() ? `        <p class="tier__badge">${esc(tier.badge)}</p>\n` : ''}      </li>`).join('\n');
   return `<section class="section section--deep pricing" aria-labelledby="pricing-title">
   <div class="container">
     <p class="pricing__label caps">${esc(p.subheading)} · ${esc(p.total_spots).replace(/ /g, '&nbsp;')}${draftTag(ctx, 'pricing.subheading')}</p>

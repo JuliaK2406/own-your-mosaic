@@ -193,9 +193,11 @@ test('first screen: the title, the three lines of 17 Nov under it (each on a lin
   assert.equal(count(none, /<svg class="mosaic /g), 10, 'only the band drawings remain');
 });
 
-test('Is this you: the heading of 17 Nov, Ready for bigger first, then Stretched too thin; an icon in a champagne circle, the title in italic Lora and the text; no tiles in the cards', () => {
+test('Who it is for: the small line and the heading of 18 Nov, Ready for bigger first, then Stretched too thin; an icon in a champagne circle, the title in italic Lora and the text; no tiles in the cards', () => {
   const who = section('who');
-  assert.equal(content.who.heading, 'A lot of high-achieving women leaders can relate to this');
+  assert.equal(content.who.heading, 'Which of these sounds like you?');
+  assert.ok(who.includes(`<p class="who__label caps">${esc(content.who.label)}</p>\n    <h2 id="who-title">${esc(content.who.heading)}</h2>`));
+  assert.equal(content.who.label, 'Where you are now');
   assert.deepEqual(content.who.items.map((item) => item.title), ['Ready for bigger', 'Stretched too thin', 'The best-kept secret', 'A plan for everyone but you']);
   assert.equal(ICONS['who-0'], 'trending-up');
   assert.equal(ICONS['who-1'], 'expand');
@@ -302,7 +304,7 @@ test('What\'s included (slide 7): six tiles with an icon in an aubergine circle,
   assert.equal(p.heading, "What's included, in every tier");
 });
 
-test('Pricing (Julia\'s new slide 09 of 17 Nov): the cohort line, the heading Choose Your Experience, the invoices line with a check above the cards, three coloured cards with the first price struck through, the arrow and the founding price on one line, the VAT line with the spots, the intro and the list or the line; under the cards only the buttons', () => {
+test('Pricing (Julia\'s slide of 18 Nov): the cohort line, the heading Choose Your Experience, the invoices line with a check above the cards, three coloured cards with one price each and "(excl. VAT)" beside it, no spots, the intro and the list or the line, the badge on Plus only; under the cards only the buttons', () => {
   const pricing = section('pricing');
   const p = content.pricing;
   assert.ok(pricing.includes(`<p class="pricing__label caps">${esc(p.subheading)} · ${esc(p.total_spots).replace(/ /g, '&nbsp;')}</p>\n    <h2 id="pricing-title">${esc(p.heading)}</h2>\n    <p class="pricing__invoice"><span class="circle circle--aubergine" aria-hidden="true"><svg class="icon"`));
@@ -316,20 +318,23 @@ test('Pricing (Julia\'s new slide 09 of 17 Nov): the cohort line, the heading Ch
   assert.ok(tiers[0].includes('tier--core') && tiers[1].includes('tier--plus') && tiers[2].includes('tier--premium'));
   tiers.forEach((tier, i) => {
     const t = p.tiers[i];
-    assert.ok(tier.includes(`<p class="tier__price"><s class="tier__was">${esc(t.was)}</s><span class="tier__arrow" aria-hidden="true"><svg class="arrow"`));
-    assert.ok(tier.includes(`<span class="tier__amount">${esc(t.price)}</span></p>`));
+    assert.ok(tier.includes(`<p class="tier__price"><span class="tier__amount">${esc(t.price)}</span> <span class="tier__vat">${esc(p.vat_label)}</span></p>`), `${t.name}: the price with the VAT note beside it`);
     assert.ok(tier.includes(`<p class="tier__intro">${esc(t.intro)}</p>`));
+    assert.ok(!tier.includes('tier__terms') && !tier.includes('tier__was') && !tier.includes('tier__arrow'), `${t.name}: no spots, no first price, no arrow`);
   });
-  assert.ok(tiers[0].includes(`<p class="tier__terms">${esc(p.vat_label)}</p>`), 'Core: VAT only');
-  assert.ok(tiers[1].includes(`<p class="tier__terms">${esc(p.vat_label)} · ${esc(p.tiers[1].spots)}</p>`) && tiers[2].includes(`<p class="tier__terms">${esc(p.vat_label)} · ${esc(p.tiers[2].spots)}</p>`));
+  assert.equal(p.vat_label, '(excl. VAT)');
+  assert.deepEqual(p.tiers.map((t) => t.price), ['€800', '€1,100', '€1,900']);
+  assert.deepEqual(p.tiers.map((t) => t.spots), ['', '', '']);
   const list = tiers[0].match(/<ul class="tier__list">[^]*?<\/ul>/)[0];
   assert.equal(count(list, /<li>/g), 5);
   p.tiers[0].items.forEach((item) => assert.ok(list.includes(`<li>${esc(item)}</li>`)));
   assert.ok(list.includes('<li>Post course &quot;check-in&quot; group session</li>'));
   assert.ok(tiers[1].includes(`<p class="tier__line">${esc(p.tiers[1].items[0])}</p>`) && !tiers[1].includes('tier__list'));
   assert.ok(tiers[2].includes(`<p class="tier__line">${esc(p.tiers[2].items[0])}</p>`) && !tiers[2].includes('tier__list'));
-  assert.deepEqual(p.tiers.map((t) => [t.was, t.price]), [['€995', '€795'], ['€1,295', '€1,095'], ['€2,095', '€1,895']]);
-  assert.ok(!pricing.includes('pricing__note') && !/founding member|better price than future cohorts/.test(html), 'the founding note and the old invoices line are gone');
+  assert.ok(tiers[1].endsWith(`<p class="tier__badge">${esc(p.tiers[1].badge)}</p>\n      </li>`), 'Most recommended at the foot of Plus');
+  assert.equal(p.tiers[1].badge, 'Most recommended');
+  assert.equal(count(pricing, /tier__badge/g), 1, 'a badge on Plus only');
+  assert.ok(!pricing.includes('pricing__note') && !/founding member|better price than future cohorts|up to 5 spots|only 2 spots|€995|€795/.test(html), 'the founding note, the spots and the old prices are gone');
   assert.ok(pricing.includes('<div class="pricing__call">\n        <div class="pricing__cta">'), 'under the cards only the call button on the left');
   assert.ok(!pricing.includes('tier__text') && !pricing.includes('pricing__sub'));
 });
@@ -447,7 +452,7 @@ test('the closing band (Julia\'s screenshot of 17 Nov): the two large lines of t
   assert.ok(!/One year from now/.test(html));
 });
 
-test('icons: nineteen places, every icon an inline svg with one stroke, aria-hidden, without text; eight arrows; the footer and the legal line', () => {
+test('icons: nineteen places, every icon an inline svg with one stroke, aria-hidden, without text; five arrows; the footer and the legal line', () => {
   assert.equal(Object.keys(ICONS).length, 19);
   const icons = html.match(/<svg class="icon"[^]*?<\/svg>/g) || [];
   assert.equal(icons.length, 19);
@@ -455,7 +460,7 @@ test('icons: nineteen places, every icon an inline svg with one stroke, aria-hid
     assert.ok(svg.includes('stroke="currentColor" stroke-width="1.5"') && svg.includes('aria-hidden="true"') && svg.includes('focusable="false"'));
     assert.ok(!/<(text|image|script)\b/.test(svg));
   }
-  assert.equal(count(html, /<svg class="arrow"/g), 8, 'four shift rows, the tiles picture and the three founding prices');
+  assert.equal(count(html, /<svg class="arrow"/g), 5, 'four shift rows and the tiles picture');
   assert.ok(html.includes(`<p>${esc(content.footer.legal_line)}</p>`));
   assert.ok(html.includes(`<a href="${content.links.main_site}">${esc(content.footer.main_site_label)}</a>`));
 });

@@ -493,7 +493,14 @@ a:hover {
   }
 }
 
-/* Is this you?: four cards, an icon in a champagne circle, a title in Lora italic, the text */
+/* Who it is for: the small line above the heading, four cards, an icon in a champagne circle,
+   a title in Lora italic, the text */
+
+.who__label {
+  margin: 0 0 var(--s-3);
+  max-width: none;
+  color: var(--aubergine);
+}
 
 .cards {
   list-style: none;
@@ -1138,10 +1145,10 @@ a:hover {
 }
 
 /* Pricing: the cohort line in capitals, the heading, the line about the invoices in a box with
-   a gold border and a check mark, three filled cards with a gold line on top; in each the first
-   price struck through, the gold arrow and the founding price on one line, then the VAT line
-   with the spots where a tier has them, the intro line and the list (Core) or the line (Plus,
-   Premium) of what is in. */
+   a gold border and a check mark, three filled cards with a gold line on top; in each the price
+   with "(excl. VAT)" beside it, the spots where a tier has them, the intro line and the list
+   (Core) or the line (Plus, Premium) of what is in, and at the foot the champagne badge where a
+   tier has one (Plus: "Most recommended"), pushed to the bottom of cards of equal height. */
 
 .pricing__label {
   margin: 0 0 var(--s-3);
@@ -1229,23 +1236,11 @@ a:hover {
 .tier__price {
   display: flex;
   flex-wrap: wrap;
-  align-items: center;
+  align-items: baseline;
   gap: var(--s-2);
   margin: 0 0 var(--s-2);
   max-width: none;
   color: inherit;
-}
-
-.tier__was {
-  font-family: var(--font-heading);
-  font-size: clamp(1.25rem, 1.111rem + 0.571vw, 1.625rem);   /* 20 to 26 px */
-  line-height: 1.2;
-  opacity: 0.6;
-}
-
-.tier__arrow .arrow {
-  width: 26px;
-  height: 26px;
 }
 
 .tier__amount {
@@ -1255,12 +1250,39 @@ a:hover {
   line-height: 1;
 }
 
+.tier__vat,
 .tier__terms {
-  margin: 0;
-  max-width: none;
   font-size: var(--secondary-size);
   opacity: 0.85;
   color: inherit;
+}
+
+.tier__terms {
+  margin: 0;
+  max-width: none;
+}
+
+.tier__badge {
+  align-self: center;
+  margin: var(--s-5) 0 0;
+  padding: 6px 20px;
+  max-width: none;
+  border-radius: 999px;
+  background: var(--champagne);
+  color: var(--navy);
+  font-size: var(--secondary-size);
+  font-weight: 600;
+}
+
+@media (min-width: 900px) {
+  .tier__badge {
+    margin-top: auto;
+    padding-top: 6px;
+  }
+  .tier__list,
+  .tier__line {
+    margin-bottom: var(--s-5);
+  }
 }
 
 .tier__intro {

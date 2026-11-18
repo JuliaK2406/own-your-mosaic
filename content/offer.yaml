@@ -37,7 +37,8 @@ hero:
   photo_alt: "Julia Krylova speaking into a microphone with one arm raised, in a white jacket"
 
 who:
-  heading: "A lot of high-achieving women leaders can relate to this"
+  label: "Where you are now"   # the small line above the heading (Julia, 18 Nov)
+  heading: "Which of these sounds like you?"
   items:
     - title: "Ready for bigger"
       text: "You're ready for a bigger role, a bigger bet, a bigger version of what you're already doing. You just haven't built the bridge to get there yet."
@@ -105,17 +106,17 @@ package:   # slide 7
   after_label: "After week 8"
   after_text: "**A group calibration session** one month after the program, to check progress and adjust your roadmap. And you're invited to the **Mosaic of Life alumni club**: an active community of women on the same path."
 
-pricing:   # Julia's new slide 09 of 17 Nov
+pricing:   # Julia's price slide of 18 Nov: one price per tier, excl. VAT, no spots, "Most recommended" on Plus
   heading: "Choose Your Experience"
   subheading: "Founding cohort, January 2027"
   total_spots: "8 spots in total"
   invoice_note: "Invoices available for employer or L&D budgets, plus a short letter for your manager."
-  vat_label: "+ VAT"
+  vat_label: "(excl. VAT)"
   tiers:
     - name: "Core"
-      was: "€995"
-      price: "€795"
+      price: "€800"
       spots: ""
+      badge: ""
       intro: "Complete group program, including:"
       items:
         - "The diagnostic"
@@ -124,19 +125,19 @@ pricing:   # Julia's new slide 09 of 17 Nov
         - "Community"
         - 'Post course "check-in" group session'
     - name: "Plus"
-      was: "€1,295"
-      price: "€1,095"
-      spots: "up to 5 spots"
+      price: "€1,100"
+      spots: ""
+      badge: "Most recommended"
       intro: "Complete group program (Core), plus:"
       items:
-        - "one 90-minute 1:1 mentoring session"
+        - "1 x individual mentoring session"
     - name: "Premium"
-      was: "€2,095"
-      price: "€1,895"
-      spots: "only 2 spots"
+      price: "€1,900"
+      spots: ""
+      badge: ""
       intro: "Complete group program (Core), plus:"
       items:
-        - "four 90-minute 1:1 mentoring sessions"
+        - "4x individual mentoring sessions"
 
 proof:   # the text of Julia's document (16 Nov)
   heading: "Meet Your Mentor"
